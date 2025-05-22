@@ -1,3 +1,3 @@
-# fluo10-sync
+# Lazy Supplements Framework
 
-Thick Client Framework for Progress Pile and Bullet Cards
+A local-first application framework for lazy person
