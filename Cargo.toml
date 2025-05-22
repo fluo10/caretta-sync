@@ -1,0 +1,12 @@
+[workspace]
+members = [ "lazy-supplements", "lazy-supplements-*" ]
+
+[workspace.package]
+edition = "2024"
+version = "0.1.0"
+description = "A local-first application framework for lazy person"
+license = "MIT OR Apache-2.0"
+repository = "https://forgejo.fireturlte.net" 
+
+[workspace.dependencies]
+libp2p = "0.55.0"
