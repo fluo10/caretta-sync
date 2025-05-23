@@ -1,5 +1,5 @@
 [workspace]
-members = [ "lazy-supplements", "lazy-supplements-*" ]
+members = [ "examples/timestamper", "lazy-supplements", "lazy-supplements-*" ]
 
 [workspace.package]
 edition = "2024"
@@ -9,4 +9,5 @@ license = "MIT OR Apache-2.0"
 repository = "https://forgejo.fireturlte.net" 
 
 [workspace.dependencies]
+lazy-supplements.path = "lazy-supplements"
 libp2p = "0.55.0"
