@@ -8,41 +8,41 @@ pub struct Migration;
 #[async_trait::async_trait]
 impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
-        Device::up(manager).await?;
+        Node::up(manager).await?;
         RecordDeletion::up(manager).await?;
         Ok(())
     }
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
-        Device::down(manager).await?;
+        Node::down(manager).await?;
         RecordDeletion::down(manager).await?;
         Ok(())
     }
 }
 
 #[derive(DeriveIden)]
-enum Device {
+enum Node {
     Table,
     Id,
     CreatedAt,
     UpdatedAt,
     SyncedAt,
-    Name,
+    PeerId,
     Note,
 }
 
 #[async_trait::async_trait]
-impl TableMigration for Device {
+impl TableMigration for Node {
     async fn up<'a>(manager: &'a SchemaManager<'a>) -> Result<(), DbErr> {
         manager.create_table(
             Table::create()
                 .table(Self::Table)
                 .if_not_exists()
                 .col(pk_uuid(Self::Id))
-                .col(timestamp_with_time_zone(Self::CreatedAt))
+                .col(timestamp(Self::CreatedAt))
                 .col(timestamp(Self::UpdatedAt))
-                .col(timestamp_with_time_zone_null(Self::SyncedAt))
-                .col(string(Self::Name))
+                .col(timestamp_null(Self::SyncedAt))
+                .col(string_len(Self::PeerId, 255))
                 .col(text(Self::Note))
                 .to_owned()
         ).await?;
