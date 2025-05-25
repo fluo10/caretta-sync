@@ -1,6 +1,5 @@
 use std::{collections::HashSet, net::{IpAddr, Ipv4Addr}, str::FromStr, sync::LazyLock};
 
-use automerge::hydrate::List;
 use clap::Args;
 use serde::{Deserialize, Serialize};
 
