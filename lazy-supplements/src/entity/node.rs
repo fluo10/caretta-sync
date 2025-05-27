@@ -49,7 +49,7 @@ mod tests {
 
      #[tokio::test]
     async fn check_insert_node() {
-        let db = GLOBAL.get_or_init_temporary_database().await;
+        let db = crate::global::get_or_init_temporary_database().await;
         
         ActiveModel{
             peer_id: Set(identity::Keypair::generate_ed25519().public().to_peer_id().to_string()),

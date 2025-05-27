@@ -1,6 +1,6 @@
 use sea_orm_migration::{prelude::*, schema::*};
 
-mod m20220101_000001_create_lazy_supplements_tables;
+pub mod m20220101_000001_create_lazy_supplements_tables;
 
 pub struct Migrator;
 

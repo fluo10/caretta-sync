@@ -38,11 +38,11 @@ mod tests {
     use super::*;
 
     use uuid::Uuid;
-    use crate::global::GLOBAL;
+    use crate::global::get_or_init_temporary_database;
 
      #[tokio::test]
     async fn check_insert_record_deletion() {
-        let db = GLOBAL.get_or_init_temporary_database().await;
+        let db = get_or_init_temporary_database().await;
         
         assert!(ActiveModel{
             table_name: Set("test_table".to_string()),
