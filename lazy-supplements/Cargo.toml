@@ -17,6 +17,7 @@ chrono-tz = "0.10.3"
 clap = { version = "4.5.38", features = ["derive"] }
 libp2p.workspace = true
 sea-orm = { version = "1.1.11", features = ["sqlx-sqlite", "runtime-tokio-native-tls", "macros", "with-chrono", "with-uuid"] } 
+sea-orm-migration.workspace = true
 serde = { version = "1.0.219", features = ["derive"] }
 tempfile = { version = "3.20.0", optional = true }
 thiserror = "2.0.12"

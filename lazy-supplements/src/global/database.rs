@@ -1,6 +1,7 @@
 use std::path::Path;
 
 use sea_orm::{ConnectOptions, Database, DbErr, DatabaseConnection};
+use sea_orm_migration::MigratorTrait;
 use crate::error::Error;
 use tokio::sync::OnceCell;
 
@@ -18,26 +19,25 @@ impl Global {
     fn get_database(&self) -> Option<&DatabaseConnection> {
         self.database.get()
     }
-    async fn get_or_try_init_database<T, F, Fut>(&self, path: T, migration: F) -> Result<&DatabaseConnection, Error>
+    async fn get_or_try_init_database<T, U>(&self, path: T, _: U) -> Result<&DatabaseConnection, Error>
     where
         T: AsRef<Path>,
-        F: FnOnce(DatabaseConnection) -> Fut,
-        Fut: Future<Output = Result<DatabaseConnection, DbErr>>
+        U: MigratorTrait,
     {
         let url = "sqlite://".to_string() + path.as_ref().to_str().unwrap() + "?mode=rwc";
 
         Ok(self.database.get_or_try_init(|| async {
             let db = Database::connect(&url).await?;
-            Ok::<DatabaseConnection, DbErr>(migration(db).await?)
+            U::up(&db, None).await?;
+            Ok::<DatabaseConnection, DbErr>(db)
         }).await?)
     }
     #[cfg(any(test, feature="test"))]
-    pub async fn get_or_try_init_temporary_database<F, Fut>(&self, migration: F) -> Result<&DatabaseConnection, Error>
+    pub async fn get_or_try_init_temporary_database<T>(&self, migrator: T) -> Result<&DatabaseConnection, Error>
     where 
-        F: FnOnce(DatabaseConnection) -> Fut,
-        Fut: Future<Output = Result<DatabaseConnection, DbErr>>
+        T: MigratorTrait,
     {
-        self.get_or_try_init_database(&*TEST_DATABASE_URL, migration).await
+        self.get_or_try_init_database(&*TEST_DATABASE_URL, migrator).await
     }
 }
 
@@ -56,10 +56,7 @@ pub mod tests {
     use super::*;
 
     pub async fn get_or_init_temporary_database() -> &'static DatabaseConnection {
-        GLOBAL.get_or_try_init_temporary_database( |x| async {
-            Migrator::up(&x, None).await?;
-            Ok(x)
-        }).await.unwrap()
+        GLOBAL.get_or_try_init_temporary_database( Migrator).await.unwrap()
     }
 
     #[tokio::test]

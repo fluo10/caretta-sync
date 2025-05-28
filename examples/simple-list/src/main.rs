@@ -14,10 +14,7 @@ pub mod tests {
 
     use super::*;
     pub async fn get_or_init_temporary_database() -> &'static DatabaseConnection {
-        global::GLOBAL.get_or_try_init_temporary_database( |x| async {
-            migration::Migrator::up(&x, None).await?;
-            Ok(x)
-        }).await.unwrap()
+        global::GLOBAL.get_or_try_init_temporary_database(migration::Migrator).await.unwrap()
     }
 }
 
