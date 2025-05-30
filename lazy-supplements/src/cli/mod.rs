@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
-mod connect;
 mod init;
+mod node;
 mod server;
 
 pub use server::ServerArgs;

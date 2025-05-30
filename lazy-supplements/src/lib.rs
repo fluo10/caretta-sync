@@ -3,3 +3,5 @@ pub mod config;
 pub mod entity;
 pub mod error;
 pub mod global;
+#[cfg(any(test, feature="test"))]
+pub mod tests;

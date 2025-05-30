@@ -1,17 +1,70 @@
-use crate::config::{ServerConfig};
+use std::{path::PathBuf, sync::LazyLock};
+
+use crate::config::{NodeConfig, ServerConfig};
 use sea_orm::DatabaseConnection;
 use tokio::sync::OnceCell;
 
 mod database;
 
+pub static PRODUCT_NAME: LazyLock<String> = LazyLock::new(|| {
+    env!("CARGO_PKG_NAME").to_string()
+});
+
+pub static DEFAULT_CONFIG_DIR_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
+    let dir = if let Some(x) = dirs::config_local_dir() {
+        x
+    } else {
+        todo!()
+    };
+    
+    dir.join(&*PRODUCT_NAME)
+});
+
+pub static DEFAULT_CONFIG_FILE_NAME: LazyLock<PathBuf> = LazyLock::new(|| {
+    PathBuf::from(String::new() + env!("CARGO_PKG_NAME") + ".toml")
+});
+
+pub static DEFAULT_CONFIG_FILE_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
+    DEFAULT_CONFIG_DIR_PATH.join(&*DEFAULT_CONFIG_FILE_NAME)
+});
+
+pub static DEFAULT_DATA_DIR_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
+    let dir = if let Some(x) = dirs::data_local_dir() {
+        x
+    } else {
+        todo!()
+    };
+    
+    dir.join(&*PRODUCT_NAME)
+});
+
+pub static DEFAULT_DATABASE_FILE_NAME: LazyLock<PathBuf> = LazyLock::new(|| {
+    PathBuf::from(String::new() + env!("CARGO_PKG_NAME") + ".sqlite")
+});
+
+pub static DEFAULT_DATABASE_FILE_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
+    DEFAULT_DATA_DIR_PATH.join(&*DEFAULT_DATABASE_FILE_NAME)
+});
+
 pub static GLOBAL: Global = Global{
+    node_config: OnceCell::const_new(),
     server_config: OnceCell::const_new(),
     database: OnceCell::const_new(),
 };
 pub struct Global {
-    server_config: OnceCell<ServerConfig>,
-    database: OnceCell<DatabaseConnection>,
+    pub server_config: OnceCell<ServerConfig>,
+    pub node_config: OnceCell<NodeConfig>,
+    pub database: OnceCell<DatabaseConnection>,
 }
 
 #[cfg(test)]
 pub use database::tests::get_or_init_temporary_database;
+
+impl Global {
+    pub fn get_node_config(&self) -> Option<&NodeConfig> {
+        self.node_config.get()
+    }
+    pub async fn get_or_try_init_node_config(&self, config: NodeConfig) -> &NodeConfig {
+        self.node_config.get_or_init(|| async {config}).await
+    }
+}

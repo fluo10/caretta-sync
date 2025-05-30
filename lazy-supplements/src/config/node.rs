@@ -1,10 +1,31 @@
+use std::path::PathBuf;
+
 use libp2p::identity::{self, Keypair};
 use serde::{Deserialize, Serialize};
+
+use crate::global::DEFAULT_DATABASE_FILE_PATH;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct NodeConfig {
     #[serde(with = "keypair")]
     secret: Keypair,
+    database_path: Option<PathBuf>
+}
+
+impl NodeConfig {
+    pub fn new() -> Self {
+        Self {
+            secret: identity::Keypair::generate_ed25519(),
+            database_path: None,
+        }
+    }
+    pub fn get_database_path(&self) -> PathBuf {
+        if let Some(x) = self.database_path.clone() {
+            x
+        } else {
+            DEFAULT_DATABASE_FILE_PATH.clone()
+        }
+    }
 }
 
 mod keypair {
@@ -39,6 +60,7 @@ mod tests {
         let keypair = identity::Keypair::generate_ed25519();
         let config = NodeConfig {
             secret: keypair.clone(),
+            database_path: None,
         };
         let string = toml::to_string(&config).unwrap();
         println!("Parsed config: {}", &string);
