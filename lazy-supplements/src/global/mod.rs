@@ -1,6 +1,6 @@
-use std::{path::PathBuf, sync::LazyLock};
+use std::{net::{IpAddr, Ipv4Addr}, path::PathBuf, sync::LazyLock};
 
-use crate::config::{NodeConfig, ServerConfig};
+use crate::config::NodeConfig;
 use sea_orm::DatabaseConnection;
 use tokio::sync::OnceCell;
 
@@ -9,6 +9,10 @@ mod database;
 pub static PRODUCT_NAME: LazyLock<String> = LazyLock::new(|| {
     env!("CARGO_PKG_NAME").to_string()
 });
+
+pub static DEFAULT_LISTEN_IPS: &[IpAddr] = &[IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0))];
+
+pub static DEFAULT_PORT: u16 = 8080;
 
 pub static DEFAULT_CONFIG_DIR_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
     let dir = if let Some(x) = dirs::config_local_dir() {
@@ -48,11 +52,9 @@ pub static DEFAULT_DATABASE_FILE_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
 
 pub static GLOBAL: Global = Global{
     node_config: OnceCell::const_new(),
-    server_config: OnceCell::const_new(),
     database: OnceCell::const_new(),
 };
 pub struct Global {
-    pub server_config: OnceCell<ServerConfig>,
     pub node_config: OnceCell<NodeConfig>,
     pub database: OnceCell<DatabaseConnection>,
 }

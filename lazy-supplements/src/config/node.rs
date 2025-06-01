@@ -1,52 +1,87 @@
-use std::path::PathBuf;
+use std::{net::IpAddr, path::PathBuf};
 
-use libp2p::identity::{self, Keypair};
+use base64::{prelude::BASE64_STANDARD, Engine};
+use libp2p::identity::{self, DecodingError, Keypair};
 use serde::{Deserialize, Serialize};
 
-use crate::global::DEFAULT_DATABASE_FILE_PATH;
+
+use crate::{error::Error, global::DEFAULT_DATABASE_FILE_PATH};
+
+use super::{DEFAULT_LISTEN_IPS, DEFAULT_PORT};
+
+fn keypair_to_base64(keypair: &Keypair) -> Result<String, Error> {
+        let vec = keypair.to_protobuf_encoding()?;
+        let base64 = BASE64_STANDARD.encode(vec);
+        Ok(base64)
+}
+
+fn base64_to_keypair(base64: &str) -> Result<Keypair, Error>  {
+        let vec = BASE64_STANDARD.decode(base64)?;
+        Ok(Keypair::from_protobuf_encoding(&vec)?)
+
+}
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct NodeConfig {
-    #[serde(with = "keypair")]
+    #[serde(with = "keypair_parser")]
     secret: Keypair,
-    database_path: Option<PathBuf>
+    database_path: PathBuf,
+    listen_ips: Vec<IpAddr>,
+    port: u16,
 }
 
-impl NodeConfig {
-    pub fn new() -> Self {
-        Self {
+impl Default for NodeConfig {
+    fn default() -> NodeConfig{
+        NodeConfig {
             secret: identity::Keypair::generate_ed25519(),
-            database_path: None,
-        }
-    }
-    pub fn get_database_path(&self) -> PathBuf {
-        if let Some(x) = self.database_path.clone() {
-            x
-        } else {
-            DEFAULT_DATABASE_FILE_PATH.clone()
+            database_path: DEFAULT_DATABASE_FILE_PATH.to_path_buf(),
+            listen_ips: DEFAULT_LISTEN_IPS.to_vec(),
+            port: DEFAULT_PORT,
         }
     }
 }
 
-mod keypair {
-    use base64::{prelude::BASE64_STANDARD, Engine};
+impl TryFrom<RawNodeConfig> for NodeConfig {
+    type Error = Error;
+    fn try_from(raw: RawNodeConfig) -> Result<NodeConfig, Self::Error> {
+        Ok(NodeConfig {
+            secret: base64_to_keypair(&raw.secret.ok_or(Error::MissingConfig("secret"))?)?,
+            database_path: raw.database_path.ok_or(Error::MissingConfig("database_path"))?,
+            listen_ips: raw.listen_ips.ok_or(Error::MissingConfig("listen_ips"))?,
+            port: raw.port.ok_or(Error::MissingConfig("port"))?
+        })
+    }
+}
+
+mod keypair_parser {
     use libp2p::identity::Keypair;
     use serde::{Deserialize, Deserializer, Serializer};
 
     pub fn serialize<S>(keypair: &Keypair, serializer: S) -> Result<S::Ok, S::Error>
     where S: Serializer
     {
-        let vec = keypair.to_protobuf_encoding().unwrap();
-        let base64 = BASE64_STANDARD.encode(vec);
-        serializer.serialize_str(&base64)
+        match super::keypair_to_base64(keypair) {
+            Ok(x) => serializer.serialize_str(&x),
+            Err(_) => Err(serde::ser::Error::custom("Decoding keypair error"))
+        }
     }
     pub fn deserialize<'de, D>(deserializer: D) -> Result<Keypair, D::Error>
     where D: Deserializer<'de>
     {
-        let base64 = String::deserialize(deserializer)?;
-        let vec = BASE64_STANDARD.decode(base64).unwrap();
-        Ok(Keypair::from_protobuf_encoding(&vec).unwrap())
+        match super::base64_to_keypair(&String::deserialize(deserializer)?) {
+            Ok(x) => Ok(x),
+            Err(crate::error::Error::Base64Decode(_)) => Err(serde::de::Error::custom("Decoding base64 error")),
+            Err(_) => unreachable!()
+        }
     }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct RawNodeConfig {
+    secret: Option<String>,
+    database_path: Option<PathBuf>,
+    listen_ips: Option<Vec<IpAddr>>,
+    port: Option<u16>,
 }
 
 #[cfg(test)]
@@ -56,15 +91,10 @@ mod tests {
     
 
     #[tokio::test]
-    async fn serialize_deserialize() {
+    async fn parse_keypair() {
         let keypair = identity::Keypair::generate_ed25519();
-        let config = NodeConfig {
-            secret: keypair.clone(),
-            database_path: None,
-        };
-        let string = toml::to_string(&config).unwrap();
-        println!("Parsed config: {}", &string);
-        let parsed_config: NodeConfig = toml::from_str(&string).unwrap();
-        assert_eq!(keypair.public(), parsed_config.secret.public());
+        let keypair2 = base64_to_keypair(&keypair_to_base64(&keypair).unwrap()).unwrap();
+
+        assert_eq!(keypair.public(), keypair2.public());
     }
 }

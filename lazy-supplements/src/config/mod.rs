@@ -1,30 +1,23 @@
 mod node;
-mod server;
 
 use std::path::Path;
 use crate::error::Error;
 pub use node::NodeConfig;
 use serde::{Deserialize, Serialize};
-pub use server::{
-    PartialServerConfig,
-    ServerConfig,
+pub use crate::global::{
     DEFAULT_LISTEN_IPS,
     DEFAULT_PORT,
-    DEFAULT_PARTIAL_SERVER_CONFIG,
-    DEFAULT_SERVER_CONFIG
 };
 use tokio::{fs::File, io::{AsyncReadExt, AsyncWriteExt}};
 #[derive(Debug, Deserialize, Serialize)]
 pub struct PartialConfig {
     node: Option<NodeConfig>,
-    server: Option<ServerConfig>,
 }
 
 impl PartialConfig {
     pub fn new() -> Self {
         PartialConfig {
-            node: Some(NodeConfig::new()),
-            server: None,
+            node: Some(NodeConfig::default()),
         }
     }
     pub async fn read_or_create<T>(path: T) -> Result<Self, Error> 

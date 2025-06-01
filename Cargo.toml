@@ -11,7 +11,7 @@ repository = "https://forgejo.fireturlte.net"
 [workspace.dependencies]
 lazy-supplements.path = "lazy-supplements"
 lazy-supplements-migration.path = "lazy-supplements-migration"
-libp2p = "0.55.0"
+libp2p = { version = "0.55.0", features = ["noise", "ping", "tcp", "tokio", "yamux" ] }
 
 [workspace.dependencies.sea-orm-migration]
 version = "1.1.0"
