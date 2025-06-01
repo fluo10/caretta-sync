@@ -12,19 +12,19 @@ use crate::error::Error;
 #[derive(Args, Debug)]
 pub struct NodeArgs {
     #[command(subcommand)]
-    command: NodeCommand
+    pub command: NodeCommand
 }
 
 #[derive(Args, Debug)]
 pub struct JoinNodeArgs {
     #[arg(long)]
-    endpoint: IpAddr,
+    pub endpoint: IpAddr,
     #[arg(long)]
-    port: u16,
+    pub port: u16,
     #[arg(long)]
-    peer_id: String,
+    pub peer_id: String,
     #[arg(long)]
-    config: Option<PathBuf>,
+    pub config: Option<PathBuf>,
 }
 
 #[derive(Debug, Subcommand)]

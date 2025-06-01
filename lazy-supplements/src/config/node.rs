@@ -1,13 +1,15 @@
-use std::{net::IpAddr, path::PathBuf};
+use std::{net::IpAddr, path::{Path, PathBuf}};
 
 use base64::{prelude::BASE64_STANDARD, Engine};
+use clap::Args;
 use libp2p::identity::{self, DecodingError, Keypair};
 use serde::{Deserialize, Serialize};
+use tokio::{fs::File, io::{AsyncReadExt, AsyncWriteExt}};
 
 
 use crate::{error::Error, global::DEFAULT_DATABASE_FILE_PATH};
 
-use super::{DEFAULT_LISTEN_IPS, DEFAULT_PORT};
+use super::{PartialConfig, DEFAULT_LISTEN_IPS, DEFAULT_PORT};
 
 fn keypair_to_base64(keypair: &Keypair) -> Result<String, Error> {
         let vec = keypair.to_protobuf_encoding()?;
@@ -76,12 +78,66 @@ mod keypair_parser {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Args, Debug, Deserialize, Serialize)]
 pub struct RawNodeConfig {
+    #[arg(skip)]
     secret: Option<String>,
+    #[arg(long)]
     database_path: Option<PathBuf>,
+    #[arg(long)]
     listen_ips: Option<Vec<IpAddr>>,
+    #[arg(long)]
     port: Option<u16>,
+}
+impl RawNodeConfig {
+
+    pub fn with_new_secret(mut self) -> Self {
+        self.secret = Some(keypair_to_base64(&Keypair::generate_ed25519()).unwrap());
+        self
+    }
+
+    pub fn new() -> Self {
+        RawNodeConfig {
+            secret: None,
+            database_path: None,
+            listen_ips: None,
+            port: None,
+        }
+    }
+
+    pub async fn read_or_create<T>(path: T) -> Result<Self, Error> 
+    where
+    T: AsRef<Path>
+    {
+        if !path.as_ref().exists() {
+            Self::new().write_to(&path).await?;
+        }
+        Self::read_from(&path).await
+    }
+    pub async fn read_from<T>(path:T) -> Result<Self, Error> 
+    where 
+    T: AsRef<Path>
+    {
+        let mut file = File::open(path.as_ref()).await?;
+        let mut content = String::new();
+        file.read_to_string(&mut content).await?;
+        let config: RawNodeConfig = toml::from_str(&content)?;
+        Ok(config)
+    }
+    pub async fn write_to<T>(&self, path:T) -> Result<(), Error> 
+    where 
+    T: AsRef<Path>
+    {
+        if !path.as_ref().exists() {
+            if let Some(x) = path.as_ref().parent() {
+                std::fs::create_dir_all(x)?;
+            };
+            let _ = File::create(&path).await?;
+        }
+        let mut file = File::create(&path).await?;
+        file.write_all(toml::to_string(self)?.as_bytes()).await?;
+        Ok(())
+    }
 }
 
 #[cfg(test)]
