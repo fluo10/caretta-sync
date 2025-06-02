@@ -7,7 +7,9 @@ use libp2p::{
 };
 use tracing_subscriber::EnvFilter;
 
-use crate::error::Error;
+use crate::{cli::ServerArgs, error::Error};
+
+use super::ConfigArgs;
 
 #[derive(Args, Debug)]
 pub struct NodeArgs {
@@ -18,13 +20,13 @@ pub struct NodeArgs {
 #[derive(Args, Debug)]
 pub struct JoinNodeArgs {
     #[arg(long)]
-    pub endpoint: IpAddr,
+    pub peer_ip: IpAddr,
     #[arg(long)]
-    pub port: u16,
-    #[arg(long)]
-    pub peer_id: String,
-    #[arg(long)]
-    pub config: Option<PathBuf>,
+    pub peer_port: u16,
+    //#[arg(long)]
+    //pub peer_id: String,
+    #[command(flatten)]
+    pub config: ConfigArgs,
 }
 
 #[derive(Debug, Subcommand)]
@@ -36,28 +38,14 @@ pub enum NodeCommand {
 
 impl JoinNodeArgs {
     pub async fn ping(self) -> Result<(), Error> {
-        let _ = tracing_subscriber::fmt()
-            .with_env_filter(EnvFilter::from_default_env())
-            .try_init();
-        let mut swarm = libp2p::SwarmBuilder::with_new_identity()
-            .with_tokio()
-            .with_tcp(
-                tcp::Config::default(),
-                noise::Config::new,
-                yamux::Config::default,
-            )?
-            .with_behaviour(|_| ping::Behaviour::default())?
-            .build();
-            
-        swarm.listen_on("/ip4/0.0.0.0/tcp/0".parse()?)?;
-        
+        let mut swarm = self.config.try_into_node_config().await?.try_into_swarm().await?;
 
         let mut remote: Multiaddr = Multiaddr::empty();
-        remote.push(match self.endpoint {
+        remote.push(match self.peer_ip {
             IpAddr::V4(x) => Protocol::Ip4(x),
             IpAddr::V6(x) => Protocol::Ip6(x),
         });
-        remote.push(Protocol::Tcp(self.port));
+        remote.push(Protocol::Tcp(self.peer_port));
         let addr = remote.to_string();
         swarm.dial(remote)?;
         println!("Dialed {addr}");

@@ -1,6 +1,6 @@
 use std::{net::{IpAddr, Ipv4Addr}, path::PathBuf, sync::LazyLock};
 
-use crate::config::NodeConfig;
+use crate::config::{NodeConfig, RawNodeConfig};
 use sea_orm::DatabaseConnection;
 use tokio::sync::OnceCell;
 
@@ -70,3 +70,12 @@ impl Global {
         self.node_config.get_or_init(|| async {config}).await
     }
 }
+
+pub static DEFAULT_RAW_NODE_CONFIG: LazyLock<RawNodeConfig> = LazyLock::new(|| {
+    RawNodeConfig {
+        secret: None,
+        database_path: Some(DEFAULT_DATABASE_FILE_PATH.to_path_buf()),
+        listen_ips: Some(DEFAULT_LISTEN_IPS.to_vec()),
+        port: Some(DEFAULT_PORT),
+    }
+});

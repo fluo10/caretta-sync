@@ -1,13 +1,14 @@
-use std::{net::IpAddr, path::{Path, PathBuf}};
+use std::{net::IpAddr, ops, path::{Path, PathBuf}};
 
 use base64::{prelude::BASE64_STANDARD, Engine};
 use clap::Args;
-use libp2p::identity::{self, DecodingError, Keypair};
+use libp2p::{identity::{self, DecodingError, Keypair}, noise, ping, tcp, yamux, Swarm};
 use serde::{Deserialize, Serialize};
 use tokio::{fs::File, io::{AsyncReadExt, AsyncWriteExt}};
+use tracing_subscriber::EnvFilter;
 
 
-use crate::{error::Error, global::DEFAULT_DATABASE_FILE_PATH};
+use crate::{cli::ConfigArgs, error::Error, global::DEFAULT_DATABASE_FILE_PATH};
 
 use super::{PartialConfig, DEFAULT_LISTEN_IPS, DEFAULT_PORT};
 
@@ -20,26 +21,33 @@ fn keypair_to_base64(keypair: &Keypair) -> Result<String, Error> {
 fn base64_to_keypair(base64: &str) -> Result<Keypair, Error>  {
         let vec = BASE64_STANDARD.decode(base64)?;
         Ok(Keypair::from_protobuf_encoding(&vec)?)
-
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct NodeConfig {
     #[serde(with = "keypair_parser")]
-    secret: Keypair,
-    database_path: PathBuf,
-    listen_ips: Vec<IpAddr>,
-    port: u16,
+    pub secret: Keypair,
+    pub database_path: PathBuf,
+    pub listen_ips: Vec<IpAddr>,
+    pub port: u16,
 }
 
-impl Default for NodeConfig {
-    fn default() -> NodeConfig{
-        NodeConfig {
-            secret: identity::Keypair::generate_ed25519(),
-            database_path: DEFAULT_DATABASE_FILE_PATH.to_path_buf(),
-            listen_ips: DEFAULT_LISTEN_IPS.to_vec(),
-            port: DEFAULT_PORT,
-        }
+impl NodeConfig {
+    pub async fn try_into_swarm (self) -> Result<Swarm<ping::Behaviour>, Error> {
+        let _ = tracing_subscriber::fmt()
+            .with_env_filter(EnvFilter::from_default_env())
+            .try_init();
+        let mut swarm = libp2p::SwarmBuilder::with_existing_identity(self.secret)
+            .with_tokio()
+            .with_tcp(
+                tcp::Config::default(),
+                noise::Config::new,
+                yamux::Config::default,
+            )?
+            .with_behaviour(|_| ping::Behaviour::default())?
+            .build();
+        swarm.listen_on("/ip4/0.0.0.0/tcp/0".parse()?)?;
+        Ok(swarm)
     }
 }
 
@@ -78,16 +86,16 @@ mod keypair_parser {
     }
 }
 
-#[derive(Args, Debug, Deserialize, Serialize)]
+#[derive(Args, Clone, Debug, Deserialize, Serialize)]
 pub struct RawNodeConfig {
     #[arg(skip)]
-    secret: Option<String>,
+    pub secret: Option<String>,
     #[arg(long)]
-    database_path: Option<PathBuf>,
+    pub database_path: Option<PathBuf>,
     #[arg(long)]
-    listen_ips: Option<Vec<IpAddr>>,
+    pub listen_ips: Option<Vec<IpAddr>>,
     #[arg(long)]
-    port: Option<u16>,
+    pub port: Option<u16>,
 }
 impl RawNodeConfig {
 
@@ -138,7 +146,32 @@ impl RawNodeConfig {
         file.write_all(toml::to_string(self)?.as_bytes()).await?;
         Ok(())
     }
+
+    pub fn merge(&mut self, another: RawNodeConfig) {
+        if let Some(x) = another.secret {
+            self.secret = Some(x);
+        };
+        if let Some(x) = another.database_path {
+            self.database_path = Some(x);
+        };
+        if let Some(x) = another.listen_ips {
+            self.listen_ips = Some(x);
+        };
+        if let Some(x) = another.port {
+            self.port = Some(x);
+        };
+    }
 }
+
+impl ops::Add<RawNodeConfig> for RawNodeConfig {
+    type Output = RawNodeConfig;
+    fn add(mut self, another: RawNodeConfig) -> RawNodeConfig {
+        self.merge(another);
+        self
+    }
+}
+
+
 
 #[cfg(test)]
 mod tests {

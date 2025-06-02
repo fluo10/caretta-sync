@@ -1,5 +1,5 @@
 use clap::{Parser, Subcommand};
-use lazy_supplements::{cli::{InitArgs, NodeArgs, NodeCommand}, *};
+use lazy_supplements::{cli::{InitArgs, NodeArgs, NodeCommand, ServerArgs}, *};
 
 #[derive(Debug, Parser)]
 struct Cli {
@@ -11,6 +11,7 @@ struct Cli {
 enum Command {
     Node(NodeArgs),
     Init(InitArgs),
+    Server(ServerArgs),
 }
 
 
@@ -22,5 +23,6 @@ async fn main() {
             NodeCommand::Join(y) => println!("{y:?}"),
         },
         Command::Init(x) => x.init_config().await,
+        Command::Server(x) => x.start_server().await.unwrap(),
     }
 }
