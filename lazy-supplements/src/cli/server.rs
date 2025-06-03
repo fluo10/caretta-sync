@@ -18,7 +18,10 @@ impl ServerArgs {
         loop{
             match swarm.select_next_some().await {
                 SwarmEvent::NewListenAddr { address, .. } => println!("Listening on {address:?}"),
-                SwarmEvent::Behaviour(event) => println!("{event:?}"),
+                SwarmEvent::Behaviour(event) => {
+                    println!("{event:?}");
+                    event.run().await;
+                },
                 _ => {}
             }
         }

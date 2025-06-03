@@ -8,7 +8,7 @@ use tokio::{fs::File, io::{AsyncReadExt, AsyncWriteExt}};
 use tracing_subscriber::EnvFilter;
 
 
-use crate::{cli::ConfigArgs, error::Error, global::DEFAULT_DATABASE_FILE_PATH};
+use crate::{cli::ConfigArgs, error::Error, global::DEFAULT_DATABASE_FILE_PATH, p2p};
 
 use super::{PartialConfig, DEFAULT_LISTEN_IPS, DEFAULT_PORT};
 
@@ -33,7 +33,7 @@ pub struct NodeConfig {
 }
 
 impl NodeConfig {
-    pub async fn try_into_swarm (self) -> Result<Swarm<ping::Behaviour>, Error> {
+    pub async fn try_into_swarm (self) -> Result<Swarm<p2p::Behaviour>, Error> {
         let _ = tracing_subscriber::fmt()
             .with_env_filter(EnvFilter::from_default_env())
             .try_init();
@@ -44,7 +44,7 @@ impl NodeConfig {
                 noise::Config::new,
                 yamux::Config::default,
             )?
-            .with_behaviour(|_| ping::Behaviour::default())?
+            .with_behaviour(|keypair| p2p::Behaviour::try_from(keypair).unwrap())?
             .build();
         swarm.listen_on("/ip4/0.0.0.0/tcp/0".parse()?)?;
         Ok(swarm)

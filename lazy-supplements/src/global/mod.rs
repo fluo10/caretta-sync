@@ -1,8 +1,9 @@
-use std::{net::{IpAddr, Ipv4Addr}, path::PathBuf, sync::LazyLock};
+use std::{collections::HashMap, net::{IpAddr, Ipv4Addr}, path::PathBuf, sync::LazyLock};
 
 use crate::config::{NodeConfig, RawNodeConfig};
+use libp2p::{Multiaddr, PeerId};
 use sea_orm::DatabaseConnection;
-use tokio::sync::OnceCell;
+use tokio::sync::{OnceCell, RwLock};
 
 mod database;
 
@@ -53,10 +54,12 @@ pub static DEFAULT_DATABASE_FILE_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
 pub static GLOBAL: Global = Global{
     node_config: OnceCell::const_new(),
     database: OnceCell::const_new(),
+    peers: OnceCell::const_new(),
 };
 pub struct Global {
     pub node_config: OnceCell<NodeConfig>,
     pub database: OnceCell<DatabaseConnection>,
+    pub peers: OnceCell<RwLock<HashMap<PeerId, Multiaddr>>>
 }
 
 #[cfg(test)]
@@ -68,6 +71,17 @@ impl Global {
     }
     pub async fn get_or_try_init_node_config(&self, config: NodeConfig) -> &NodeConfig {
         self.node_config.get_or_init(|| async {config}).await
+    }
+    pub async fn get_or_init_peers(&self) -> &RwLock<HashMap<PeerId, Multiaddr>> {
+        self.peers.get_or_init(|| async {
+            RwLock::new(HashMap::new())
+        }).await
+    }
+    pub async fn read_peers(&self) -> tokio::sync::RwLockReadGuard<'_, HashMap<PeerId, Multiaddr>>{
+        self.get_or_init_peers().await.read().await
+    }
+    pub async fn write_peers(&self) -> tokio::sync::RwLockWriteGuard<'_, HashMap<PeerId, Multiaddr>>{
+        self.get_or_init_peers().await.write().await
     }
 }
 
