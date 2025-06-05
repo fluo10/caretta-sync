@@ -23,7 +23,7 @@ fn base64_to_keypair(base64: &str) -> Result<Keypair, Error>  {
         Ok(Keypair::from_protobuf_encoding(&vec)?)
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct NodeConfig {
     #[serde(with = "keypair_parser")]
     pub secret: Keypair,

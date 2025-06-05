@@ -1,7 +1,8 @@
 use std::{collections::HashMap, net::{IpAddr, Ipv4Addr}, path::PathBuf, sync::LazyLock};
 
-use crate::config::{NodeConfig, RawNodeConfig};
-use libp2p::{Multiaddr, PeerId};
+use crate::{config::{NodeConfig, RawNodeConfig}, error::Error};
+use futures::StreamExt;
+use libp2p::{swarm::SwarmEvent, Multiaddr, PeerId};
 use sea_orm::DatabaseConnection;
 use tokio::sync::{OnceCell, RwLock};
 
@@ -59,7 +60,7 @@ pub static GLOBAL: Global = Global{
 pub struct Global {
     pub node_config: OnceCell<NodeConfig>,
     pub database: OnceCell<DatabaseConnection>,
-    pub peers: OnceCell<RwLock<HashMap<PeerId, Multiaddr>>>
+    pub peers: OnceCell<RwLock<HashMap<PeerId, Multiaddr>>>,
 }
 
 #[cfg(test)]
@@ -69,7 +70,7 @@ impl Global {
     pub fn get_node_config(&self) -> Option<&NodeConfig> {
         self.node_config.get()
     }
-    pub async fn get_or_try_init_node_config(&self, config: NodeConfig) -> &NodeConfig {
+    pub async fn get_or_init_node_config(&self, config: NodeConfig) -> &NodeConfig {
         self.node_config.get_or_init(|| async {config}).await
     }
     pub async fn get_or_init_peers(&self) -> &RwLock<HashMap<PeerId, Multiaddr>> {
@@ -82,6 +83,22 @@ impl Global {
     }
     pub async fn write_peers(&self) -> tokio::sync::RwLockWriteGuard<'_, HashMap<PeerId, Multiaddr>>{
         self.get_or_init_peers().await.write().await
+    }
+    pub async fn launch_swarm(&self) -> Result<(), Error> {
+        let mut swarm = self.get_node_config().unwrap().clone().try_into_swarm().await?;
+        loop{
+            let swarm_event = swarm.select_next_some().await;
+            tokio::spawn(async move{
+                match swarm_event {
+                    SwarmEvent::NewListenAddr { address, .. } => println!("Listening on {address:?}"),
+                    SwarmEvent::Behaviour(event) => {
+                        println!("{event:?}");
+                        event.run().await;
+                    },
+                    _ => {}
+                }
+            });
+        }
     }
 }
 
