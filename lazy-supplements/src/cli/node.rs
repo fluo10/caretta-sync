@@ -24,15 +24,15 @@ pub struct ConsoleNodeArgs {
 }
 
 impl ConsoleNodeArgs {
-    pub fn run(self) -> Result<(), Error> {
+    pub async fn run(self) -> Result<(), Error> {
         println!("{self:?}");
         Ok(())
     }
 }
 
-pub fn parse_and_run_console_node_command(s:Vec<String>) -> Result<(), Error> {
+pub async fn parse_and_run_console_node_command(s:Vec<String>) -> Result<(), Error> {
     let args = ConsoleNodeArgs::parse_from(s);
-    args.run()
+    args.run().await
 }
 
 #[derive(Args, Debug)]
