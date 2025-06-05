@@ -18,6 +18,8 @@ pub enum Error {
     Multiaddr(#[from] libp2p::multiaddr::Error),
     #[error("Noise error: {0}")]
     Noise(#[from] libp2p::noise::Error),
+    #[error("Parse args error: {0}")]
+    ParseCommand(#[from] clap::Error),
     #[error("Readline error: {0}")]
     Readline(#[from] rustyline::error::ReadlineError),
     #[error("Shell word split error: {0}")]

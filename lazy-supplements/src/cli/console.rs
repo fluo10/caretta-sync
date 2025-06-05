@@ -44,7 +44,7 @@ impl ConsoleCommands {
                 println!("Invalid command: {command_name}");
                 self.print_commands();
                 Ok(())
-            }
+            } 
         } else {
             Ok(())
         }
@@ -81,7 +81,9 @@ impl ConsoleArgs {
         loop {
             match rl.readline(">> ") {
                 Ok(line) => {
-                    commands.parse_and_run(line).await?
+                    if let Err(e) = commands.parse_and_run(line).await {                
+                        println!("{e}");
+                    }
                 },
                 Err(x) => Err(x)?,
             };

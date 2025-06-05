@@ -23,7 +23,7 @@ pub struct ConsoleNodeArgs {
     pub args: NodeArgs,
 }
 
-impl ConsoleNodeArgs {
+impl NodeArgs {
     pub async fn run(self) -> Result<(), Error> {
         println!("{self:?}");
         Ok(())
@@ -31,8 +31,7 @@ impl ConsoleNodeArgs {
 }
 
 pub async fn parse_and_run_console_node_command(s:Vec<String>) -> Result<(), Error> {
-    let args = ConsoleNodeArgs::parse_from(s);
-    args.run().await
+    ConsoleNodeArgs::try_parse_from(s)?.args.run().await
 }
 
 #[derive(Args, Debug)]
