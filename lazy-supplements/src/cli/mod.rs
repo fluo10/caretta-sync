@@ -7,7 +7,7 @@ mod node;
 mod server;
 
 pub use config::ConfigArgs;
-pub use console::ConsoleArgs;
+pub use console::{ConsoleArgs, ConsoleCommands};
 pub use init::InitArgs;
-pub use node::{ NodeArgs, NodeCommand, JoinNodeArgs };
+pub use node::{ NodeArgs, NodeCommand, JoinNodeArgs , ConsoleNodeArgs};
 pub use server::ServerArgs;

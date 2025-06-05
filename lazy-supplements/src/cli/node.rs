@@ -1,6 +1,6 @@
 use std::{net::IpAddr, path::PathBuf};
 
-use clap::{Args, Subcommand};
+use clap::{Args, Parser, Subcommand};
 use futures::StreamExt;
 use libp2p::{
     multiaddr::Protocol, noise, ping, swarm::SwarmEvent, tcp, yamux, Multiaddr
@@ -11,10 +11,28 @@ use crate::{cli::ServerArgs, error::Error};
 
 use super::ConfigArgs;
 
-#[derive(Args, Debug)]
+#[derive(Debug, Args)]
 pub struct NodeArgs {
     #[command(subcommand)]
     pub command: NodeCommand
+}
+
+#[derive(Debug, Parser)]
+pub struct ConsoleNodeArgs {
+    #[command(flatten)]
+    pub args: NodeArgs,
+}
+
+impl ConsoleNodeArgs {
+    pub fn run(self) -> Result<(), Error> {
+        println!("{self:?}");
+        Ok(())
+    }
+}
+
+pub fn parse_and_run_console_node_command(s:Vec<String>) -> Result<(), Error> {
+    let args = ConsoleNodeArgs::parse_from(s);
+    args.run()
 }
 
 #[derive(Args, Debug)]

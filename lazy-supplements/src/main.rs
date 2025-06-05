@@ -1,5 +1,5 @@
 use clap::{Parser, Subcommand};
-use lazy_supplements::{cli::{ConsoleArgs, InitArgs, NodeArgs, NodeCommand, ServerArgs}, *};
+use lazy_supplements::{cli::{ConsoleArgs, ConsoleCommands, InitArgs, NodeArgs, NodeCommand, ServerArgs}, *};
 
 #[derive(Debug, Parser)]
 struct Cli {
@@ -25,6 +25,6 @@ async fn main() {
         },
         Command::Init(x) => x.init_config().await,
         Command::Server(x) => x.start_server().await.unwrap(),
-        Command::Console(x) => x.start_console().await.unwrap(),
+        Command::Console(x) => x.start_console(ConsoleCommands::default()).await.unwrap(),
     }
 }

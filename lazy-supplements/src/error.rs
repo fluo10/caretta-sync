@@ -18,6 +18,10 @@ pub enum Error {
     Multiaddr(#[from] libp2p::multiaddr::Error),
     #[error("Noise error: {0}")]
     Noise(#[from] libp2p::noise::Error),
+    #[error("Readline error: {0}")]
+    Readline(#[from] rustyline::error::ReadlineError),
+    #[error("Shell word split error: {0}")]
+    ShellWord(#[from] shell_words::ParseError),
     #[error("toml deserialization error: {0}")]
     TomlDe(#[from] toml::de::Error),
     #[error("toml serialization error: {0}")]
