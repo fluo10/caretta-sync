@@ -34,9 +34,6 @@ pub struct NodeConfig {
 
 impl NodeConfig {
     pub async fn try_into_swarm (self) -> Result<Swarm<p2p::Behaviour>, Error> {
-        let _ = tracing_subscriber::fmt()
-            .with_env_filter(EnvFilter::from_default_env())
-            .try_init();
         let mut swarm = libp2p::SwarmBuilder::with_existing_identity(self.secret)
             .with_tokio()
             .with_tcp(

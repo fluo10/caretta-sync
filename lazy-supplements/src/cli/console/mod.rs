@@ -1,10 +1,14 @@
+mod writer;
+
 use std::{collections::HashMap, ffi::OsString, hash::Hash, time::Duration};
 
 use clap::{Args, Parser};
 use futures::{future::BoxFuture, StreamExt};
-use libp2p::{noise, ping, swarm::{NetworkBehaviour, SwarmEvent}, tcp, yamux, Swarm};
-use tokio::time::sleep;
+use libp2p::{core::transport::dummy::DummyTransport, noise, ping, swarm::{NetworkBehaviour, SwarmEvent}, tcp, yamux, Swarm};
+use rustyline::ExternalPrinter;
+use tokio::{sync::Mutex, time::sleep};
 use tracing_subscriber::EnvFilter;
+use writer::ConsoleWriter;
 
 use crate::{error::Error, global::GLOBAL};
 
@@ -78,6 +82,17 @@ impl ConsoleArgs {
             GLOBAL.launch_swarm().await
         });
         let mut rl = rustyline::DefaultEditor::new()?;
+        let mut printer = rl.create_external_printer()?;
+        tracing_subscriber::fmt()
+            .with_env_filter(EnvFilter::from_default_env())
+            .with_writer(std::sync::Mutex::new(ConsoleWriter::try_from(&mut rl)?)
+        ).init();
+        tokio::spawn(async move {
+            loop{
+                tracing::event!(tracing::Level::ERROR, "test");
+                tokio::time::sleep(Duration::from_secs(1)).await;
+            }
+        });
         loop {
             match rl.readline(">> ") {
                 Ok(line) => {
