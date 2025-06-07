@@ -9,5 +9,5 @@ mod server;
 pub use config::ConfigArgs;
 pub use console::{ConsoleArgs, ConsoleCommands};
 pub use init::InitArgs;
-pub use node::{ NodeArgs, NodeCommand, JoinNodeArgs , ConsoleNodeArgs};
+pub use node::{ NodeArgs, NodeCommand, PeerArgs , ConsoleNodeArgs};
 pub use server::ServerArgs;

@@ -1,9 +1,9 @@
-use std::{net::IpAddr, path::PathBuf};
+use std::{net::IpAddr, ops::Mul, path::PathBuf, str::FromStr};
 
 use clap::{Args, Parser, Subcommand};
 use futures::StreamExt;
 use libp2p::{
-    multiaddr::Protocol, noise, ping, swarm::SwarmEvent, tcp, yamux, Multiaddr
+    multiaddr::Protocol, noise, ping, swarm::SwarmEvent, tcp, yamux, Multiaddr, PeerId
 };
 use tracing_subscriber::EnvFilter;
 
@@ -35,47 +35,53 @@ pub async fn parse_and_run_console_node_command(s:Vec<String>) -> Result<(), Err
 }
 
 #[derive(Args, Debug)]
-pub struct JoinNodeArgs {
-    #[arg(long)]
-    pub peer_ip: IpAddr,
-    #[arg(long)]
-    pub peer_port: u16,
-    //#[arg(long)]
-    //pub peer_id: String,
+pub struct PeerArgs {
+    #[arg(value_parser = clap::value_parser!(PeerArg))]
+    pub peer: PeerArg,
+}
+#[derive(Clone, Debug)]
+pub enum PeerArg {
+    Addr(Multiaddr),
+    Id(PeerId),
+    Number(u32),
+}
+
+impl FromStr for PeerArg {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if let Ok(x) = s.parse::<Multiaddr>() {
+            Ok(Self::Addr(x))
+        } else if let Ok(x) = s.parse::<PeerId>() {
+            Ok(Self::Id(x))
+        } else if let Ok(x) = s.parse::<u32>() {
+            Ok(Self::Number(x))
+        } else {
+            Err(format!("Invalid value: {s}").to_string())
+        }
+    }
+}
+
+
+#[derive(Args, Debug)]
+pub struct NodeJoinArgs {
     #[command(flatten)]
-    pub config: ConfigArgs,
+    pub peer: PeerArgs,
+    pub pass: Option<String>,
 }
 
 #[derive(Debug, Subcommand)]
 pub enum NodeCommand {
-    Ping(JoinNodeArgs),
-    Join(JoinNodeArgs),
+    Add(PeerArgs),
+    Ping(PeerArgs),
+    Join(PeerArgs),
+    List,
+    Delete(PeerArgs),
 }
 
 
-impl JoinNodeArgs {
-    pub async fn ping(self) -> Result<(), Error> {
-        let mut swarm = self.config.try_into_node_config().await?.try_into_swarm().await?;
-
-        let mut remote: Multiaddr = Multiaddr::empty();
-        remote.push(match self.peer_ip {
-            IpAddr::V4(x) => Protocol::Ip4(x),
-            IpAddr::V6(x) => Protocol::Ip6(x),
-        });
-        remote.push(Protocol::Tcp(self.peer_port));
-        let addr = remote.to_string();
-        swarm.dial(remote)?;
-        println!("Dialed {addr}");
-
-        loop{
-            match swarm.select_next_some().await {
-                SwarmEvent::NewListenAddr { address, .. } => println!("Listening on {address:?}"),
-                SwarmEvent::Behaviour(event) => {
-                    println!("{event:?}");
-                    event.run().await;
-                },
-                _ => {}
-            }
-        }
+impl PeerArgs {
+    pub async fn run(self) -> Result<(), Error> {
+        println!("{self:?}");
+        todo!()
     }
 }

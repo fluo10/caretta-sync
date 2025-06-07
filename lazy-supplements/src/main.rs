@@ -1,10 +1,12 @@
 use clap::{Parser, Subcommand};
-use lazy_supplements::{cli::{ConsoleArgs, ConsoleCommands, InitArgs, NodeArgs, NodeCommand, ServerArgs}, *};
+use lazy_supplements::{cli::{ConfigArgs, ConsoleArgs, ConsoleCommands, InitArgs, NodeArgs, NodeCommand, ServerArgs}, global::{Global, GLOBAL}, *};
 
 #[derive(Debug, Parser)]
 struct Cli {
     #[command(subcommand)]
     command: Command,
+    #[command(flatten)]
+    pub config: ConfigArgs,
 }
 
 #[derive(Debug, Subcommand)]
@@ -18,11 +20,10 @@ enum Command {
 
 #[tokio::main]
 async fn main() {
-    match Cli::parse().command {
-        Command::Node(x) => match x.command {
-            NodeCommand::Ping(y) => y.ping().await.unwrap(),
-            NodeCommand::Join(y) => println!("{y:?}"),
-        },
+    let cli =  Cli::parse();
+    let _ = GLOBAL.get_or_init_node_config(cli.config.try_into_node_config().await.unwrap()).await;
+    match cli.command {
+        Command::Node(x) => x.run().await.unwrap(),
         Command::Init(x) => x.init_config().await,
         Command::Server(x) => x.start_server().await.unwrap(),
         Command::Console(x) => x.start_console(ConsoleCommands::default()).await.unwrap(),
