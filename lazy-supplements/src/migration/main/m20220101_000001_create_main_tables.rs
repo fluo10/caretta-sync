@@ -1,6 +1,6 @@
 use sea_orm_migration::{prelude::*, schema::*};
 
-use crate::TableMigration;
+use crate::migration::TableMigration;
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;

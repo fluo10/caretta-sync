@@ -1,12 +1,14 @@
-use std::{collections::HashMap, net::{IpAddr, Ipv4Addr}, path::PathBuf, sync::LazyLock};
+use std::{collections::HashMap, net::{IpAddr, Ipv4Addr}, path::{Path, PathBuf}, sync::LazyLock};
 
 use crate::{config::{NodeConfig, RawNodeConfig}, error::Error};
 use futures::StreamExt;
 use libp2p::{swarm::SwarmEvent, Multiaddr, PeerId};
-use sea_orm::DatabaseConnection;
+use sea_orm::{prelude::*, Database};
+use sea_orm_migration::MigratorTrait;
 use tokio::sync::{OnceCell, RwLock};
 
 mod database;
+use database::GlobalDatabase;
 
 pub static PRODUCT_NAME: LazyLock<String> = LazyLock::new(|| {
     env!("CARGO_PKG_NAME").to_string()
@@ -54,17 +56,17 @@ pub static DEFAULT_DATABASE_FILE_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
 
 pub static GLOBAL: Global = Global{
     node_config: OnceCell::const_new(),
-    database: OnceCell::const_new(),
+    main_database: OnceCell::const_new(),
+    cache_database: OnceCell::const_new(),
     peers: OnceCell::const_new(),
+    
 };
 pub struct Global {
     pub node_config: OnceCell<NodeConfig>,
-    pub database: OnceCell<DatabaseConnection>,
+    pub main_database: OnceCell<DatabaseConnection>,
+    pub cache_database: OnceCell<DatabaseConnection>,
     pub peers: OnceCell<RwLock<HashMap<PeerId, Multiaddr>>>,
 }
-
-#[cfg(test)]
-pub use database::tests::get_or_init_temporary_database;
 
 impl Global {
     pub fn get_node_config(&self) -> Option<&NodeConfig> {
@@ -102,6 +104,42 @@ impl Global {
     }
 }
 
+impl GlobalDatabase for Global {
+    fn get_main_database(&self) -> Option<&DatabaseConnection> {
+        self.main_database.get()
+    }
+    async fn get_or_try_init_main_database<T, U>(&self, path: T, _: U) -> Result<&DatabaseConnection, Error>
+    where
+        T: AsRef<Path>,
+        U: MigratorTrait,
+    {
+        let url = "sqlite://".to_string() + path.as_ref().to_str().unwrap() + "?mode=rwc";
+
+        Ok(self.main_database.get_or_try_init(|| async {
+            let db = Database::connect(&url).await?;
+            U::up(&db, None).await?;
+            Ok::<DatabaseConnection, DbErr>(db)
+        }).await?)
+    }
+    fn get_cache_database(&self) -> Option<&DatabaseConnection> {
+        self.cache_database.get()
+    }
+    async fn get_or_try_init_cache_database<T, U>(&self, path: T, _: U) -> Result<&DatabaseConnection, Error>
+    where
+        T: AsRef<Path>,
+        U: MigratorTrait,
+    {
+        let url = "sqlite://".to_string() + path.as_ref().to_str().unwrap() + "?mode=rwc";
+
+        Ok(self.cache_database.get_or_try_init(|| async {
+            let db = Database::connect(&url).await?;
+            U::up(&db, None).await?;
+            Ok::<DatabaseConnection, DbErr>(db)
+        }).await?)
+    }
+
+}
+
 pub static DEFAULT_RAW_NODE_CONFIG: LazyLock<RawNodeConfig> = LazyLock::new(|| {
     RawNodeConfig {
         secret: None,
@@ -110,3 +148,34 @@ pub static DEFAULT_RAW_NODE_CONFIG: LazyLock<RawNodeConfig> = LazyLock::new(|| {
         port: Some(DEFAULT_PORT),
     }
 });
+#[cfg(test)]
+pub use tests::{get_or_init_temporary_main_database, get_or_init_temporary_cache_database};
+#[cfg(test)]
+pub mod tests {
+    use std::sync::LazyLock;
+
+    use sea_orm_migration::MigratorTrait;
+
+    use crate::{global::GLOBAL, migration::{cache::CacheMigrator, main::MainMigrator}};
+
+    use super::*;
+
+    pub async fn get_or_init_temporary_main_database() -> &'static DatabaseConnection {
+        GLOBAL.get_or_try_init_temporary_main_database(MainMigrator).await.unwrap()
+    }
+    pub async fn get_or_init_temporary_cache_database() -> &'static DatabaseConnection {
+        GLOBAL.get_or_try_init_temporary_cache_database(CacheMigrator).await.unwrap()
+    }
+
+    #[tokio::test]
+    async fn connect_main_database () {
+        let db = get_or_init_temporary_main_database().await;
+        assert!(db.ping().await.is_ok());
+    }
+
+    #[tokio::test]
+    async fn connect_cache_database () {
+        let db = get_or_init_temporary_cache_database().await;
+        assert!(db.ping().await.is_ok());
+    }
+}
