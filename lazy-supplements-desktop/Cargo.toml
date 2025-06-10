@@ -1,0 +1,19 @@
+[package]
+name = "lazy-supplements-desktop"
+edition.workspace = true
+version.workspace = true
+description.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+clap = { version = "4.5.38", features = ["derive"] }
+dirs = "6.0.0"
+lazy-supplements-core.workspace = true
+libp2p.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+
+[dev-dependencies]
+lazy-supplements-core = {workspace = true, features = ["test"]}

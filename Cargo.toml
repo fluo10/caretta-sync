@@ -1,5 +1,5 @@
 [workspace]
-members = [ "examples/*", "lazy-supplements", "lazy-supplements-*" ]
+members = [ "lazy-supplements-*" ]
 
 [workspace.package]
 edition = "2024"
@@ -9,8 +9,11 @@ license = "MIT OR Apache-2.0"
 repository = "https://forgejo.fireturlte.net" 
 
 [workspace.dependencies]
-lazy-supplements.path = "lazy-supplements"
+lazy-supplements-core.path = "lazy-supplements-core"
 libp2p = { version = "0.55.0", features = ["macros", "mdns", "noise", "ping", "tcp", "tokio", "yamux" ] }
+serde = { version = "1.0.219", features = ["derive"] }
+thiserror = "2.0.12"
+tokio = { version = "1.45.0", features = ["macros", "rt", "rt-multi-thread"] }
 
 [workspace.dependencies.sea-orm-migration]
 version = "1.1.0"
