@@ -6,4 +6,9 @@ description.workspace = true
 license.workspace = true
 repository.workspace = true
 
+[features]
+default = []
+test = ["lazy-supplements-core/test"]
+
 [dependencies]
+lazy-supplements-core.workspace = true

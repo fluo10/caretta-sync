@@ -6,6 +6,10 @@ description.workspace = true
 license.workspace = true
 repository.workspace = true
 
+[features]
+default = []
+test = ["lazy-supplements-core/test"]
+
 [dependencies]
 clap = { version = "4.5.38", features = ["derive"] }
 dirs = "6.0.0"
