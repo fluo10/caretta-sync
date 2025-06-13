@@ -1,0 +1,10 @@
+[package]
+name = "lazy-supplements-examples-core"
+edition.workspace = true
+version.workspace = true
+description.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+dioxus.workspace = true
