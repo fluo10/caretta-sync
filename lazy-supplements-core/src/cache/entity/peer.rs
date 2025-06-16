@@ -7,18 +7,20 @@ use serde::{Deserialize, Serialize};
 
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
-#[sea_orm(table_name = "record_deletion")]
+#[sea_orm(table_name = "node")]
 pub struct Model {
-    #[sea_orm(primary_key, auto_increment = false)]
-    pub id: Uuid,
+    #[sea_orm(primary_key)]
+    pub id: u32,
     #[sea_orm(indexed)]
     pub created_at: DateTimeUtc,
-    pub table_name: String,
-    pub record_id: Uuid,
+    #[sea_orm(indexed)]
+    pub updated_at: DateTimeUtc,
+    #[sea_orm(indexed)]
+    pub peer_id: String,
 }
 
 #[derive(Copy, Clone, Debug, DeriveRelation, EnumIter)]
-pub enum Relation{}
+pub enum Relation {}
     
 impl ActiveModelBehavior for ActiveModel {}
 
@@ -26,8 +28,8 @@ impl ActiveModel {
     pub fn new() -> Self {
         let timestamp: DateTimeUtc = Local::now().to_utc();
         Self{
-            id: Set(crate::global::generate_uuid()),
             created_at: Set(timestamp),
+            updated_at: Set(timestamp),
             ..Default::default()
         }
     }
@@ -37,18 +39,17 @@ impl ActiveModel {
 mod tests {
     use super::*;
 
-    use uuid::{Timestamp, Uuid};
-    use crate::global::get_or_init_temporary_main_database;
+    use libp2p::identity;
+    use crate::global::GLOBAL;
 
      #[tokio::test]
-    async fn check_insert_record_deletion() {
-        let db = get_or_init_temporary_main_database().await;
+    async fn check_insert_node() {
+        let db = crate::global::get_or_init_temporary_main_database().await;
         
-        assert!(ActiveModel{
-            table_name: Set("test_table".to_string()),
-            record_id: Set(crate::global::generate_uuid()),
+        ActiveModel{
+            peer_id: Set(identity::Keypair::generate_ed25519().public().to_peer_id().to_string()),
             ..ActiveModel::new()
-        }.insert(db).await.is_ok());
+        }.insert(db).await.unwrap();
     }
 
 }

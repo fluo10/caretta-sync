@@ -9,8 +9,8 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
 #[sea_orm(table_name = "node")]
 pub struct Model {
-    #[sea_orm(primary_key, auto_increment = false)]
-    pub id: Uuid,
+    #[sea_orm(primary_key)]
+    pub id: u32,
     #[sea_orm(indexed)]
     pub created_at: DateTimeUtc,
     #[sea_orm(indexed)]
@@ -32,7 +32,6 @@ impl ActiveModel {
     pub fn new() -> Self {
         let timestamp: DateTimeUtc = Local::now().to_utc();
         Self{
-            id: Set(crate::global::generate_uuid()),
             created_at: Set(timestamp),
             updated_at: Set(timestamp),
             ..Default::default()

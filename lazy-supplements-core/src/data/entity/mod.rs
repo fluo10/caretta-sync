@@ -14,8 +14,3 @@ pub use record_deletion::{
     Entity as RecordDeletionEntity,
     Model as RecordDeletionModel,
 };
-use uuid::{ContextV7, Timestamp, Uuid};
-
-pub fn generate_uuid() -> Uuid {
-    Uuid::new_v7(Timestamp::now(ContextV7::new()))
-}

@@ -9,6 +9,11 @@ use tokio::sync::{OnceCell, RwLock};
 
 mod database;
 use database::GlobalDatabase;
+use uuid::{ContextV7, Timestamp, Uuid};
+
+pub fn generate_uuid() -> Uuid {
+    Uuid::new_v7(Timestamp::now(ContextV7::new()))
+}
 
 pub static PRODUCT_NAME: LazyLock<String> = LazyLock::new(|| {
     env!("CARGO_PKG_NAME").to_string()
