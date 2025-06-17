@@ -2,6 +2,10 @@
 pub enum Error {
     #[error("Base64 decode error: {0}")]
     Base64Decode(#[from] base64::DecodeError),
+    #[error(transparent)]
+    CiborDeserialize(#[from] ciborium::de::Error<std::io::Error>),
+    #[error(transparent)]
+    CiborSerialize(#[from] ciborium::ser::Error<std::io::Error>),
     #[error("DB Error: {0}")]
     Db(#[from]sea_orm::DbErr),
     #[error("Dial Error: {0}")]
@@ -18,10 +22,13 @@ pub enum Error {
     Multiaddr(#[from] libp2p::multiaddr::Error),
     #[error("Noise error: {0}")]
     Noise(#[from] libp2p::noise::Error),
+    #[cfg(feature="desktop")]
+    #[error("Parse args error: {0}")]
+    ParseCommand(#[from] clap::Error),
     #[error("toml deserialization error: {0}")]
     TomlDe(#[from] toml::de::Error),
     #[error("toml serialization error: {0}")]
-    TomlSer(#[from] toml::ser::Error), 
+    TomlSer(#[from] toml::ser::Error),
     #[error("Transport error: {0}")]
     Transport(#[from]libp2p::TransportError<std::io::Error>)
 }

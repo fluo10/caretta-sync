@@ -1,6 +1,6 @@
 use std::{path::PathBuf, sync::LazyLock};
 
-use lazy_supplements_core::config::RawNodeConfig;
+use lazy_supplements_core::config::PartialCoreConfig;
 pub use lazy_supplements_core::global::*;
 
 pub static DEFAULT_DATA_DIR_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
@@ -29,10 +29,9 @@ pub static DEFAULT_DATABASE_FILE_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
     DEFAULT_DATA_DIR_PATH.join(&*DEFAULT_DATABASE_FILE_NAME)
 });
 
-pub static DEFAULT_RAW_NODE_CONFIG: LazyLock<RawNodeConfig> = LazyLock::new(|| {
-    RawNodeConfig {
+pub static DEFAULT_PARTIAL_CORE_CONFIG: LazyLock<PartialCoreConfig> = LazyLock::new(|| {
+    PartialCoreConfig {
         secret: None,
-        database_path: Some(DEFAULT_DATABASE_FILE_PATH.to_path_buf()),
         listen_ips: Some(DEFAULT_LISTEN_IPS.to_vec()),
         port: Some(0),
     }

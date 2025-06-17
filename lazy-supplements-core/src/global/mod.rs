@@ -1,6 +1,6 @@
 use std::{collections::HashMap, net::{IpAddr, Ipv4Addr}, path::{Path, PathBuf}, sync::LazyLock};
 
-use crate::{config::{NodeConfig, RawNodeConfig}, error::Error};
+use crate::{config::{CoreConfig, PartialCoreConfig}, error::Error};
 use futures::StreamExt;
 use libp2p::{swarm::SwarmEvent, Multiaddr, PeerId};
 use sea_orm::{prelude::*, Database};
@@ -33,25 +33,25 @@ pub static DEFAULT_DATABASE_FILE_NAME: LazyLock<PathBuf> = LazyLock::new(|| {
 
 
 pub static GLOBAL: Global = Global{
-    node_config: OnceCell::const_new(),
+    core_config: OnceCell::const_new(),
     main_database: OnceCell::const_new(),
     cache_database: OnceCell::const_new(),
     peers: OnceCell::const_new(),
     
 };
 pub struct Global {
-    pub node_config: OnceCell<NodeConfig>,
+    pub core_config: OnceCell<CoreConfig>,
     pub main_database: OnceCell<DatabaseConnection>,
     pub cache_database: OnceCell<DatabaseConnection>,
     pub peers: OnceCell<RwLock<HashMap<PeerId, Multiaddr>>>,
 }
 
 impl Global {
-    pub fn get_node_config(&self) -> Option<&NodeConfig> {
-        self.node_config.get()
+    pub fn get_core_config(&self) -> Option<&CoreConfig> {
+        self.core_config.get()
     }
-    pub async fn get_or_init_node_config(&self, config: NodeConfig) -> &NodeConfig {
-        self.node_config.get_or_init(|| async {config}).await
+    pub async fn get_or_init_core_config(&self, config: CoreConfig) -> &CoreConfig {
+        self.core_config.get_or_init(|| async {config}).await
     }
     pub async fn get_or_init_peers(&self) -> &RwLock<HashMap<PeerId, Multiaddr>> {
         self.peers.get_or_init(|| async {
@@ -65,7 +65,7 @@ impl Global {
         self.get_or_init_peers().await.write().await
     }
     pub async fn launch_swarm(&self) -> Result<(), Error> {
-        let mut swarm = self.get_node_config().unwrap().clone().try_into_swarm().await?;
+        let mut swarm = self.get_core_config().unwrap().clone().try_into_swarm().await?;
         loop{
             let swarm_event = swarm.select_next_some().await;
             tokio::spawn(async move{

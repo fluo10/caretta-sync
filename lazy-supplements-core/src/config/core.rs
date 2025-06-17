@@ -1,20 +1,25 @@
 use std::{net::IpAddr, ops, path::{Path, PathBuf}};
 
 use base64::{prelude::BASE64_STANDARD, Engine};
+#[cfg(feature="desktop")]
+use clap::Args;
 use libp2p::{identity::{self, DecodingError, Keypair}, noise, ping, tcp, yamux, Swarm};
 use serde::{Deserialize, Serialize};
 use tokio::{fs::File, io::{AsyncReadExt, AsyncWriteExt}};
 use tracing_subscriber::EnvFilter;
 
 
-use crate::{error::Error, p2p};
+use crate::{
+    config::PartialConfig,
+    error::Error, p2p
+};
 
-use super::{PartialConfig};
-
-fn keypair_to_base64(keypair: &Keypair) -> Result<String, Error> {
-        let vec = keypair.to_protobuf_encoding()?;
-        let base64 = BASE64_STANDARD.encode(vec);
-        Ok(base64)
+fn keypair_to_base64(keypair: &Keypair) -> String {
+        let vec = match keypair.to_protobuf_encoding() {
+            Ok(x) => x,
+            Err(_) => unreachable!(),
+        };
+        BASE64_STANDARD.encode(vec)
 }
 
 fn base64_to_keypair(base64: &str) -> Result<Keypair, Error>  {
@@ -23,15 +28,14 @@ fn base64_to_keypair(base64: &str) -> Result<Keypair, Error>  {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct NodeConfig {
+pub struct CoreConfig {
     #[serde(with = "keypair_parser")]
     pub secret: Keypair,
-    pub database_path: PathBuf,
     pub listen_ips: Vec<IpAddr>,
     pub port: u16,
 }
 
-impl NodeConfig {
+impl CoreConfig {
     pub async fn try_into_swarm (self) -> Result<Swarm<p2p::Behaviour>, Error> {
         let mut swarm = libp2p::SwarmBuilder::with_existing_identity(self.secret)
             .with_tokio()
@@ -47,12 +51,11 @@ impl NodeConfig {
     }
 }
 
-impl TryFrom<RawNodeConfig> for NodeConfig {
+impl TryFrom<PartialCoreConfig> for CoreConfig {
     type Error = Error;
-    fn try_from(raw: RawNodeConfig) -> Result<NodeConfig, Self::Error> {
-        Ok(NodeConfig {
+    fn try_from(raw: PartialCoreConfig) -> Result<CoreConfig, Self::Error> {
+        Ok(CoreConfig {
             secret: base64_to_keypair(&raw.secret.ok_or(Error::MissingConfig("secret"))?)?,
-            database_path: raw.database_path.ok_or(Error::MissingConfig("database_path"))?,
             listen_ips: raw.listen_ips.ok_or(Error::MissingConfig("listen_ips"))?,
             port: raw.port.ok_or(Error::MissingConfig("port"))?
         })
@@ -66,10 +69,7 @@ mod keypair_parser {
     pub fn serialize<S>(keypair: &Keypair, serializer: S) -> Result<S::Ok, S::Error>
     where S: Serializer
     {
-        match super::keypair_to_base64(keypair) {
-            Ok(x) => serializer.serialize_str(&x),
-            Err(_) => Err(serde::ser::Error::custom("Decoding keypair error"))
-        }
+        serializer.serialize_str(&super::keypair_to_base64(keypair))
     }
     pub fn deserialize<'de, D>(deserializer: D) -> Result<Keypair, D::Error>
     where D: Deserializer<'de>
@@ -82,35 +82,28 @@ mod keypair_parser {
     }
 }
 
+#[cfg_attr(feature="desktop",derive(Args))]
 #[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct RawNodeConfig {
+pub struct PartialCoreConfig {
+    #[cfg_attr(feature="desktop",arg(long))]
     pub secret: Option<String>,
-    pub database_path: Option<PathBuf>,
+    #[cfg_attr(feature="desktop",arg(long))]
     pub listen_ips: Option<Vec<IpAddr>>,
+    #[cfg_attr(feature="desktop",arg(long))]
     pub port: Option<u16>,
 }
-impl RawNodeConfig {
+impl PartialCoreConfig {
 
     pub fn with_new_secret(mut self) -> Self {
-        self.secret = Some(keypair_to_base64(&Keypair::generate_ed25519()).unwrap());
+        self.secret = Some(keypair_to_base64(&Keypair::generate_ed25519()));
         self
     }
-
-    pub fn new() -> Self {
-        RawNodeConfig {
-            secret: None,
-            database_path: None,
-            listen_ips: None,
-            port: None,
-        }
-    }
-
     pub async fn read_or_create<T>(path: T) -> Result<Self, Error> 
     where
     T: AsRef<Path>
     {
         if !path.as_ref().exists() {
-            Self::new().write_to(&path).await?;
+            Self::empty().write_to(&path).await?;
         }
         Self::read_from(&path).await
     }
@@ -121,7 +114,7 @@ impl RawNodeConfig {
         let mut file = File::open(path.as_ref()).await?;
         let mut content = String::new();
         file.read_to_string(&mut content).await?;
-        let config: RawNodeConfig = toml::from_str(&content)?;
+        let config: Self = toml::from_str(&content)?;
         Ok(config)
     }
     pub async fn write_to<T>(&self, path:T) -> Result<(), Error> 
@@ -138,13 +131,28 @@ impl RawNodeConfig {
         file.write_all(toml::to_string(self)?.as_bytes()).await?;
         Ok(())
     }
+}
 
-    pub fn merge(&mut self, another: RawNodeConfig) {
+impl From<CoreConfig> for PartialCoreConfig {
+    fn from(config: CoreConfig) -> Self {
+        Self {
+            secret: Some(keypair_to_base64(&config.secret)),
+            listen_ips: Some(config.listen_ips),
+            port: Some(config.port)
+        }
+    }
+}
+impl PartialConfig<CoreConfig> for PartialCoreConfig {
+    fn empty() -> Self {
+        Self {
+            secret: None,
+            listen_ips: None,
+            port: None,
+        }
+    }
+    fn merge(&mut self, another: Self) {
         if let Some(x) = another.secret {
             self.secret = Some(x);
-        };
-        if let Some(x) = another.database_path {
-            self.database_path = Some(x);
         };
         if let Some(x) = another.listen_ips {
             self.listen_ips = Some(x);
@@ -153,17 +161,11 @@ impl RawNodeConfig {
             self.port = Some(x);
         };
     }
-}
-
-impl ops::Add<RawNodeConfig> for RawNodeConfig {
-    type Output = RawNodeConfig;
-    fn add(mut self, another: RawNodeConfig) -> RawNodeConfig {
-        self.merge(another);
-        self
+    
+    fn default() -> Self {
+        todo!()
     }
 }
-
-
 
 #[cfg(test)]
 mod tests {
@@ -174,7 +176,7 @@ mod tests {
     #[tokio::test]
     async fn parse_keypair() {
         let keypair = identity::Keypair::generate_ed25519();
-        let keypair2 = base64_to_keypair(&keypair_to_base64(&keypair).unwrap()).unwrap();
+        let keypair2 = base64_to_keypair(&keypair_to_base64(&keypair)).unwrap();
 
         assert_eq!(keypair.public(), keypair2.public());
     }

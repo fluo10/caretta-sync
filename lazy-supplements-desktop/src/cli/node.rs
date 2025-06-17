@@ -5,7 +5,7 @@ use libp2p::{
     multiaddr::Protocol, noise, ping, swarm::SwarmEvent, tcp, yamux, Multiaddr, PeerId
 };
 
-use crate::{cli::ServerArgs, error::{CoreError, DesktopError, Error}};
+use crate::{cli::ServerArgs, error::Error};
 
 use super::ConfigArgs;
 

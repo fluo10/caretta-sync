@@ -8,12 +8,15 @@ repository.workspace = true
 
 [features]
 default = []
+desktop = ["dep:clap"]
 test = ["dep:tempfile"]
 
 [dependencies]
 base64 = "0.22.1"
 chrono = "0.4.41"
 chrono-tz = "0.10.3"
+ciborium.workspace = true
+clap = {workspace = true, optional = true}
 futures = "0.3.31"
 libp2p.workspace = true
 sea-orm = { version = "1.1.11", features = ["sqlx-sqlite", "runtime-tokio-native-tls", "macros", "with-chrono", "with-uuid"] } 

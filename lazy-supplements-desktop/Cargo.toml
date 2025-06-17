@@ -12,9 +12,9 @@ test = ["lazy-supplements-core/test"]
 
 [dependencies]
 ciborium.workspace = true
-clap = { version = "4.5.38", features = ["derive"] }
+clap.workspace = true
 dirs = "6.0.0"
-lazy-supplements-core.workspace = true
+lazy-supplements-core = { workspace = true, features = ["desktop"] }
 libp2p.workspace = true
 serde.workspace = true
 thiserror.workspace = true

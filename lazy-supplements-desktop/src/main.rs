@@ -19,7 +19,7 @@ enum Command {
 #[tokio::main]
 async fn main() {
     let cli =  Cli::parse();
-    let _ = GLOBAL.get_or_init_node_config(cli.config.try_into_node_config().await.unwrap()).await;
+    let _ = GLOBAL.get_or_init_core_config(cli.config.try_into_core_config().await.unwrap()).await;
     match cli.command {
         Command::Node(x) => x.run().await.unwrap(),
         Command::Server(x) => x.start_server().await.unwrap(),
