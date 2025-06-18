@@ -1,4 +1,4 @@
-use std::{net::IpAddr, ops, path::{Path, PathBuf}};
+use std::{net::{IpAddr, Ipv4Addr}, ops, path::{Path, PathBuf}};
 
 use base64::{prelude::BASE64_STANDARD, Engine};
 #[cfg(feature="desktop")]
@@ -14,6 +14,9 @@ use crate::{
     error::Error, p2p
 };
 
+static DEFAULT_P2P_LISTEN_IPS: &[IpAddr] = &[IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0))];
+static DEFAULT_P2P_PORT: u16 = 0;
+
 fn keypair_to_base64(keypair: &Keypair) -> String {
         let vec = match keypair.to_protobuf_encoding() {
             Ok(x) => x,
@@ -28,14 +31,14 @@ fn base64_to_keypair(base64: &str) -> Result<Keypair, Error>  {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct CoreConfig {
+pub struct P2pConfig {
     #[serde(with = "keypair_parser")]
     pub secret: Keypair,
     pub listen_ips: Vec<IpAddr>,
     pub port: u16,
 }
 
-impl CoreConfig {
+impl P2pConfig {
     pub async fn try_into_swarm (self) -> Result<Swarm<p2p::Behaviour>, Error> {
         let mut swarm = libp2p::SwarmBuilder::with_existing_identity(self.secret)
             .with_tokio()
@@ -51,10 +54,10 @@ impl CoreConfig {
     }
 }
 
-impl TryFrom<PartialCoreConfig> for CoreConfig {
+impl TryFrom<PartialP2pConfig> for P2pConfig {
     type Error = Error;
-    fn try_from(raw: PartialCoreConfig) -> Result<CoreConfig, Self::Error> {
-        Ok(CoreConfig {
+    fn try_from(raw: PartialP2pConfig) -> Result<P2pConfig, Self::Error> {
+        Ok(P2pConfig {
             secret: base64_to_keypair(&raw.secret.ok_or(Error::MissingConfig("secret"))?)?,
             listen_ips: raw.listen_ips.ok_or(Error::MissingConfig("listen_ips"))?,
             port: raw.port.ok_or(Error::MissingConfig("port"))?
@@ -83,8 +86,8 @@ mod keypair_parser {
 }
 
 #[cfg_attr(feature="desktop",derive(Args))]
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct PartialCoreConfig {
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+pub struct PartialP2pConfig {
     #[cfg_attr(feature="desktop",arg(long))]
     pub secret: Option<String>,
     #[cfg_attr(feature="desktop",arg(long))]
@@ -92,7 +95,7 @@ pub struct PartialCoreConfig {
     #[cfg_attr(feature="desktop",arg(long))]
     pub port: Option<u16>,
 }
-impl PartialCoreConfig {
+impl PartialP2pConfig {
 
     pub fn with_new_secret(mut self) -> Self {
         self.secret = Some(keypair_to_base64(&Keypair::generate_ed25519()));
@@ -133,8 +136,8 @@ impl PartialCoreConfig {
     }
 }
 
-impl From<CoreConfig> for PartialCoreConfig {
-    fn from(config: CoreConfig) -> Self {
+impl From<P2pConfig> for PartialP2pConfig {
+    fn from(config: P2pConfig) -> Self {
         Self {
             secret: Some(keypair_to_base64(&config.secret)),
             listen_ips: Some(config.listen_ips),
@@ -142,13 +145,17 @@ impl From<CoreConfig> for PartialCoreConfig {
         }
     }
 }
-impl PartialConfig<CoreConfig> for PartialCoreConfig {
+
+impl PartialConfig for PartialP2pConfig {
     fn empty() -> Self {
         Self {
             secret: None,
             listen_ips: None,
             port: None,
         }
+    }
+    fn is_empty(&self) -> bool {
+        self.secret.is_none() && self.listen_ips.is_none() && self.port.is_none()
     }
     fn merge(&mut self, another: Self) {
         if let Some(x) = another.secret {
@@ -163,14 +170,22 @@ impl PartialConfig<CoreConfig> for PartialCoreConfig {
     }
     
     fn default() -> Self {
-        todo!()
+        Self {
+            secret: None,
+            listen_ips: Some(Vec::from(DEFAULT_P2P_LISTEN_IPS)),
+            port: Some(DEFAULT_P2P_PORT),
+        }
     }
 }
+
+
+
 
 #[cfg(test)]
 mod tests {
     use libp2p::identity;
     use super::*;
+    use crate::{config::PartialConfig, tests::test_toml_serialize_deserialize};
     
 
     #[tokio::test]
@@ -179,5 +194,10 @@ mod tests {
         let keypair2 = base64_to_keypair(&keypair_to_base64(&keypair)).unwrap();
 
         assert_eq!(keypair.public(), keypair2.public());
+    }
+    #[tokio::test]
+    async fn test_p2p_config_serialize_deserialize() {
+        test_toml_serialize_deserialize(PartialP2pConfig::empty());
+        test_toml_serialize_deserialize(PartialP2pConfig::default());
     }
 }

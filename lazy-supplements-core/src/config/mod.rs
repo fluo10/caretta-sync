@@ -1,22 +1,31 @@
 pub mod error;
-mod core;
+mod storage;
+mod p2p;
 
 use std::path::Path;
 use crate::error::Error;
-pub use core::{ CoreConfig, PartialCoreConfig };
 pub use error::ConfigError;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 use tokio::{fs::File, io::{AsyncReadExt, AsyncWriteExt}};
+pub use storage::{StorageConfig, PartialStorageConfig};
+pub use p2p::{P2pConfig, PartialP2pConfig};
+pub trait PartialConfig: Serialize + Sized + DeserializeOwned 
+{
 
-pub trait PartialConfig<T>: From<T>
-where T: TryFrom<Self> {
     fn default() -> Self;
     fn empty() -> Self;
     fn merge(&mut self, other: Self);
+    fn from_toml(s: &str) -> Result<Self, toml::de::Error> {
+        toml::from_str(s)
+    }
+    fn into_toml(&self) -> Result<String, toml::ser::Error> {
+        toml::to_string(self)
+    }
+    fn is_empty(&self) -> bool;
 }
 
-pub trait ConfigFile: DeserializeOwned + Serialize {
+pub trait ConfigRoot: DeserializeOwned + Serialize {
     fn new() -> Self;
 
     async fn read_or_create<T>(path: T) -> Result<Self, Error> 
@@ -52,4 +61,52 @@ pub trait ConfigFile: DeserializeOwned + Serialize {
         file.write_all(toml::to_string(self)?.as_bytes()).await?;
         Ok(())
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use serde::{Deserialize, Serialize};
+
+    use crate::tests::test_toml_serialize_deserialize;
+
+    use super::{p2p::{P2pConfig, PartialP2pConfig}, PartialConfig};
+
+    #[derive(Debug, Deserialize, Serialize, PartialEq)]
+    pub struct TestConfig {
+        
+        p2p: Option<PartialP2pConfig>
+    }
+
+    impl PartialConfig for TestConfig {
+        fn default() -> Self {
+            Self {
+                p2p: Some(PartialP2pConfig::default()),
+            }
+        }
+    
+        fn empty() -> Self {
+            Self {
+                p2p: None,
+            }
+        }
+
+        fn is_empty(&self) -> bool {
+            self.p2p.is_none()
+        }
+    
+        fn merge(&mut self, other: Self) {
+            if let Some(p2p) = other.p2p {
+                self.p2p = Some(p2p);
+            }
+        }
+    }
+    
+    #[tokio::test]
+    async fn test_p2p_config_serialize_deserialize() {
+        test_toml_serialize_deserialize(TestConfig::empty());
+        test_toml_serialize_deserialize(TestConfig::default());
+        assert_eq!(TestConfig::empty(), toml::from_str("").unwrap());
+        assert_eq!("", &toml::to_string(&TestConfig::empty()).unwrap());
+    }
+    
 }

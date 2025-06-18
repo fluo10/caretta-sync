@@ -35,11 +35,11 @@ impl Event {
                 match x {
                     mdns::Event::Discovered(e) => {
                         for peer in e {
-                            let mut peers = crate::global::GLOBAL.write_peers().await;
-                            peers.insert(peer.0, peer.1);
+                            //let mut peers = crate::global::GLOBAL.write_peers().await;
+                            //peers.insert(peer.0, peer.1);
                         }
-                        let peers = crate::global::GLOBAL.read_peers().await;
-                        println!("Peers: {peers:?}");
+                        //let peers = crate::global::GLOBAL.read_peers().await;
+                        //println!("Peers: {peers:?}");
                     },
                     _ => {},
                 }
