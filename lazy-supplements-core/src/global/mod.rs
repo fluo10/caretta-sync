@@ -1,4 +1,4 @@
-use std::{collections::HashMap, net::{IpAddr, Ipv4Addr}, path::{Path, PathBuf}, sync::LazyLock};
+use std::{any::type_name, collections::HashMap, net::{IpAddr, Ipv4Addr}, path::{Path, PathBuf}, sync::LazyLock};
 
 use crate::{config::{P2pConfig, PartialP2pConfig, StorageConfig}, error::Error};
 use futures::StreamExt;
@@ -10,7 +10,7 @@ use tokio::sync::{OnceCell, RwLock};
 mod peers;
 pub use peers::GlobalPeers;
 mod config;
-pub use config::*;
+pub use config::STORAGE_CONFIG;
 mod database_connection;
 pub use database_connection::*;
 use uuid::{ContextV7, Timestamp, Uuid};
@@ -33,6 +33,47 @@ pub static DEFAULT_CONFIG_FILE_NAME: LazyLock<PathBuf> = LazyLock::new(|| {
 pub static DEFAULT_DATABASE_FILE_NAME: LazyLock<PathBuf> = LazyLock::new(|| {
     PathBuf::from(String::new() + env!("CARGO_PKG_NAME") + ".sqlite")
 });
+fn uninitialized_message<T>(var: T) -> String {
+    format!("{} is uninitialized!", &stringify!(var))
+}
+
+struct SimpleGlobal<T> {
+    inner: OnceCell<T>
+}
+
+impl<T> SimpleGlobal<T> { 
+    pub const fn const_new() -> Self {
+        Self{inner: OnceCell::const_new()}
+    }
+    pub async fn get_or_init(&'static self, source: T) -> &'static T {
+        self.inner.get_or_init(|| async {
+            source
+        }).await
+    }
+    pub fn get(&'static self) -> Option<&'static T> {
+        self.inner.get()
+    }
+    pub fn get_and_unwrap(&'static self) -> &'static T {
+        self.get().expect(&format!("{} is uninitialized!", &stringify!(self)))
+    }
+}
+
+struct GlobalRwLock<T> {
+    inner: OnceCell<RwLock<T>>
+}
+
+impl<T> GlobalRwLock<T> {
+    pub const fn const_new() -> Self {
+        Self{inner: OnceCell::const_new()}
+    }
+    async fn write(&'static self) -> tokio::sync::RwLockWriteGuard<'_ ,T> {
+        self.get_peers_once_cell().get().expect(UNINITIALIZED_MESSAGE).write().await
+    }
+    async fn read(&'static self) -> RwLockReadGuard<'_, T> {
+        self.get_peers_once_cell().get().expect(UNINITIALIZED_MESSAGE).read().await
+
+    }
+}
 
 #[cfg(test)]
 pub struct TestGlobal {
