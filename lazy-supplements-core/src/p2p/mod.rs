@@ -1,6 +1,6 @@
 use libp2p::{ identity::Keypair, mdns, ping, swarm};
 
-use crate::error::Error;
+use crate::{error::Error, global::GlobalPeers};
 
 #[derive(swarm::NetworkBehaviour)]
 #[behaviour(to_swarm = "Event")]
@@ -29,17 +29,20 @@ pub enum Event {
 }
 
 impl Event {
-    pub async fn run(self) {
+    pub async fn run<T>(self, global: &T)
+    where 
+        T: GlobalPeers
+    {
         match self {
             Self::Mdns(x) => {
                 match x {
                     mdns::Event::Discovered(e) => {
                         for peer in e {
-                            //let mut peers = crate::global::GLOBAL.write_peers().await;
-                            //peers.insert(peer.0, peer.1);
+                            global.write_peers().await;
+                            peers.insert(peer.0, peer.1);
                         }
-                        //let peers = crate::global::GLOBAL.read_peers().await;
-                        //println!("Peers: {peers:?}");
+                        let peers = global.read_peers().await;
+                        println!("Peers: {peers:?}");
                     },
                     _ => {},
                 }

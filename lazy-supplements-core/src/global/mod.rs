@@ -9,9 +9,10 @@ use tokio::sync::{OnceCell, RwLock};
 
 mod peers;
 pub use peers::GlobalPeers;
-mod storage_config;
+mod config;
+pub use config::*;
 mod database_connection;
-pub use database_connection::GlobalDatabaseConnection;
+pub use database_connection::*;
 use uuid::{ContextV7, Timestamp, Uuid};
 
 pub fn generate_uuid() -> Uuid {
@@ -33,17 +34,29 @@ pub static DEFAULT_DATABASE_FILE_NAME: LazyLock<PathBuf> = LazyLock::new(|| {
     PathBuf::from(String::new() + env!("CARGO_PKG_NAME") + ".sqlite")
 });
 
-#[cfg(any(test, feature="test"))]
+#[cfg(test)]
 pub struct TestGlobal {
-    p2p_config: OnceCell<P2pConfig>,
-    storage_config: OnceCell<StorageConfig>,
-    data_database_connection: OnceCell<DatabaseConnection>,
-    cache_database_connection: OnceCell<DatabaseConnection>,
+    pub storage_config: &'static StorageConfig,
+    pub data_database_connection: &'static DatabaseConnection,
+    pub cache_database_connection: &'static DatabaseConnection,
 }
-#[cfg(any(test, feature="test"))]
-pub static GLOBAL: TestGlobal = TestGlobal{
-    p2p_config: OnceCell::const_new(),
-    storage_config: OnceCell::const_new(),
-    data_database_connection: OnceCell::const_new(),
-    cache_database_connection: OnceCell::const_new(),
-};
+
+#[cfg(test)]
+mod tests {
+    use crate::{cache::migration::CacheMigrator, data::migration::DataMigrator};
+
+    use super::*;
+    static TEST_DATA_DIRECTORY: LazyLock<PathBuf> = todo!();
+    static TEST_DATA_DATABASE_PATH: LazyLock<PathBuf> = todo!();
+    static TEST_CACHE_DIRECTORY: LazyLock<PathBuf> = todo!();
+    static TEST_CACHE_DATABASE_PATH: LazyLock<PathBuf> = todo!();
+    static TEST_STORAGE_CONFIG: LazyLock<StorageConfig> = todo!();
+    
+    pub async fn get_or_try_init_test() -> TestGlobal {
+        TestGlobal {
+            storage_config: get_or_init_storage_config(StorageConfig{data_directory: TEST_DATA_DIRECTORY.clone(), cache_directory: TEST_CACHE_DIRECTORY.clone()}).await,
+            data_database_connection: get_or_try_init_data_database_connection(&*TEST_DATA_DATABASE_PATH, DataMigrator ).await.unwrap(),
+            cache_database_connection: get_or_try_init_cache_database_connection(&*TEST_CACHE_DATABASE_PATH, CacheMigrator).await.unwrap(),
+        }
+    }
+}

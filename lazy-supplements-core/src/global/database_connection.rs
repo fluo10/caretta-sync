@@ -5,28 +5,43 @@ use sea_orm_migration::MigratorTrait;
 use crate::error::Error;
 use tokio::sync::OnceCell;
 
-use super::storage_config::GlobalStorageConfig;
+static DATA_DATABASE_CONNECTION: OnceCell<DatabaseConnection> = OnceCell::const_new();
+static CACHE_DATABASE_CONNECTION: OnceCell<DatabaseConnection> = OnceCell::const_new();
 
-static UNINITIALIZED_MESSAGE: &str = "global database connection uninitialized!";
+pub fn get_data_database_connection() -> Option<&'static DatabaseConnection> {
+    DATA_DATABASE_CONNECTION.get()
+}
+pub fn get_and_unwrap_data_database_connection() -> &'static DatabaseConnection {
+    get_data_database_connection().expect("global data database connection uninitialized!")
+}
+pub async fn get_or_try_init_data_database_connection<T, U>(path: T, _: U) -> Result<&'static DatabaseConnection, Error>
+where
+    T: AsRef<Path>,
+    U: MigratorTrait
+{
+    let url = "sqlite://".to_string() + path.as_ref().to_str().unwrap() + "?mode=rwc";
+    Ok(DATA_DATABASE_CONNECTION.get_or_try_init(|| async {
+        let db = Database::connect(&url).await?;
+        U::up(&db, None).await?;
+        Ok::<DatabaseConnection, DbErr>(db)
+    }).await?)
+}
 
-pub trait GlobalDatabaseConnection: GlobalStorageConfig {
-    fn get_data_database_connection_as_once_cell(&'static self) -> &'static OnceCell<DatabaseConnection>;
-    fn get_data_database_connection(&'static self) -> Option<&'static DatabaseConnection> {
-        self.get_data_database_connection_as_once_cell().get()
-    }
-    fn get_and_unwrap_data_database_connection(&'static self) -> &'static DatabaseConnection {
-        self.get_data_database_connection().expect(UNINITIALIZED_MESSAGE)
-    }
-    async fn get_or_try_init_data_database_connection<T>(&'static self, _: T) -> Result<&DatabaseConnection, Error>
-    where
-        T: MigratorTrait
-    {
-        let url = "sqlite://".to_string() + self.get_and_unwrap_storage_config().get_data_database_path().to_str().unwrap() + "?mode=rwc";
-        Ok(self.get_data_database_connection_as_once_cell().get_or_try_init(|| async {
-            let db = Database::connect(&url).await?;
-            T::up(&db, None).await?;
-            Ok::<DatabaseConnection, DbErr>(db)
-        }).await?)
-    }
-    
+pub fn get_cache_database_connection() -> Option<&'static DatabaseConnection> {
+    CACHE_DATABASE_CONNECTION.get()
+}
+pub fn get_and_unwrap_cache_database_connection() -> &'static DatabaseConnection {
+    CACHE_DATABASE_CONNECTION.get().expect("global data database connection uninitialized!")
+}
+pub async fn get_or_try_init_cache_database_connection<T, U>(path: T, _: U) -> Result<&'static DatabaseConnection, Error>
+where
+    T: AsRef<Path>,
+    U: MigratorTrait
+{
+    let url = "sqlite://".to_string() + path.as_ref().to_str().unwrap() + "?mode=rwc";
+    Ok(DATA_DATABASE_CONNECTION.get_or_try_init(|| async {
+        let db = Database::connect(&url).await?;
+        U::up(&db, None).await?;
+        Ok::<DatabaseConnection, DbErr>(db)
+    }).await?)
 }

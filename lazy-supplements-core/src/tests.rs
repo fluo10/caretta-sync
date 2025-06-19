@@ -20,7 +20,6 @@ pub static TEST_DATABASE_PATH: std::sync::LazyLock<PathBuf> = std::sync::LazyLoc
     TEST_DIR_PATH.join("lazy-supplements.sqlite")
 });
 
-#[cfg(any(test, feature="test"))]
 pub fn test_cbor_serialize_deserialize<T>(src: T)
 where T: DeserializeOwned + Serialize + PartialEq + std::fmt::Debug
 {
@@ -30,7 +29,6 @@ where T: DeserializeOwned + Serialize + PartialEq + std::fmt::Debug
     assert_eq!(src, dst);
 }
 
-#[cfg(any(test, feature="test"))]
 pub fn test_toml_serialize_deserialize<T>(src: T)
 where T: DeserializeOwned + Serialize + PartialEq + std::fmt::Debug
 {
