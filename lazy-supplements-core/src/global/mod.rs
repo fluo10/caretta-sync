@@ -1,14 +1,16 @@
 use std::{any::type_name, collections::HashMap, net::{IpAddr, Ipv4Addr}, path::{Path, PathBuf}, sync::LazyLock};
 
-use crate::{config::{P2pConfig, PartialP2pConfig, StorageConfig}, error::Error};
+use crate::{config::{P2pConfig, PartialP2pConfig, StorageConfig}, error::Error }; 
+#[cfg(any(test, feature="test"))]
+use crate::tests::{GlobalTestDefault, TestDefault};
 use futures::StreamExt;
 use libp2p::{swarm::SwarmEvent, Multiaddr, PeerId};
 use sea_orm::{prelude::*, Database};
 use sea_orm_migration::MigratorTrait;
-use tokio::sync::{OnceCell, RwLock};
+use tokio::sync::{OnceCell, RwLock, RwLockReadGuard, RwLockWriteGuard};
 
 mod peers;
-pub use peers::GlobalPeers;
+pub use peers::PEERS;
 mod config;
 pub use config::STORAGE_CONFIG;
 mod database_connection;
@@ -37,13 +39,17 @@ fn uninitialized_message<T>(var: T) -> String {
     format!("{} is uninitialized!", &stringify!(var))
 }
 
-struct SimpleGlobal<T> {
+pub struct GlobalConstant<T> {
+    pub name: &'static str,
     inner: OnceCell<T>
 }
 
-impl<T> SimpleGlobal<T> { 
-    pub const fn const_new() -> Self {
-        Self{inner: OnceCell::const_new()}
+impl<T> GlobalConstant<T> { 
+    pub const fn const_new(name: &'static str ) -> Self {
+        Self{
+            name: name,
+            inner: OnceCell::const_new()
+        }
     }
     pub async fn get_or_init(&'static self, source: T) -> &'static T {
         self.inner.get_or_init(|| async {
@@ -58,46 +64,40 @@ impl<T> SimpleGlobal<T> {
     }
 }
 
+#[cfg(any(test, feature="test"))]
+impl<T> GlobalTestDefault<T> for GlobalConstant<T>
+where
+    T: TestDefault + 'static
+{
+    async fn get_or_init_test_default(&'static self) -> &'static T {
+        self.get_or_init(T::test_default()).await
+    }
+}
+
 struct GlobalRwLock<T> {
+    pub name: &'static str,
     inner: OnceCell<RwLock<T>>
 }
 
 impl<T> GlobalRwLock<T> {
-    pub const fn const_new() -> Self {
-        Self{inner: OnceCell::const_new()}
+    pub const fn const_new(name: &'static str) -> Self {
+        Self{
+            name: name, 
+            inner: OnceCell::const_new()
+        }
     }
-    async fn write(&'static self) -> tokio::sync::RwLockWriteGuard<'_ ,T> {
-        self.get_peers_once_cell().get().expect(UNINITIALIZED_MESSAGE).write().await
+    pub fn get(&'static self) -> &'static RwLock<T> {
+        self.inner.get().expect(&format!("{} is uninitialized", self.name))
     }
-    async fn read(&'static self) -> RwLockReadGuard<'_, T> {
-        self.get_peers_once_cell().get().expect(UNINITIALIZED_MESSAGE).read().await
-
+    pub async fn write(&'static self) -> RwLockWriteGuard<'_ ,T> {
+        self.get().write().await
     }
-}
-
-#[cfg(test)]
-pub struct TestGlobal {
-    pub storage_config: &'static StorageConfig,
-    pub data_database_connection: &'static DatabaseConnection,
-    pub cache_database_connection: &'static DatabaseConnection,
+    pub async fn read(&'static self) -> RwLockReadGuard<'_, T> {
+        self.get().read().await
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::{cache::migration::CacheMigrator, data::migration::DataMigrator};
 
-    use super::*;
-    static TEST_DATA_DIRECTORY: LazyLock<PathBuf> = todo!();
-    static TEST_DATA_DATABASE_PATH: LazyLock<PathBuf> = todo!();
-    static TEST_CACHE_DIRECTORY: LazyLock<PathBuf> = todo!();
-    static TEST_CACHE_DATABASE_PATH: LazyLock<PathBuf> = todo!();
-    static TEST_STORAGE_CONFIG: LazyLock<StorageConfig> = todo!();
-    
-    pub async fn get_or_try_init_test() -> TestGlobal {
-        TestGlobal {
-            storage_config: get_or_init_storage_config(StorageConfig{data_directory: TEST_DATA_DIRECTORY.clone(), cache_directory: TEST_CACHE_DIRECTORY.clone()}).await,
-            data_database_connection: get_or_try_init_data_database_connection(&*TEST_DATA_DATABASE_PATH, DataMigrator ).await.unwrap(),
-            cache_database_connection: get_or_try_init_cache_database_connection(&*TEST_CACHE_DATABASE_PATH, CacheMigrator).await.unwrap(),
-        }
-    }
 }

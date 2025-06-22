@@ -20,6 +20,14 @@ pub static TEST_DATABASE_PATH: std::sync::LazyLock<PathBuf> = std::sync::LazyLoc
     TEST_DIR_PATH.join("lazy-supplements.sqlite")
 });
 
+pub trait TestDefault {
+    fn test_default() -> Self;
+}
+
+pub trait GlobalTestDefault<T: 'static> {
+    async fn get_or_init_test_default(&'static self) -> &'static T; 
+}
+
 pub fn test_cbor_serialize_deserialize<T>(src: T)
 where T: DeserializeOwned + Serialize + PartialEq + std::fmt::Debug
 {

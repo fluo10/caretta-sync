@@ -33,7 +33,7 @@ impl From<UnixConfig> for PartialUnixConfig {
     }
 }
 
-impl PartialConfig<UnixConfig> for PartialUnixConfig {
+impl PartialConfig for PartialUnixConfig {
     fn empty() -> Self {
         Self { socket_path: None }
     }

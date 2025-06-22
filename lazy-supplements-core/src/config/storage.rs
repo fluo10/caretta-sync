@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 #[cfg(feature="desktop")]
 use clap::Args;
-use crate::config::{ConfigError, PartialConfig};
+use crate::{config::{ConfigError, PartialConfig}};
 use libp2p::mdns::Config;
 use serde::{Deserialize, Serialize};
 
@@ -10,14 +10,7 @@ static DATA_DATABASE_NAME: &str = "data.sqlite";
 static CACHE_DATABASE_NAME: &str = "cache.sqlite";
 
 #[cfg(any(test, feature="test"))]
-static TEST_DATA_DATABASE_PATH: std::sync::LazyLock<tempfile::TempPath> = std::sync::LazyLock::new(|| {
-    let mut temp_path = tempfile::NamedTempFile::new().unwrap().into_temp_path();
-    temp_path.disable_cleanup(true);
-    println!("{}", temp_path.as_os_str().to_str().unwrap());
-    temp_path
-});
-
-
+use crate::tests::{GlobalTestDefault, TestDefault};
 
 #[derive(Debug)]
 pub struct StorageConfig {
@@ -26,16 +19,19 @@ pub struct StorageConfig {
 }
 
 impl StorageConfig {
-    #[cfg(any(test, feature="test"))]
-    pub fn new_test() -> Self {
-        let mut temp_path = tempfile::NamedTempFile::new().unwrap().into_temp_path().keep().unwrap();
-        Self { data_directory: temp_path.clone(), cache_directory: temp_path }
-    }
     pub fn get_data_database_path(&self) -> PathBuf{
         self.data_directory.join(DATA_DATABASE_NAME)
     }
     pub fn get_cache_database_path(&self) -> PathBuf {
         self.cache_directory.join(CACHE_DATABASE_NAME)
+    }
+}
+
+#[cfg(any(test, feature="test"))]
+impl TestDefault for StorageConfig {
+    fn test_default() -> Self {
+        let temp_path = tempfile::NamedTempFile::new().unwrap().into_temp_path().keep().unwrap();
+        Self { data_directory: temp_path.clone(), cache_directory: temp_path }
     }
 }
 

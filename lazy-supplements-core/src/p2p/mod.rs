@@ -1,6 +1,7 @@
 use libp2p::{ identity::Keypair, mdns, ping, swarm};
+use sea_orm::{ActiveModelTrait, ActiveValue::Set, ColumnTrait, EntityTrait, QueryFilter};
 
-use crate::{error::Error, global::GlobalPeers};
+use crate::{cache::entity::{ActivePeerModel, PeerColumn, PeerEntity}, error::Error, global::{CACHE_DATABASE_CONNECTION, PEERS}};
 
 #[derive(swarm::NetworkBehaviour)]
 #[behaviour(to_swarm = "Event")]
@@ -29,20 +30,23 @@ pub enum Event {
 }
 
 impl Event {
-    pub async fn run<T>(self, global: &T)
-    where 
-        T: GlobalPeers
+    pub async fn run(&self)
     {
         match self {
             Self::Mdns(x) => {
                 match x {
                     mdns::Event::Discovered(e) => {
-                        for peer in e {
-                            global.write_peers().await;
-                            peers.insert(peer.0, peer.1);
+                        for peer in e.iter() {
+                            match PeerEntity::find().filter(PeerColumn::PeerId.contains(&peer.0.to_string())).one(CACHE_DATABASE_CONNECTION.get()).await {
+                                Ok(_) => {}
+                                Err(_) => {
+                                    ActivePeerModel{
+                                        peer_id: Set(peer.0.to_string()),
+                                        ..ActivePeerModel::new()
+                                    }.insert(CACHE_DATABASE_CONNECTION.get()).await;
+                                }
+                            }
                         }
-                        let peers = global.read_peers().await;
-                        println!("Peers: {peers:?}");
                     },
                     _ => {},
                 }

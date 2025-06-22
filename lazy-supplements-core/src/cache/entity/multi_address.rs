@@ -41,14 +41,15 @@ impl ActiveModel {
 
 #[cfg(test)]
 mod tests {
+    use crate::global::get_or_init_test_cache_database;
+
     use super::*;
 
     use libp2p::identity;
-    use crate::global::GLOBAL;
 
      #[tokio::test]
     async fn check_insert_node() {
-        let db = crate::global::get_or_init_temporary_main_database().await;
+        let db = get_or_init_test_cache_database().await;
         
         ActiveModel{
             peer_id: Set(identity::Keypair::generate_ed25519().public().to_peer_id().to_string()),

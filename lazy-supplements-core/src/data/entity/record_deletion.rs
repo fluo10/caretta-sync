@@ -35,14 +35,15 @@ impl ActiveModel {
 
 #[cfg(test)]
 mod tests {
+    use crate::global::get_or_init_test_data_database;
+
     use super::*;
 
     use uuid::{Timestamp, Uuid};
-    use crate::global::get_or_init_temporary_main_database;
 
      #[tokio::test]
     async fn check_insert_record_deletion() {
-        let db = get_or_init_temporary_main_database().await;
+        let db = get_or_init_test_data_database().await;
         
         assert!(ActiveModel{
             table_name: Set("test_table".to_string()),
