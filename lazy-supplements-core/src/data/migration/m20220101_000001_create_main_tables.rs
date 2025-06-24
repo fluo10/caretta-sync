@@ -8,20 +8,20 @@ pub struct Migration;
 #[async_trait::async_trait]
 impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
-        Node::up(manager).await?;
+        TrustedPeer::up(manager).await?;
         RecordDeletion::up(manager).await?;
         Ok(())
     }
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
-        Node::down(manager).await?;
+        TrustedPeer::down(manager).await?;
         RecordDeletion::down(manager).await?;
         Ok(())
     }
 }
 
 #[derive(DeriveIden)]
-enum Node {
+enum TrustedPeer {
     Table,
     Id,
     CreatedAt,
@@ -29,10 +29,11 @@ enum Node {
     SyncedAt,
     PeerId,
     Note,
+    IsPrefered,
 }
 
 #[async_trait::async_trait]
-impl TableMigration for Node {
+impl TableMigration for TrustedPeer {
     async fn up<'a>(manager: &'a SchemaManager<'a>) -> Result<(), DbErr> {
         manager.create_table(
             Table::create()
@@ -44,6 +45,7 @@ impl TableMigration for Node {
                 .col(timestamp_null(Self::SyncedAt))
                 .col(string_len(Self::PeerId, 255))
                 .col(text(Self::Note))
+                .col(boolean(Self::IsPrefered))
                 .to_owned()
         ).await?;
         Ok(())

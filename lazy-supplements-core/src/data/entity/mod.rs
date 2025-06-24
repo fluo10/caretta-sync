@@ -1,11 +1,11 @@
-mod node;
+mod trusted_peer;
 mod record_deletion;
 
-pub use node::{
-    ActiveModel as NodeActiveModel,
-    Column as NodeColumn,
-    Entity as NodeEntity,
-    Model as NodeModel,
+pub use trusted_peer::{
+    ActiveModel as TrustedPeerActiveModel,
+    Column as TrustedPeerColumn,
+    Entity as TrustedPeerEntity,
+    Model as TrustedPeerModel,
 };
 
 pub use record_deletion::{

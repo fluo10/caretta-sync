@@ -5,9 +5,11 @@ use sea_orm::entity::{
 };
 use serde::{Deserialize, Serialize};
 
+use crate::data::value::PeerIdValue;
+
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
-#[sea_orm(table_name = "node")]
+#[sea_orm(table_name = "trusted_peer")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
@@ -18,9 +20,10 @@ pub struct Model {
     #[sea_orm(indexed)]
     pub synced_at: Option<DateTimeUtc>,
     #[sea_orm(indexed)]
-    pub peer_id: String,
+    pub peer_id: PeerIdValue,
     #[sea_orm(column_type = "Text")]
     pub note: String,
+    pub is_prefered: bool,
 }
 
 #[derive(Copy, Clone, Debug, DeriveRelation, EnumIter)]
@@ -46,14 +49,14 @@ mod tests {
 
     use super::*;
 
-    use libp2p::identity;
+    use libp2p::{identity, PeerId};
 
      #[tokio::test]
     async fn check_insert_node() {
         let db = get_or_init_test_data_database().await;
         
         ActiveModel{
-            peer_id: Set(identity::Keypair::generate_ed25519().public().to_peer_id().to_string()),
+            peer_id: Set(PeerIdValue::from(PeerId::random())),
             note: Set("test note".to_owned()),
             ..ActiveModel::new()
         }.insert(db).await.unwrap();
