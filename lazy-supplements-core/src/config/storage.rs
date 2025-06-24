@@ -2,6 +2,9 @@ use std::path::PathBuf;
 
 #[cfg(feature="desktop")]
 use clap::Args;
+
+#[cfg(any(test, feature="test"))]
+use tempfile::tempdir;
 use crate::{config::{ConfigError, PartialConfig}};
 use libp2p::mdns::Config;
 use serde::{Deserialize, Serialize};
@@ -30,8 +33,9 @@ impl StorageConfig {
 #[cfg(any(test, feature="test"))]
 impl TestDefault for StorageConfig {
     fn test_default() -> Self {
-        let temp_path = tempfile::NamedTempFile::new().unwrap().into_temp_path().keep().unwrap();
-        Self { data_directory: temp_path.clone(), cache_directory: temp_path }
+        
+        let temp_dir = tempdir().unwrap().keep();
+        Self { data_directory: temp_dir.clone(), cache_directory: temp_dir }
     }
 }
 

@@ -40,10 +40,8 @@ impl Event {
                             match PeerEntity::find().filter(PeerColumn::PeerId.contains(&peer.0.to_string())).one(CACHE_DATABASE_CONNECTION.get()).await {
                                 Ok(_) => {}
                                 Err(_) => {
-                                    ActivePeerModel{
-                                        peer_id: Set(peer.0.to_string()),
-                                        ..ActivePeerModel::new()
-                                    }.insert(CACHE_DATABASE_CONNECTION.get()).await;
+                                    ActivePeerModel::new(peer.0.clone(), peer.1.clone())
+                                        .insert(CACHE_DATABASE_CONNECTION.get()).await;
                                 }
                             }
                         }
