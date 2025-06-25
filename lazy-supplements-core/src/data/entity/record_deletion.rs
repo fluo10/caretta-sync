@@ -4,14 +4,17 @@ use sea_orm::entity::{
     prelude::*
 };
 use serde::{Deserialize, Serialize};
+use crate::data::syncable::*;
 
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, SyncableModel)]
 #[sea_orm(table_name = "record_deletion")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
+    #[syncable(uuid)]
     pub id: Uuid,
     #[sea_orm(indexed)]
+    #[syncable(timestamp)]
     pub created_at: DateTimeUtc,
     pub table_name: String,
     pub record_id: Uuid,

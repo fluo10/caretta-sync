@@ -18,7 +18,10 @@ chrono-tz = "0.10.3"
 ciborium.workspace = true
 clap = {workspace = true, optional = true}
 futures = "0.3.31"
+lazy-supplements-macros.path = "../lazy-supplements-macros"
 libp2p.workspace = true
+libp2p-core = { version = "0.43.0", features = ["serde"] }
+libp2p-identity = { version = "0.2.11", features = ["ed25519", "peerid", "rand", "serde"] }
 sea-orm = { version = "1.1.11", features = ["sqlx-sqlite", "runtime-tokio-native-tls", "macros", "with-chrono", "with-uuid"] } 
 sea-orm-migration.workspace = true
 serde.workspace = true

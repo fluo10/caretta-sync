@@ -1,8 +1,8 @@
 use sea_orm::{*, prelude::*, query::*};
-
+pub use lazy_supplements_macros::SyncableModel;
 pub trait SyncableModel: ModelTrait<Entity = Self::SyncableEntity> {
     type SyncableEntity: SyncableEntity<SyncableModel = Self>;
-    fn get_updated_at(&self) -> DateTimeUtc;
+    fn get_timestamp(&self) -> DateTimeUtc;
     fn get_uuid(&self) -> Uuid;
 }
 
@@ -31,12 +31,12 @@ pub trait SyncableActiveModel: ActiveModelTrait<Entity = Self::SyncableEntity> {
     
     type SyncableEntity: SyncableEntity<SyncableActiveModel = Self>;
     fn get_uuid(&self) -> Option<Uuid>;
-    fn get_updated_at(&self) -> Option<DateTimeUtc>;
+    fn get_timestamp(&self) -> Option<DateTimeUtc>;
     fn try_merge(&mut self, other: <Self::SyncableEntity as SyncableEntity>::SyncableModel) -> Result<(), SyncableError> {
         if self.get_uuid().ok_or(SyncableError::MissingField("uuid"))? != other.get_uuid() {
             return Err(SyncableError::MismatchUuid)
         }
-        if self.get_updated_at().ok_or(SyncableError::MissingField("updated_at"))? < other.get_updated_at() {
+        if self.get_timestamp().ok_or(SyncableError::MissingField("updated_at"))? < other.get_timestamp() {
             for column in <<<Self as ActiveModelTrait>::Entity as EntityTrait>::Column as Iterable>::iter() {
                 self.take(column).set_if_not_equals(other.get(column));
             }
@@ -48,9 +48,9 @@ pub trait SyncableActiveModel: ActiveModelTrait<Entity = Self::SyncableEntity> {
 
 pub trait SyncableColumn: ColumnTrait {
     fn is_uuid(&self) -> bool;
-    fn is_updated_at(&self) -> bool;
+    fn is_timestamp(&self) -> bool;
     fn updated_at() -> Self;
-    fn should_not_sync(&self);
+    fn should_skipped(&self);
 }
 
 
