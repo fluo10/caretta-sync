@@ -14,3 +14,9 @@ heck = "0.5.0"
 proc-macro2 = "1.0.95"
 quote = "1.0.40"
 syn = { version = "2.0.104", features = ["full"] }
+
+[dev-dependencies]
+chrono.workspace = true
+lazy-supplements-core.workspace = true
+sea-orm.workspace = true
+uuid.workspace = true

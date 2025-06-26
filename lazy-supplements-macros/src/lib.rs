@@ -4,25 +4,30 @@ use proc_macro2::Span;
 use quote::{format_ident, quote, ToTokens};
 use syn::{parse_macro_input, Data, DeriveInput, Expr, ExprTuple, Field, Fields, FieldsNamed, Ident};
 
-#[proc_macro_derive(SyncableModel)]
+#[proc_macro_derive(SyncableModel, attributes(syncable))]
 pub fn syncable_model(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     let struct_name = input.ident;
     assert_eq!(format_ident!("{}", struct_name), "Model");
     let fields = extract_fields(&input.data);
-    let uuid_field = extract_uuid_field(&fields);
-    let uuid_field_camel = Ident::new(&uuid_field.to_string().to_upper_camel_case(), Span::call_site());
-    let timestamp_field = extract_timestamp_field(&fields);
-    let timestamp_field_camel = Ident::new(&timestamp_field.to_string().to_upper_camel_case(), Span::call_site());
-    let skip_fields = extract_skip_fields(&fields);
+    let id_snake = extract_unique_field_ident(&fields, "id");
+    let id_camel = Ident::new(&id_snake.to_string().to_upper_camel_case(), Span::call_site());
+    let timestamp_snake = extract_unique_field_ident(&fields, "timestamp");
+    let timestamp_camel = Ident::new(&timestamp_snake.to_string().to_upper_camel_case(), Span::call_site());
+    let author_id_snake = extract_unique_field_ident(&fields, "author_id");
+    let author_id_camel = Ident::new(&author_id_snake.to_string().to_upper_camel_case(), Span::call_site());
+    let skips_snake = extract_field_idents(&fields, "skip");
     let output = quote!{
         impl SyncableModel for #struct_name {
             type SyncableEntity = Entity;
-            fn get_uuid(&self) -> Uuid {
-                self.#uuid_field
+            fn get_id(&self) -> Uuid {
+                self.#id_snake
             }
             fn get_timestamp() -> DateTimeUtc {
-                self.#timestamp_field
+                self.#timestamp_snake
+            }
+            fn get_author_id() -> Uuid {
+                self.#timestamp_snake
             }
         }
         impl SyncableEntity for Entity {
@@ -33,44 +38,45 @@ pub fn syncable_model(input: TokenStream) -> TokenStream {
 
         impl SyncableActiveModel for ActiveModel {
             type SyncableEntity = Entity;
-            fn get_uuid(&self) -> Option<Uuid> {
-                self.#uuid_field.into_value()
+            fn get_id(&self) -> Option<Uuid> {
+                self.#id_snake.into_value()
             }
             fn get_timestamp(&self) -> Option<DateTimeUtc> {
-                self.#timestamp_field.into_value()
+                self.#timestamp_snake.into_value()
             }
-        }
+            fn get_author_id(&self) -> Option<DateTimeUtc> {
+                self.#author_id_snake.into_value()
+            }        }
         impl SyncableColumn for Column {
-            fn is_uuid(&self) -> bool {
-                self == &Column::#uuid_field_camel 
+            fn is_id(&self) -> bool {
+                matches!(self, Column::#id_camel)
             }
             fn is_timestamp(&self) -> bool {
-                self == &Column::#timestamp_field_camel
+                matches!(self, Column::#timestamp_camel)                 
+            }
+            fn is_author_id(&self) -> bool {
+                matches!(self, Column::#author_id_camel)
+            }
+            fn should_sync(&self) -> bool {
+                todo!()
+            }
+            fn timestamp_between(from: DateTimeUtc, until: DateTimeUtc) -> SimpleExpr {
+                todo!()
             }
         }
     };
     output.into()
 }
-fn extract_skip_fields(fields: &FieldsNamed) -> Vec<&Ident> {
-    extract_fields_with_attribute(fields, "skip")
-}
-fn extract_timestamp_field(fields: &FieldsNamed) -> &Ident {
-    let mut timestamp_fields = extract_fields_with_attribute(fields, "timestamp");
-    if timestamp_fields.len() == 1 {
-        timestamp_fields.pop().unwrap()
+fn extract_unique_field_ident<'a>(fields: &'a FieldsNamed, attribute_arg: &'static str) -> &'a Ident {
+    let mut fields = extract_field_idents(fields, attribute_arg);
+    if fields.len() == 1 {
+        fields.pop().unwrap()
     } else  {
-        panic!("Model must need one timestamp field attribute")
+        panic!("Model must need one {} field attribute", attribute_arg)
     }
 }
-fn extract_uuid_field(fields: &FieldsNamed) -> &Ident {
-    let mut uuid_fields = extract_fields_with_attribute(fields, "uuid");
-    if uuid_fields.len() == 1 {
-        uuid_fields.pop().unwrap()
-    } else  {
-        panic!("Model must need one uuid field attribute")
-    }
-}
-fn extract_fields_with_attribute<'a>(fields: &'a FieldsNamed, attribute_arg: &'static str) -> Vec<&'a Ident>{
+
+fn extract_field_idents<'a>(fields: &'a FieldsNamed, attribute_arg: &'static str) -> Vec<&'a Ident>{
     fields.named.iter()
         .filter_map(|field| {
             field.attrs.iter()

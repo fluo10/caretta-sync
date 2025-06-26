@@ -10,11 +10,13 @@ license = "MIT OR Apache-2.0"
 repository = "https://forgejo.fireturlte.net/lazy-supplements" 
 
 [workspace.dependencies]
+chrono = "0.4.41"
 ciborium = "0.2.2"
 clap = { version = "4.5.38", features = ["derive"] }
 dioxus = { version = "0.6.0", features = [] }
 lazy-supplements-core.path = "lazy-supplements-core"
 libp2p = { version = "0.55.0", features = ["macros", "mdns", "noise", "ping", "tcp", "tokio", "yamux" ] }
+sea-orm = { version = "1.1.11", features = ["sqlx-sqlite", "runtime-tokio-native-tls", "macros", "with-chrono", "with-uuid"] } 
 sea-orm-migration = { version = "1.1.0", features = ["runtime-tokio-rustls", "sqlx-postgres"] }
 serde = { version = "1.0.219", features = ["derive"] }
 thiserror = "2.0.12"
