@@ -17,17 +17,17 @@ pub trait SyncableEntity: EntityTrait<
     type SyncableActiveModel: SyncableActiveModel<SyncableEntity= Self>;
     type SyncableColumn: SyncableColumn;
 
-    async fn get_updated(from: DateTimeUtc,until: DateTimeUtc, db: &DatabaseConnection) -> Result<Vec<<Self as EntityTrait>::Model>, SyncableError> {
+    async fn get_updated(from: DateTimeUtc, db: &DatabaseConnection) -> Result<Vec<<Self as EntityTrait>::Model>, SyncableError> {
         let result: Vec<Self::SyncableModel> = <Self as EntityTrait>::find()
-            .filter(Self::SyncableColumn::timestamp_between(from, until))
+            .filter(Self::SyncableColumn::timestamp_after(from))
             .all(db)
             .await.unwrap();
         Ok(result)
     }
-    async fn get_updated_by_author(from: DateTimeUtc, author: Uuid, db: &DatabaseConnection) -> Result<Vec<<Self as EntityTrait>::Model>, SyncableError> {
+    async fn get_updated_by(author: Uuid, from: DateTimeUtc, db: &DatabaseConnection) -> Result<Vec<<Self as EntityTrait>::Model>, SyncableError> {
         let result: Vec<Self::SyncableModel> = <Self as EntityTrait>::find()
-            .filter(Self::SyncableColumn::timestamp_between(from, until))
-            .filter(Self::SyncableColumn::author_eq(author))
+            .filter(Self::SyncableColumn::timestamp_after(from))
+            .filter(Self::SyncableColumn::author_id_eq(author))
             .all(db)
             .await.unwrap();
         Ok(result)
@@ -42,14 +42,14 @@ pub trait SyncableActiveModel: ActiveModelTrait<Entity = Self::SyncableEntity> {
     type SyncableEntity: SyncableEntity<SyncableActiveModel = Self>;
     fn get_id(&self) -> Option<Uuid>;
     fn get_timestamp(&self) -> Option<DateTimeUtc>;
-    fn get_author_id(&self) -> Option<DateTimeUtc>;
+    fn get_author_id(&self) -> Option<Uuid>;
     fn try_merge(&mut self, other: <Self::SyncableEntity as SyncableEntity>::SyncableModel) -> Result<(), SyncableError> {
-        if self.get_uuid().ok_or(SyncableError::MissingField("uuid"))? != other.get_uuid() {
+        if self.get_id().ok_or(SyncableError::MissingField("uuid"))? != other.get_id() {
             return Err(SyncableError::MismatchUuid)
         }
         if self.get_timestamp().ok_or(SyncableError::MissingField("updated_at"))? < other.get_timestamp() {
             for column in <<<Self as ActiveModelTrait>::Entity as EntityTrait>::Column as Iterable>::iter() {
-                if column.should_sync(){
+                if column.should_synced(){
                     self.take(column).set_if_not_equals(other.get(column));
                 }
             }
@@ -62,9 +62,9 @@ pub trait SyncableActiveModel: ActiveModelTrait<Entity = Self::SyncableEntity> {
 pub trait SyncableColumn: ColumnTrait {
     fn is_id(&self) -> bool;
     fn is_timestamp(&self) -> bool;
-    fn should_sync(&self) -> bool;
-    fn timestamp_between(from: DateTimeUtc, to: DateTimeUtc) -> SimpleExpr;
-    fn author_eq(author_id: Uuid) -> SimpleExpr;
+    fn should_synced(&self) -> bool;
+    fn timestamp_after(from: DateTimeUtc) -> SimpleExpr;
+    fn author_id_eq(author_id: Uuid) -> SimpleExpr;
     fn is_author_id(&self) -> bool;
 }
 

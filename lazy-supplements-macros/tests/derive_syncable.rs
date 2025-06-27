@@ -1,13 +1,15 @@
 use chrono::Local;
-use sea_orm::entity::{
-    *,
-    prelude::*
+use sea_orm::{
+    prelude::*,
+    entity::{
+        *,
+        prelude::*
+    }
 };
 use lazy_supplements_core::data::syncable::*;
 use lazy_supplements_macros::SyncableModel;
 
-
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, SyncableModel)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, SyncableModel)]
 #[sea_orm(table_name = "syncable")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
@@ -16,14 +18,18 @@ pub struct Model {
     #[sea_orm(indexed)]
     #[syncable(timestamp)]
     pub created_at: DateTimeUtc,
-    pub table_name: String,
-
     #[syncable(author_id)]
-    pub updated_by: Uuid,
-    pub record_id: Uuid,
+    pub created_by: Uuid,
 }
 
 #[derive(Copy, Clone, Debug, DeriveRelation, EnumIter)]
 pub enum Relation{}
     
 impl ActiveModelBehavior for ActiveModel {}
+
+#[test]
+fn test_columns() {
+    assert!(Column::Id.is_id());
+    assert!(Column::CreatedAt.is_timestamp());
+    assert!(Column::CreatedBy.is_author_id());
+}

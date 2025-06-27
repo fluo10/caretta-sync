@@ -23,11 +23,11 @@ pub fn syncable_model(input: TokenStream) -> TokenStream {
             fn get_id(&self) -> Uuid {
                 self.#id_snake
             }
-            fn get_timestamp() -> DateTimeUtc {
+            fn get_timestamp(&self) -> DateTimeUtc {
                 self.#timestamp_snake
             }
-            fn get_author_id() -> Uuid {
-                self.#timestamp_snake
+            fn get_author_id(&self) -> Uuid {
+                self.#author_id_snake
             }
         }
         impl SyncableEntity for Entity {
@@ -39,14 +39,15 @@ pub fn syncable_model(input: TokenStream) -> TokenStream {
         impl SyncableActiveModel for ActiveModel {
             type SyncableEntity = Entity;
             fn get_id(&self) -> Option<Uuid> {
-                self.#id_snake.into_value()
+                self.#id_snake.try_as_ref().cloned()
             }
             fn get_timestamp(&self) -> Option<DateTimeUtc> {
-                self.#timestamp_snake.into_value()
+                self.#timestamp_snake.try_as_ref().cloned()
             }
-            fn get_author_id(&self) -> Option<DateTimeUtc> {
-                self.#author_id_snake.into_value()
-            }        }
+            fn get_author_id(&self) -> Option<Uuid> {
+                self.#author_id_snake.try_as_ref().cloned()
+            }
+        }
         impl SyncableColumn for Column {
             fn is_id(&self) -> bool {
                 matches!(self, Column::#id_camel)
@@ -57,12 +58,16 @@ pub fn syncable_model(input: TokenStream) -> TokenStream {
             fn is_author_id(&self) -> bool {
                 matches!(self, Column::#author_id_camel)
             }
-            fn should_sync(&self) -> bool {
+            fn should_synced(&self) -> bool {
                 todo!()
             }
-            fn timestamp_between(from: DateTimeUtc, until: DateTimeUtc) -> SimpleExpr {
-                todo!()
+            fn timestamp_after(timestamp: DateTimeUtc) -> sea_orm::sea_query::expr::SimpleExpr {
+                Column::#timestamp_camel.gte(timestamp)
             }
+            fn author_id_eq(author_id: Uuid) -> sea_orm::sea_query::expr::SimpleExpr {
+                Column::#author_id_camel.eq(author_id)
+            }
+
         }
     };
     output.into()
@@ -70,9 +75,9 @@ pub fn syncable_model(input: TokenStream) -> TokenStream {
 fn extract_unique_field_ident<'a>(fields: &'a FieldsNamed, attribute_arg: &'static str) -> &'a Ident {
     let mut fields = extract_field_idents(fields, attribute_arg);
     if fields.len() == 1 {
-        fields.pop().unwrap()
+        return fields.pop().unwrap()
     } else  {
-        panic!("Model must need one {} field attribute", attribute_arg)
+        panic!("Model must need one {} field attribute", attribute_arg);
     }
 }
 

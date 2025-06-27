@@ -12,11 +12,13 @@ use crate::data::syncable::*;
 #[sea_orm(table_name = "record_deletion")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
-    #[cfg_attr(feature="macros", syncable(uuid))]
+    #[cfg_attr(feature="macros", syncable(id))]
     pub id: Uuid,
     #[sea_orm(indexed)]
     #[cfg_attr(feature="macros", syncable(timestamp))]
     pub created_at: DateTimeUtc,
+    #[cfg_attr(feature="macros", syncable(author_id))]
+    pub created_by: Uuid,
     pub table_name: String,
     pub record_id: Uuid,
 }
