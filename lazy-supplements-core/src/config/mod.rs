@@ -25,7 +25,7 @@ pub trait PartialConfig: Serialize + Sized + DeserializeOwned
     fn is_empty(&self) -> bool;
 }
 
-pub trait ConfigRoot: DeserializeOwned + Serialize {
+pub trait PartialConfigRoot: DeserializeOwned + Serialize {
     fn new() -> Self;
 
     async fn read_or_create<T>(path: T) -> Result<Self, Error> 

@@ -1,9 +1,13 @@
 use std::path::PathBuf;
 
-mod config;
-mod node;
+mod args;
+mod device;
 mod server;
 
-pub use config::ConfigArgs;
-pub use node::{ NodeArgs, NodeCommand, PeerArgs , ConsoleNodeArgs};
-pub use server::ServerArgs;
+pub use args::*;
+pub use device::*;
+pub use server::*;
+
+pub trait RunnableCommand {
+    async fn run(self);
+}

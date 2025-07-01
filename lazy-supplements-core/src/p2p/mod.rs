@@ -1,3 +1,4 @@
+pub mod error;
 use libp2p::{ identity::Keypair, mdns, ping, swarm};
 use sea_orm::{ActiveModelTrait, ActiveValue::Set, ColumnTrait, EntityTrait, QueryFilter};
 

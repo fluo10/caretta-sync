@@ -40,6 +40,9 @@ impl PartialConfig for PartialUnixConfig {
     fn default() -> Self {
         todo!()
     }
+    fn is_empty(&self) -> bool {
+        self.socket_path.is_none()
+    }
     fn merge(&mut self, other: Self) {
         if let Some(x) = other.socket_path {
             self.socket_path = Some(x);
