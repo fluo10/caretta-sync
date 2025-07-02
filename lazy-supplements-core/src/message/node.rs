@@ -2,9 +2,9 @@ use serde::{Deserialize, Serialize};
 
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct ListDeviceRequest;
+pub struct ListTrustedNodeRequest;
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct ListDeviceResponse {
-    node: Vec<crate::data::entity::TrustedNode>
+pub struct ListTrustedNodeResponse {
+    node: Vec<crate::data::entity::TrustedNodeModel>
 }

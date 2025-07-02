@@ -9,7 +9,7 @@ use crate::data::value::PeerIdValue;
 
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
-#[sea_orm(table_name = "trusted_peer")]
+#[sea_orm(table_name = "trusted_node")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,

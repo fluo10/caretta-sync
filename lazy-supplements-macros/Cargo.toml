@@ -19,4 +19,5 @@ syn = { version = "2.0.104", features = ["full"] }
 chrono.workspace = true
 lazy-supplements-core.workspace = true
 sea-orm.workspace = true
+tokio.workspace = true
 uuid.workspace = true

@@ -2,7 +2,7 @@ mod node;
 use serde::{de::DeserializeOwned, Serialize};
 use uuid::Uuid;
 
-use crate::{async_convert::{AsyncTryFrom, AsyncTryInto}, error::Error};
+use crate::{utils::async_convert::{AsyncTryFrom, AsyncTryInto}, error::Error};
 
 pub trait Message: DeserializeOwned + Sized + Serialize  {
     fn into_writer<W: std::io::Write>(&self, writer: W) -> Result<(), ciborium::ser::Error<std::io::Error>> {

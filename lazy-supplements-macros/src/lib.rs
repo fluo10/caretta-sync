@@ -1,8 +1,11 @@
+mod derive;
+
 use heck::ToUpperCamelCase;
 use proc_macro::{self,  TokenStream};
 use proc_macro2::Span;
 use quote::{format_ident, quote, ToTokens};
-use syn::{parse_macro_input, Data, DeriveInput, Expr, ExprTuple, Field, Fields, FieldsNamed, Ident};
+use syn::{parse_macro_input, Data, DataStruct, DeriveInput, Expr, ExprTuple, Field, Fields, FieldsNamed, Ident};
+use derive::*;
 
 #[proc_macro_derive(SyncableModel, attributes(syncable))]
 pub fn syncable_model(input: TokenStream) -> TokenStream {
@@ -78,7 +81,7 @@ fn extract_unique_field_ident<'a>(fields: &'a FieldsNamed, attribute_arg: &'stat
         return fields.pop().unwrap()
     } else  {
         panic!("Model must need one {} field attribute", attribute_arg);
-    }
+    };
 }
 
 fn extract_field_idents<'a>(fields: &'a FieldsNamed, attribute_arg: &'static str) -> Vec<&'a Ident>{
@@ -132,3 +135,82 @@ fn extract_fields(data: &Data) -> &FieldsNamed {
     }
 }
 
+
+#[proc_macro_derive(Emptiable)]
+pub fn emptiable(input: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(input as DeriveInput);
+    let type_ident = input.ident;
+    match input.data {
+        Data::Struct(ref data) => {
+            let field_idents = extract_idents_and_types_from_data_struct(data);
+            let is_empty_iter = field_idents.iter().map(|(ident, type_name)| {
+                quote!{
+                    <#type_name as Emptiable>::is_empty(&self.#ident)
+                }
+            });
+            let empty_iter = field_idents.iter().map(|(ident, type_name)| {
+                quote!{
+                    #ident: <#type_name as Emptiable>::empty(),
+                }
+            });
+            quote!{
+                impl Emptiable for #type_ident {
+                    fn empty() -> Self {
+                        Self {
+                            #(#empty_iter)*
+                        }
+                    }
+                    fn is_empty(&self) -> bool {
+                        #(#is_empty_iter)&&*
+                    }
+                }
+            }.into()
+        }
+        Data::Enum(ref fields) => {
+            todo!()
+
+        }, 
+        _ => panic!("struct or enum expected, but got union.")
+
+    }
+}
+
+#[proc_macro_derive(Runnable, attributes(runnable))]
+pub fn runnable(input: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(input as DeriveInput);
+    let type_ident = input.ident;
+    match input.data {
+        Data::Struct(ref data) => {
+            let mut idents = extract_idents_and_types_from_data_struct_with_attribute(data, "runnable");
+            let (field_ident, field_type) = unwrap_vec_or_panic(idents, "Runnable struct must have one field with runnable attribute");
+
+            quote!{
+                impl Runnable for #type_ident {
+                    async fn run(self) {
+                        <#field_type as Runnable>::run(self.#field_ident).await                        
+                    }
+                }
+            }.into()
+        }
+        Data::Enum(ref variants) => {
+            let quote_vec = extract_idents_and_types_from_enum_struct(&variants);
+            let quote_iter = quote_vec.iter().map(|(variant_ident, variant_type)|{
+                quote!{
+                    Self::#variant_ident(x) => <#variant_type as Runnable>::run(x).await,
+                }
+            });
+            quote!{
+                impl Runnable for #type_ident {
+                    async fn run(self) {
+                        match self {
+                            #(#quote_iter)*
+                        }
+                    }
+                }
+            }.into()
+
+        }, 
+        _ => panic!("struct or enum expected, but got union.")
+
+    }
+}
