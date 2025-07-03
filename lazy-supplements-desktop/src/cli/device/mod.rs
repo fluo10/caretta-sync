@@ -5,6 +5,7 @@ mod remove;
 mod scan;
 
 pub use add::DeviceAddCommandArgs;
+use crate::utils::runnable::Runnable;
 use libp2p::{Multiaddr, PeerId};
 pub use list::DeviceListCommandArgs;
 pub use ping::DevicePingCommandArgs;
@@ -20,13 +21,14 @@ use crate::{cli::ServerArgs, error::Error};
 use super::ConfigArgs;
 
 
-#[derive(Debug, Args)]
+#[derive(Debug, Args, Runnable)]
 pub struct DeviceCommandArgs {
     #[command(subcommand)]
+    #[runnable]
     pub command: DeviceSubcommand
 }
 
-#[derive(Debug, Subcommand)]
+#[derive(Debug, Subcommand, Runnable)]
 pub enum DeviceSubcommand {
     Add(DeviceAddCommandArgs),
     List(DeviceListCommandArgs),

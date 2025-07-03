@@ -1,6 +1,7 @@
 use clap::Args;
+use crate::utils::runnable::Runnable;
 
-use crate::cli::{ConfigArgs, RunnableCommand};
+use crate::cli::ConfigArgs;
 
 use crate::cli::PeerArgs;
 
@@ -14,7 +15,7 @@ pub struct DeviceAddCommandArgs {
     config: ConfigArgs
 }
 
-impl RunnableCommand for DeviceAddCommandArgs {
+impl Runnable for DeviceAddCommandArgs {
     async fn run(self) {
         todo!()
     }

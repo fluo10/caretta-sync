@@ -135,7 +135,6 @@ fn extract_fields(data: &Data) -> &FieldsNamed {
     }
 }
 
-
 #[proc_macro_derive(Emptiable)]
 pub fn emptiable(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
@@ -166,11 +165,32 @@ pub fn emptiable(input: TokenStream) -> TokenStream {
                 }
             }.into()
         }
-        Data::Enum(ref fields) => {
-            todo!()
+        _ => panic!("struct or expected, but got other type.")
 
-        }, 
-        _ => panic!("struct or enum expected, but got union.")
+    }
+}
+
+#[proc_macro_derive(Mergeable)]
+pub fn mergeable(input: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(input as DeriveInput);
+    let type_ident = input.ident;
+    match input.data {
+        Data::Struct(ref data) => {
+            let field_idents = extract_idents_and_types_from_data_struct(data);
+            let merge_iter = field_idents.iter().map(|(ident, type_name)| {
+                quote!{
+                    <#type_name as Mergeable>::merge(&mut self.#ident, other.#ident);
+                }
+            });
+            quote!{
+                impl Mergeable for #type_ident {
+                    fn merge(&mut self, mut other: Self){
+                        #(#merge_iter)*
+                    }
+                }
+            }.into()
+        }
+        _ => panic!("struct expected, but got other type.")
 
     }
 }

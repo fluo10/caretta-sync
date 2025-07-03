@@ -3,31 +3,30 @@ mod storage;
 mod p2p;
 
 use std::path::Path;
-use crate::error::Error;
+use crate::{error::Error, utils::{emptiable::Emptiable, mergeable::Mergeable}};
 pub use error::ConfigError;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 use tokio::{fs::File, io::{AsyncReadExt, AsyncWriteExt}};
 pub use storage::{StorageConfig, PartialStorageConfig};
 pub use p2p::{P2pConfig, PartialP2pConfig};
-pub trait PartialConfig: Serialize + Sized + DeserializeOwned 
-{
 
-    fn default() -> Self;
-    fn empty() -> Self;
-    fn merge(&mut self, other: Self);
+pub trait Config: TryFrom<Self::PartialConfig>{
+    type PartialConfig: PartialConfig<Config = Self>;
+}
+pub trait PartialConfig: Emptiable + From<Self::Config> + Mergeable {
+    type Config: Config<PartialConfig = Self>;
+
+}
+
+pub trait PartialCoreConfig: DeserializeOwned + Serialize {
+    fn new() -> Self;
     fn from_toml(s: &str) -> Result<Self, toml::de::Error> {
         toml::from_str(s)
     }
     fn into_toml(&self) -> Result<String, toml::ser::Error> {
         toml::to_string(self)
     }
-    fn is_empty(&self) -> bool;
-}
-
-pub trait PartialConfigRoot: DeserializeOwned + Serialize {
-    fn new() -> Self;
-
     async fn read_or_create<T>(path: T) -> Result<Self, Error> 
     where
     T: AsRef<Path>
@@ -67,7 +66,7 @@ pub trait PartialConfigRoot: DeserializeOwned + Serialize {
 mod tests {
     use serde::{Deserialize, Serialize};
 
-    use crate::tests::test_toml_serialize_deserialize;
+    use crate::{tests::test_toml_serialize_deserialize, utils::{emptiable::Emptiable, mergeable::Mergeable}};
 
     use super::{p2p::{P2pConfig, PartialP2pConfig}, PartialConfig};
 
@@ -77,13 +76,14 @@ mod tests {
         p2p: Option<PartialP2pConfig>
     }
 
-    impl PartialConfig for TestConfig {
+    impl Default for TestConfig {
         fn default() -> Self {
             Self {
                 p2p: Some(PartialP2pConfig::default()),
             }
         }
-    
+    }
+    impl Emptiable for TestConfig {
         fn empty() -> Self {
             Self {
                 p2p: None,
@@ -93,7 +93,8 @@ mod tests {
         fn is_empty(&self) -> bool {
             self.p2p.is_none()
         }
-    
+    }
+    impl Mergeable for TestConfig {
         fn merge(&mut self, other: Self) {
             if let Some(p2p) = other.p2p {
                 self.p2p = Some(p2p);

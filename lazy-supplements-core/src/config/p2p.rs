@@ -11,7 +11,7 @@ use tracing_subscriber::EnvFilter;
 
 use crate::{
     config::PartialConfig,
-    error::Error, p2p
+    error::Error, p2p, utils::emptiable::Emptiable
 };
 
 static DEFAULT_P2P_LISTEN_IPS: &[IpAddr] = &[IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0))];
@@ -86,6 +86,7 @@ mod keypair_parser {
 }
 
 #[cfg_attr(feature="desktop",derive(Args))]
+#[cfg_attr(feature="macros", derive(Emptiable))]
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct PartialP2pConfig {
     #[cfg_attr(feature="desktop",arg(long))]
@@ -96,43 +97,9 @@ pub struct PartialP2pConfig {
     pub port: Option<u16>,
 }
 impl PartialP2pConfig {
-
     pub fn with_new_secret(mut self) -> Self {
         self.secret = Some(keypair_to_base64(&Keypair::generate_ed25519()));
         self
-    }
-    pub async fn read_or_create<T>(path: T) -> Result<Self, Error> 
-    where
-    T: AsRef<Path>
-    {
-        if !path.as_ref().exists() {
-            Self::empty().write_to(&path).await?;
-        }
-        Self::read_from(&path).await
-    }
-    pub async fn read_from<T>(path:T) -> Result<Self, Error> 
-    where 
-    T: AsRef<Path>
-    {
-        let mut file = File::open(path.as_ref()).await?;
-        let mut content = String::new();
-        file.read_to_string(&mut content).await?;
-        let config: Self = toml::from_str(&content)?;
-        Ok(config)
-    }
-    pub async fn write_to<T>(&self, path:T) -> Result<(), Error> 
-    where 
-    T: AsRef<Path>
-    {
-        if !path.as_ref().exists() {
-            if let Some(x) = path.as_ref().parent() {
-                std::fs::create_dir_all(x)?;
-            };
-            let _ = File::create(&path).await?;
-        }
-        let mut file = File::create(&path).await?;
-        file.write_all(toml::to_string(self)?.as_bytes()).await?;
-        Ok(())
     }
 }
 
@@ -146,29 +113,7 @@ impl From<P2pConfig> for PartialP2pConfig {
     }
 }
 
-impl PartialConfig for PartialP2pConfig {
-    fn empty() -> Self {
-        Self {
-            secret: None,
-            listen_ips: None,
-            port: None,
-        }
-    }
-    fn is_empty(&self) -> bool {
-        self.secret.is_none() && self.listen_ips.is_none() && self.port.is_none()
-    }
-    fn merge(&mut self, another: Self) {
-        if let Some(x) = another.secret {
-            self.secret = Some(x);
-        };
-        if let Some(x) = another.listen_ips {
-            self.listen_ips = Some(x);
-        };
-        if let Some(x) = another.port {
-            self.port = Some(x);
-        };
-    }
-    
+impl Default for PartialP2pConfig {
     fn default() -> Self {
         Self {
             secret: None,

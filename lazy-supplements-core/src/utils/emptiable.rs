@@ -1,4 +1,6 @@
 use std::collections::{HashMap, HashSet};
+#[cfg(feature="macros")]
+pub use lazy_supplements_macros::Emptiable;
 
 pub trait Emptiable{
     fn empty() -> Self;

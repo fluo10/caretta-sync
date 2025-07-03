@@ -1,6 +1,6 @@
 use clap::Args;
-
-use crate::cli::{ConfigArgs, PeerArgs, RunnableCommand};
+use crate::utils::runnable::Runnable;
+use crate::cli::{ConfigArgs, PeerArgs};
 
 #[derive(Debug, Args)]
 pub struct DevicePingCommandArgs{
@@ -10,7 +10,7 @@ pub struct DevicePingCommandArgs{
     config: ConfigArgs
 }
 
-impl RunnableCommand for DevicePingCommandArgs {
+impl Runnable for DevicePingCommandArgs {
     async fn run(self) {
         todo!()
     }

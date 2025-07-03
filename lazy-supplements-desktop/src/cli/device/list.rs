@@ -1,5 +1,5 @@
 use clap::Args;
-
+use crate::utils::runnable::Runnable;
 use crate::cli::{ConfigArgs, RunnableCommand};
 
 #[derive(Debug, Args)]
@@ -8,7 +8,7 @@ pub struct DeviceListCommandArgs{
     config: ConfigArgs
 }
 
-impl RunnableCommand for DeviceListCommandArgs {
+impl Runnable for DeviceListCommandArgs {
     async fn run(self) {
         todo!()
     }
