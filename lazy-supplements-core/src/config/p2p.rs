@@ -3,7 +3,8 @@ use std::{net::{IpAddr, Ipv4Addr}, ops, path::{Path, PathBuf}};
 use base64::{prelude::BASE64_STANDARD, Engine};
 #[cfg(feature="desktop")]
 use clap::Args;
-use libp2p::{identity::{self, DecodingError, Keypair}, noise, ping, tcp, yamux, Swarm};
+use futures::StreamExt;
+use libp2p::{identity::{self, DecodingError, Keypair}, noise, ping, swarm::SwarmEvent, tcp, yamux, Swarm};
 use serde::{Deserialize, Serialize};
 use tokio::{fs::File, io::{AsyncReadExt, AsyncWriteExt}};
 use tracing_subscriber::EnvFilter;
@@ -11,7 +12,7 @@ use tracing_subscriber::EnvFilter;
 
 use crate::{
     config::PartialConfig,
-    error::Error, p2p, utils::emptiable::Emptiable
+    error::Error, p2p, utils::{emptiable::Emptiable, mergeable::Mergeable}
 };
 
 static DEFAULT_P2P_LISTEN_IPS: &[IpAddr] = &[IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0))];
@@ -30,7 +31,7 @@ fn base64_to_keypair(base64: &str) -> Result<Keypair, Error>  {
         Ok(Keypair::from_protobuf_encoding(&vec)?)
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize,)]
 pub struct P2pConfig {
     #[serde(with = "keypair_parser")]
     pub secret: Keypair,
@@ -39,7 +40,7 @@ pub struct P2pConfig {
 }
 
 impl P2pConfig {
-    pub async fn try_into_swarm (self) -> Result<Swarm<p2p::Behaviour>, Error> {
+    async fn try_into_swarm (self) -> Result<Swarm<p2p::Behaviour>, Error> {
         let mut swarm = libp2p::SwarmBuilder::with_existing_identity(self.secret)
             .with_tokio()
             .with_tcp(
@@ -51,6 +52,22 @@ impl P2pConfig {
             .build();
         swarm.listen_on("/ip4/0.0.0.0/tcp/0".parse()?)?;
         Ok(swarm)
+    }
+    pub async fn launch_swarm(self) -> Result<(), Error>{
+        let mut swarm = self.try_into_swarm().await?;
+        loop{
+            let swarm_event = swarm.select_next_some().await;
+            tokio::spawn(async move{
+                match swarm_event {
+                    SwarmEvent::NewListenAddr { address, .. } => println!("Listening on {address:?}"),
+                    SwarmEvent::Behaviour(event) => {
+                        println!("{event:?}");
+                        event.run().await;
+                    },
+                    _ => {}
+                }
+            });
+        }
     }
 }
 
@@ -86,7 +103,6 @@ mod keypair_parser {
 }
 
 #[cfg_attr(feature="desktop",derive(Args))]
-#[cfg_attr(feature="macros", derive(Emptiable))]
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct PartialP2pConfig {
     #[cfg_attr(feature="desktop",arg(long))]
@@ -123,7 +139,33 @@ impl Default for PartialP2pConfig {
     }
 }
 
+impl Emptiable for PartialP2pConfig {
+    fn empty() -> Self {
+        Self{
+            secret: None,
+            listen_ips: None,
+            port: None
+        }
+    }
 
+    fn is_empty(&self) -> bool {
+        self.secret.is_none() && self.listen_ips.is_none() && self.port.is_none()
+    }
+}
+
+impl Mergeable for PartialP2pConfig {
+    fn merge(&mut self, mut other: Self) {
+        if let Some(x) = other.secret.take() {
+            let _ = self.secret.insert(x);
+        };
+        if let Some(x) = other.listen_ips.take() {
+            let _ = self.listen_ips.insert(x);
+        };
+        if let Some(x) = other.port.take() {
+            let _ = self.port.insert(x);
+        };
+    }
+}
 
 
 #[cfg(test)]

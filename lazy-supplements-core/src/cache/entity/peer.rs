@@ -10,11 +10,11 @@ use serde::{Deserialize, Serialize};
 use crate::data::value::{MultiaddrValue, PeerIdValue};
 
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Deserialize, Serialize)]
 #[sea_orm(table_name = "peer")]
 pub struct Model {
     #[sea_orm(primary_key)]
-    pub id: u32,
+    pub id: Uuid,
     #[sea_orm(indexed)]
     pub created_at: DateTimeUtc,
     #[sea_orm(indexed)]

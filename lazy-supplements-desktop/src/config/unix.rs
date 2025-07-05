@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 use clap::Args;
-use lazy_supplements_core::config::PartialConfig;
+use lazy_supplements_core::{config::PartialConfig, utils::{emptiable::Emptiable, mergeable::Mergeable}};
 use libp2p::mdns::Config;
 use serde::{Deserialize, Serialize};
 
@@ -20,9 +20,15 @@ impl TryFrom<PartialUnixConfig> for UnixConfig {
     }
 }
 
-#[derive(Args, Clone, Debug, Deserialize, Serialize)]
+#[derive(Args, Clone, Debug, Deserialize, Emptiable, Mergeable, Serialize)]
 pub struct PartialUnixConfig {
     pub socket_path: Option<PathBuf>,
+}
+
+impl Default for PartialUnixConfig {
+    fn default() -> Self {
+        todo!()
+    }
 }
 
 impl From<UnixConfig> for PartialUnixConfig {
@@ -33,19 +39,4 @@ impl From<UnixConfig> for PartialUnixConfig {
     }
 }
 
-impl PartialConfig for PartialUnixConfig {
-    fn empty() -> Self {
-        Self { socket_path: None }
-    }
-    fn default() -> Self {
-        todo!()
-    }
-    fn is_empty(&self) -> bool {
-        self.socket_path.is_none()
-    }
-    fn merge(&mut self, other: Self) {
-        if let Some(x) = other.socket_path {
-            self.socket_path = Some(x);
-        };
-    }
-}
+

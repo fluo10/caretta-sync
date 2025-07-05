@@ -1,3 +1,5 @@
+#[cfg(feature="macros")]
+pub use lazy_supplements_macros::Mergeable;
 pub trait Mergeable: Sized {
     fn merge(&mut self, other: Self);
 }

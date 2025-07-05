@@ -3,7 +3,7 @@ mod storage;
 mod p2p;
 
 use std::path::Path;
-use crate::{error::Error, utils::{emptiable::Emptiable, mergeable::Mergeable}};
+use crate::{utils::{emptiable::Emptiable, mergeable::Mergeable}};
 pub use error::ConfigError;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
@@ -19,7 +19,7 @@ pub trait PartialConfig: Emptiable + From<Self::Config> + Mergeable {
 
 }
 
-pub trait PartialCoreConfig: DeserializeOwned + Serialize {
+pub trait BaseConfig: DeserializeOwned + Serialize {
     fn new() -> Self;
     fn from_toml(s: &str) -> Result<Self, toml::de::Error> {
         toml::from_str(s)
@@ -27,7 +27,7 @@ pub trait PartialCoreConfig: DeserializeOwned + Serialize {
     fn into_toml(&self) -> Result<String, toml::ser::Error> {
         toml::to_string(self)
     }
-    async fn read_or_create<T>(path: T) -> Result<Self, Error> 
+    async fn read_or_create<T>(path: T) -> Result<Self, ConfigError> 
     where
     T: AsRef<Path>
     {
@@ -36,7 +36,7 @@ pub trait PartialCoreConfig: DeserializeOwned + Serialize {
         }
         Self::read_from(&path).await
     }
-    async fn read_from<T>(path:T) -> Result<Self, Error> 
+    async fn read_from<T>(path:T) -> Result<Self, ConfigError> 
     where 
     T: AsRef<Path>
     {
@@ -46,7 +46,7 @@ pub trait PartialCoreConfig: DeserializeOwned + Serialize {
         let config: Self = toml::from_str(&content)?;
         Ok(config)
     }
-    async fn write_to<T>(&self, path:T) -> Result<(), Error> 
+    async fn write_to<T>(&self, path:T) -> Result<(), ConfigError> 
     where 
     T: AsRef<Path>
     {

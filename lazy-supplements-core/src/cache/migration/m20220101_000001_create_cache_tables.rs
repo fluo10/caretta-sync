@@ -42,7 +42,7 @@ impl TableMigration for Peer {
             Table::create()
                 .table(Self::Table)
                 .if_not_exists()
-                .col(pk_auto(Self::Id))
+                .col(pk_uuid(Self::Id))
                 .col(string_len(Self::PeerId, 255))
                 .col(timestamp(Self::CreatedAt))
                 .col(timestamp(Self::UpdatedAt))

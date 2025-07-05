@@ -5,7 +5,7 @@ use clap::Args;
 
 #[cfg(any(test, feature="test"))]
 use tempfile::tempdir;
-use crate::{config::{ConfigError, PartialConfig}, utils::emptiable::Emptiable};
+use crate::{config::{ConfigError, PartialConfig}, utils::{emptiable::Emptiable, mergeable::Mergeable}};
 use libp2p::mdns::Config;
 use serde::{Deserialize, Serialize};
 
@@ -50,7 +50,6 @@ impl TryFrom<PartialStorageConfig> for StorageConfig {
     }
 }
 #[cfg_attr(feature="desktop", derive(Args))]
-#[cfg_attr(feature="macros", derive(Emptiable))]
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct PartialStorageConfig {
     #[cfg_attr(feature="desktop", arg(long))]
@@ -65,5 +64,28 @@ impl From<StorageConfig> for PartialStorageConfig {
             data_directory: Some(config.data_directory),
             cache_directory: Some(config.cache_directory),
         }
+    }
+}
+
+impl Emptiable for PartialStorageConfig {
+    fn empty() -> Self {
+        Self {
+            data_directory: None,
+            cache_directory: None
+        }
+    }
+
+    fn is_empty(&self) -> bool {
+        self.data_directory.is_none() && self.cache_directory.is_none()
+    }
+}
+impl Mergeable for PartialStorageConfig {
+    fn merge(&mut self, mut other: Self) {
+        if let Some(x) = other.data_directory.take() {
+            let _ = self.data_directory.insert(x);
+        };
+        if let Some(x) = other.cache_directory.take() {
+            let _ = self.cache_directory.insert(x);
+        };
     }
 }

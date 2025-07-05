@@ -10,9 +10,9 @@ use sea_orm_migration::MigratorTrait;
 use tokio::sync::{OnceCell, RwLock, RwLockReadGuard, RwLockWriteGuard};
 
 mod peers;
-pub use peers::PEERS;
+pub use peers::*;
 mod config;
-pub use config::STORAGE_CONFIG;
+pub use config::*;
 mod database_connection;
 pub use database_connection::*;
 use uuid::{ContextV7, Timestamp, Uuid};
