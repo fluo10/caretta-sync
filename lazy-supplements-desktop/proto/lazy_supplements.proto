@@ -1,0 +1,28 @@
+syntax = "proto3";
+package lazy_supplements;
+
+enum PeerListOrderBy {
+    CREATED_AT = 0;
+    UPDATED_AT = 1;
+    PEER_ID = 2;
+}
+
+service CachedPeerService {
+    rpc List(CachedPeerListRequest) returns (CachedPeerListResponse);
+}
+
+message CachedPeerListRequest {
+    uint32 start = 1;
+    uint32 count = 2;
+    PeerListOrderBy order_by = 3;
+    
+}
+
+message CachedPeer {
+    string peer_id = 1;
+    repeated string multi_addresss = 2; 
+}
+
+message CachedPeerListResponse {
+    repeated CachedPeer peers = 1;
+}

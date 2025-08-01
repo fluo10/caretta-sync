@@ -3,8 +3,6 @@ use std::{net::IpAddr, path::PathBuf};
 use clap::Args;
 use lazy_supplements_core::config::{BaseConfig, ConfigError};
 use crate::config::{PartialP2pConfig, PartialStorageConfig};
-#[cfg(unix)]
-use crate::config::PartialUnixConfig;
 
 use serde::{Deserialize, Serialize};
 

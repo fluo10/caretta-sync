@@ -1,8 +1,4 @@
-#[cfg(unix)]
-pub mod unix;
-
-#[cfg(windows)]
-pub mod windows;
+pub mod rpc;
 
 use clap::Args;
 pub use lazy_supplements_core::config::*;
@@ -10,7 +6,7 @@ pub use lazy_supplements_core::config::*;
 use lazy_supplements_core::utils::{emptiable::Emptiable, mergeable::Mergeable};
 use serde::{Deserialize, Serialize};
 #[cfg(unix)]
-pub use unix::*;
+pub use rpc::*;
 
 #[cfg(windows)]
 pub use windows::*;
@@ -21,9 +17,8 @@ pub struct DesktopBaseConfig {
     p2p: PartialP2pConfig,
     #[command(flatten)]
     storage: PartialStorageConfig,
-    #[cfg(unix)]
     #[command(flatten)]
-    unix: PartialUnixConfig,
+    rpc: PartialRpcConfig,
 }
 
 impl BaseConfig for DesktopBaseConfig {
@@ -31,7 +26,7 @@ impl BaseConfig for DesktopBaseConfig {
         Self {
             p2p : PartialP2pConfig::empty().with_new_secret(),
             storage: PartialStorageConfig::empty(),
-            unix: PartialUnixConfig::empty(),
+            rpc: PartialRpcConfig::empty().with_unused_port(),
         }
     }
 }
@@ -46,8 +41,8 @@ impl Into<PartialStorageConfig> for &DesktopBaseConfig {
         self.storage.clone()
     }
 }
-impl Into<PartialUnixConfig> for &DesktopBaseConfig {
-    fn into(self) -> PartialUnixConfig {
-        self.unix.clone()
+impl Into<PartialRpcConfig> for &DesktopBaseConfig {
+    fn into(self) -> PartialRpcConfig {
+        self.rpc.clone()
     }
 }
