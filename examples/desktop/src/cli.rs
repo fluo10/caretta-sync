@@ -1,5 +1,5 @@
 use clap::{Parser, Subcommand};
-use lazy_supplements_desktop::cli::*;
+use caretta_desktop::cli::*;
 
 #[derive(Debug, Parser)]
 pub struct Cli {

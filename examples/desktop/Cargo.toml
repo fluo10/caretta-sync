@@ -1,5 +1,5 @@
 [package]
-name = "lazy-supplements-examples-desktop"
+name = "caretta-examples-desktop"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,8 +8,8 @@ edition = "2021"
 [dependencies]
 clap.workspace = true
 dioxus.workspace = true
-lazy-supplements-desktop.path = "../../lazy-supplements-desktop"
-lazy-supplements-examples-core.path = "../core"
+caretta-desktop.path = "../../desktop"
+caretta-examples-core.path = "../core"
 
 [features]
 default = ["desktop"]

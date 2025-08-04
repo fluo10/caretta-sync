@@ -1,3 +1,3 @@
 fn main() {
-    dioxus::launch(lazy_supplements_examples_core::ui::plain::App);
+    dioxus::launch(caretta_examples_core::ui::plain::App);
 }

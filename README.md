@@ -1,3 +1,8 @@
-# Lazy Supplements Framework
+# Caretta Framework
 
-A local-first application framework for lazy person
+A local-first application framework.
+
+## Features
+- Local first
+- Decentralized data synchronization with libp2p
+- Device management

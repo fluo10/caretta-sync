@@ -1,0 +1,39 @@
+[package]
+name = "caretta-core"
+edition.workspace = true
+version.workspace = true
+description.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[features]
+default = []
+desktop = ["dep:clap", "macros"]
+mobile = ["macros"]
+macros = ["dep:caretta-macros"]
+test = ["dep:tempfile", "macros"]
+
+[dependencies]
+base64 = "0.22.1"
+chrono.workspace = true
+chrono-tz = "0.10.3"
+ciborium.workspace = true
+clap = {workspace = true, optional = true}
+futures = "0.3.31"
+caretta-macros = { path = "../macros", optional = true }
+libp2p.workspace = true
+libp2p-core = { version = "0.43.0", features = ["serde"] }
+libp2p-identity = { version = "0.2.11", features = ["ed25519", "peerid", "rand", "serde"] }
+sea-orm.workspace = true
+sea-orm-migration.workspace = true
+serde.workspace = true
+tempfile = { version = "3.20.0", optional = true }
+thiserror.workspace = true
+tokio.workspace = true
+toml = "0.8.22"
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
+uuid.workspace = true
+
+[dev-dependencies]
+tempfile = "3.20.0"

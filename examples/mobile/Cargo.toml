@@ -1,5 +1,5 @@
 [package]
-name = "lazy-supplements-examples-mobile"
+name = "caretta-examples-mobile"
 version = "0.1.0"
 authors = ["fluo10 <fluo10.dev@fireturtle.net>"]
 edition = "2021"
@@ -8,7 +8,7 @@ edition = "2021"
 
 [dependencies]
 dioxus.workspace = true
-lazy-supplements-examples-core.path = "../core"
+caretta-examples-core.path = "../core"
 
 [features]
 default = ["mobile"]
