@@ -16,13 +16,12 @@ clap.workspace = true
 dirs = "6.0.0"
 caretta-core = { workspace = true, features = ["desktop"] }
 libp2p.workspace = true
-prost = "0.14.1"
 sea-orm.workspace = true
 serde.workspace = true
 thiserror.workspace = true
 tokio.workspace = true
-tonic = "0.14.0"
-tonic-prost = "0.14.0"
+tonic.workspace = true
+
 uuid.workspace = true
 
 [dev-dependencies]

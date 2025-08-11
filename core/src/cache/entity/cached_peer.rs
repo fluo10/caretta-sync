@@ -18,6 +18,8 @@ pub struct Model {
     #[sea_orm(indexed)]
     pub created_at: DateTimeUtc,
     #[sea_orm(indexed)]
+    pub updated_at: DateTimeUtc,
+    #[sea_orm(indexed)]
     pub peer_id: PeerIdValue,
 }
 
@@ -42,7 +44,14 @@ impl ActiveModel {
         Self{
             peer_id: Set(PeerIdValue::from(peer_id)),
             created_at: Set(timestamp),
+            updated_at: Set(timestamp),
             ..Default::default()
         }
+    }
+}
+
+impl Entity {
+    pub fn find_by_peer_id(peer_id: PeerId) -> Select<Entity> {
+        Self::find().filter(Column::PeerId.eq(PeerIdValue::from(peer_id)))
     }
 }

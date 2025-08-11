@@ -76,7 +76,7 @@ async fn try_get_or_insert_cached_peer(peer_id: &PeerId, peer_addr: &Multiaddr) 
             if x.id == y.cached_peer_id {
                 event!(Level::TRACE, "Known peer: {}, {}", peer_id, peer_addr);
                 let mut addr: CachedAddressActiveModel = y.into();
-                addr.last_used_at = Set(Local::now().to_utc());
+                addr.updated_at = Set(Local::now().to_utc());
                 let updated = addr.update(CACHE_DATABASE_CONNECTION.get()).await?;
                 Ok((x, updated))
             } else {

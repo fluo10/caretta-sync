@@ -8,7 +8,6 @@ pub use cached_peer::{
     Entity as CachedPeerEntity,
 };
 
-
 pub use cached_address::{
     ActiveModel as CachedAddressActiveModel,
     Column as CachedAddressColumn,
@@ -28,6 +27,8 @@ mod tests {
     use libp2p::{identity::{self, Keypair}, multiaddr, swarm::handler::multi, Multiaddr, PeerId};
     use sea_orm::ActiveModelTrait;
 
+
+
      #[tokio::test]
     async fn insert() {
         let db = get_or_init_test_cache_database().await;
@@ -40,7 +41,7 @@ mod tests {
         let inserted_cached_address: CachedAddressModel = CachedAddressActiveModel::new(inserted_cached_peer.id, multiaddr.clone())
             .insert(db).await.unwrap();
         assert_eq!(PeerId::from(inserted_cached_peer.peer_id), peer_id);
-        assert_eq!(Multiaddr::from(inserted_cached_address.address), multiaddr);     
+        assert_eq!(Multiaddr::from(inserted_cached_address.multiaddress), multiaddr);     
     }
 
 }

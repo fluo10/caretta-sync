@@ -26,11 +26,12 @@ enum CachedPeer {
     Id,
     PeerId,
     CreatedAt,
+    UpdatedAt,
 }
 
-static IDX_CACHED_ADDRESS: &str = "idx_CACHED_ADDRESS";
 static IDX_CACHED_PEER_PEER_ID: &str = "idx_cached_peer_peer_id";
 static IDX_CACHED_PEER_CREATED_AT: &str = "idx_cached_peer_created_at";
+static IDX_CACHED_PEER_UPDATED_AT: &str = "idx_cached_peer_updated_at";
 
 #[async_trait::async_trait]
 impl TableMigration for CachedPeer {
@@ -42,6 +43,7 @@ impl TableMigration for CachedPeer {
                 .col(pk_auto(Self::Id))
                 .col(string_len(Self::PeerId, 255))
                 .col(timestamp(Self::CreatedAt))
+                .col(timestamp(Self::UpdatedAt))
                 .to_owned()
         ).await?;
         manager.create_index(
@@ -58,6 +60,13 @@ impl TableMigration for CachedPeer {
                 .col(Self::CreatedAt)
                 .to_owned()
         ).await?;
+        manager.create_index(
+            Index::create()
+                .name(IDX_CACHED_PEER_UPDATED_AT)
+                .table(Self::Table)
+                .col(Self::UpdatedAt)
+                .to_owned()
+        ).await?;
         Ok(())
     }
     async fn down<'a>(manager: &'a SchemaManager<'a>) -> Result<(), DbErr>{
@@ -71,14 +80,14 @@ enum CachedAddress {
     Id,
     CachedPeerId,
     CreatedAt,
-    LastUsedAt,
-    Address,
+    UpdatedAt,
+    Multiaddress,
 }
 
-static IDX_CACHED_ADDRESS_ADDRESS: &str = "idx_cached_address_address";
+static IDX_CACHED_ADDRESS_MULTIADDRESS: &str = "idx_cached_address_multiaddress";
 static IDX_CACHED_ADDRESS_CACHED_PEER_ID: &str = "idx_cached_address_cached_peer_id";
 static IDX_CACHED_ADDRESS_CREATED_AT: &str = "idx_cached_address_created_at";
-static IDX_CACHED_ADDRESS_LAST_USED_AT: &str = "idx_cached_address_last_used_at";
+static IDX_CACHED_ADDRESS_UPDATED_AT: &str = "idx_cached_address_updated_at";
 static FK_CACHED_ADDRESS_CACHED_PEER: &str = "fk_cached_address_cached_peer";
 
 #[async_trait::async_trait]
@@ -98,8 +107,8 @@ impl TableMigration for CachedAddress {
                     .on_update(ForeignKeyAction::Cascade)
                 )
                 .col(timestamp(Self::CreatedAt))
-                .col(timestamp(Self::LastUsedAt))
-                .col(text_uniq(Self::Address))
+                .col(timestamp(Self::UpdatedAt))
+                .col(text_uniq(Self::Multiaddress))
                 .to_owned()
         ).await?;
         manager.create_index(
@@ -111,9 +120,9 @@ impl TableMigration for CachedAddress {
         ).await?;
         manager.create_index(
             Index::create()
-                .name(IDX_CACHED_ADDRESS_ADDRESS)
+                .name(IDX_CACHED_ADDRESS_MULTIADDRESS)
                 .table(Self::Table)
-                .col(Self::Address)
+                .col(Self::Multiaddress)
                 .to_owned()
         ).await?;
         manager.create_index(
@@ -125,9 +134,9 @@ impl TableMigration for CachedAddress {
         ).await?;
         manager.create_index(
             Index::create()
-                .name(IDX_CACHED_ADDRESS_LAST_USED_AT)
+                .name(IDX_CACHED_ADDRESS_UPDATED_AT)
                 .table(Self::Table)
-                .col(Self::LastUsedAt)
+                .col(Self::UpdatedAt)
                 .to_owned()
         ).await?;
 
