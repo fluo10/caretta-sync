@@ -8,7 +8,7 @@ use sea_orm::{entity::{
 }, sea_query};
 use serde::{Deserialize, Serialize};
 
-use crate::{cache, data::value::{MultiaddrValue, PeerIdValue}, rpc::proto::CachedAddressMessage, utils::utc_to_timestamp};
+use crate::{cache, data::value::{MultiaddrValue, PeerIdValue}, utils::utc_to_timestamp};
 
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Deserialize, Serialize)]
@@ -57,13 +57,3 @@ impl ActiveModel {
     }
 }
 
-impl From<Model> for CachedAddressMessage {
-    fn from(a: Model) -> Self {
-        Self {
-            number: a.id,
-            created_at: Some(utc_to_timestamp(a.created_at)),
-            updated_at: Some(utc_to_timestamp(a.updated_at)),
-            multiaddress: Multiaddr::from(a.multiaddress).to_string(),
-        }
-    }
-}

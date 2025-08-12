@@ -70,7 +70,7 @@ impl From<ping::Event> for Event {
 async fn try_get_or_insert_cached_peer(peer_id: &PeerId, peer_addr: &Multiaddr) -> Result<(CachedPeerModel, CachedAddressModel), Error> {
     match (
         CachedPeerEntity::find().filter(CachedPeerColumn::PeerId.eq(PeerIdValue::from(peer_id.clone()))).one(CACHE_DATABASE_CONNECTION.get()).await?,
-        CachedAddressEntity::find().filter(CachedAddressColumn::Address.eq(MultiaddrValue::from(peer_addr.clone()))).one(CACHE_DATABASE_CONNECTION.get()).await?,
+        CachedAddressEntity::find().filter(CachedAddressColumn::Multiaddress.eq(MultiaddrValue::from(peer_addr.clone()))).one(CACHE_DATABASE_CONNECTION.get()).await?,
     ) {
         (Some(x), Some(y) ) => {
             if x.id == y.cached_peer_id {
