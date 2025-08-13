@@ -1,6 +1,7 @@
 use std::{net::{IpAddr, Ipv4Addr, SocketAddr, TcpListener}, path::PathBuf};
+#[cfg(feature="desktop")]
 use clap::Args;
-use caretta_core::{config::PartialConfig, utils::{emptiable::Emptiable, mergeable::Mergeable}};
+use crate::{config::PartialConfig, utils::{emptiable::Emptiable, mergeable::Mergeable}};
 use libp2p::mdns::Config;
 use serde::{Deserialize, Serialize};
 

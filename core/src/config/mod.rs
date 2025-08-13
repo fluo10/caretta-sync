@@ -1,6 +1,7 @@
 pub mod error;
 mod storage;
 mod p2p;
+mod rpc;
 
 use std::path::Path;
 use crate::{utils::{emptiable::Emptiable, mergeable::Mergeable}};
@@ -10,6 +11,10 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use tokio::{fs::File, io::{AsyncReadExt, AsyncWriteExt}};
 pub use storage::{StorageConfig, PartialStorageConfig};
 pub use p2p::{P2pConfig, PartialP2pConfig};
+pub use rpc::*;
+
+#[cfg(feature="desktop")]
+use clap::Args;
 
 pub trait Config: TryFrom<Self::PartialConfig>{
     type PartialConfig: PartialConfig<Config = Self>;
@@ -19,8 +24,25 @@ pub trait PartialConfig: Emptiable + From<Self::Config> + Mergeable {
 
 }
 
-pub trait BaseConfig: DeserializeOwned + Serialize {
-    fn new() -> Self;
+#[cfg_attr(feature="desktop", derive(Args))]
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct BaseConfig {
+    #[cfg_attr(feature="desktop", command(flatten))]
+    p2p: PartialP2pConfig,
+    #[cfg_attr(feature="desktop", command(flatten))]
+    storage: PartialStorageConfig,
+    #[cfg_attr(feature="desktop", command(flatten))]
+    rpc: PartialRpcConfig,
+}
+
+impl BaseConfig {
+    fn new() -> Self {
+        Self {
+            p2p : PartialP2pConfig::empty().with_new_secret(),
+            storage: PartialStorageConfig::empty(),
+            rpc: PartialRpcConfig::empty().with_unused_port(),
+        }
+    }
     fn from_toml(s: &str) -> Result<Self, toml::de::Error> {
         toml::from_str(s)
     }
@@ -61,6 +83,7 @@ pub trait BaseConfig: DeserializeOwned + Serialize {
         Ok(())
     }
 }
+
 
 #[cfg(test)]
 mod tests {
