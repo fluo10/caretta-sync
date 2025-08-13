@@ -7,7 +7,7 @@ impl From<(&CachedPeerModel, &Vec<CachedAddressModel>)> for CachedPeerMessage {
         Self {
             number: peer.id,
             peer_id: peer.peer_id.to_string(),
-            created_at: Some(utc_to_timestamp(peer.created_at)),
+            created_at: Some(utc_to_timestamp(&peer.created_at)),
             addresses: addresses.iter().map(|x| CachedAddressMessage::from(x)).collect(),
         }
     }

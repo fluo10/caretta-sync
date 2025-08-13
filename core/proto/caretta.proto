@@ -12,12 +12,7 @@ service CachedPeerService {
     rpc List(CachedPeerListRequest) returns (CachedPeerListResponse);
 }
 
-message CachedPeerListRequest {
-    uint32 start = 1;
-    uint32 count = 2;
-    PeerListOrderBy order_by = 3;
-    
-}
+message CachedPeerListRequest {}
 
 message CachedPeerMessage {
     uint32 number = 1;
