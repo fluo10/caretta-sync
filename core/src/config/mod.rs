@@ -40,7 +40,7 @@ impl BaseConfig {
         Self {
             p2p : PartialP2pConfig::empty().with_new_secret(),
             storage: PartialStorageConfig::empty(),
-            rpc: PartialRpcConfig::empty().with_unused_port(),
+            rpc: PartialRpcConfig::empty(),
         }
     }
     fn from_toml(s: &str) -> Result<Self, toml::de::Error> {
