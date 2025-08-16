@@ -10,6 +10,7 @@ use crate::config::error::ConfigError;
 #[cfg(unix)]
 static DEFAULT_SOCKET_PATH: &str = "caretta.sock";
 
+#[derive(Clone, Debug)]
 pub struct RpcConfig {
     pub socket_path: PathBuf,
 }
@@ -24,7 +25,7 @@ impl TryFrom<PartialRpcConfig> for RpcConfig {
 }
 
 #[cfg_attr(feature="desktop", derive(Args))]
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct PartialRpcConfig {
     pub socket_path: Option<PathBuf>,
 }

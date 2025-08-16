@@ -31,9 +31,8 @@ fn base64_to_keypair(base64: &str) -> Result<Keypair, Error>  {
         Ok(Keypair::from_protobuf_encoding(&vec)?)
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize,)]
+#[derive(Clone, Debug)]
 pub struct P2pConfig {
-    #[serde(with = "keypair_parser")]
     pub secret: Keypair,
     pub listen_ips: Vec<IpAddr>,
     pub port: u16,
@@ -79,26 +78,6 @@ impl TryFrom<PartialP2pConfig> for P2pConfig {
             listen_ips: raw.listen_ips.ok_or(Error::MissingConfig("listen_ips"))?,
             port: raw.port.ok_or(Error::MissingConfig("port"))?
         })
-    }
-}
-
-mod keypair_parser {
-    use libp2p::identity::Keypair;
-    use serde::{Deserialize, Deserializer, Serializer};
-
-    pub fn serialize<S>(keypair: &Keypair, serializer: S) -> Result<S::Ok, S::Error>
-    where S: Serializer
-    {
-        serializer.serialize_str(&super::keypair_to_base64(keypair))
-    }
-    pub fn deserialize<'de, D>(deserializer: D) -> Result<Keypair, D::Error>
-    where D: Deserializer<'de>
-    {
-        match super::base64_to_keypair(&String::deserialize(deserializer)?) {
-            Ok(x) => Ok(x),
-            Err(crate::error::Error::Base64Decode(_)) => Err(serde::de::Error::custom("Decoding base64 error")),
-            Err(_) => unreachable!()
-        }
     }
 }
 
@@ -172,7 +151,7 @@ impl Mergeable for PartialP2pConfig {
 mod tests {
     use libp2p::identity;
     use super::*;
-    use crate::{config::PartialConfig, tests::test_toml_serialize_deserialize};
+    use crate::{tests::test_toml_serialize_deserialize};
     
 
     #[tokio::test]

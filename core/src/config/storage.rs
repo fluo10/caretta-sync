@@ -5,7 +5,7 @@ use clap::Args;
 
 #[cfg(any(test, feature="test"))]
 use tempfile::tempdir;
-use crate::{config::{ConfigError, PartialConfig}, utils::{emptiable::Emptiable, mergeable::Mergeable}};
+use crate::{config::{ConfigError, PartialConfig}, utils::{emptiable::Emptiable, get_binary_name, mergeable::Mergeable}};
 use libp2p::mdns::Config;
 use serde::{Deserialize, Serialize};
 
@@ -15,7 +15,7 @@ static CACHE_DATABASE_NAME: &str = "cache.sqlite";
 #[cfg(any(test, feature="test"))]
 use crate::tests::{GlobalTestDefault, TestDefault};
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct StorageConfig {
     pub data_directory: PathBuf,
     pub cache_directory: PathBuf,
@@ -50,12 +50,29 @@ impl TryFrom<PartialStorageConfig> for StorageConfig {
     }
 }
 #[cfg_attr(feature="desktop", derive(Args))]
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct PartialStorageConfig {
     #[cfg_attr(feature="desktop", arg(long))]
     pub data_directory: Option<PathBuf>,
     #[cfg_attr(feature="desktop", arg(long))]
     pub cache_directory: Option<PathBuf>,
+}
+
+impl Default for PartialStorageConfig {
+    fn default() -> Self {
+        #[cfg(any(target_os="linux", target_os="macos", target_os="windows"))]
+        {
+            let mut data_dir = dirs::data_local_dir().unwrap();
+            data_dir.push(get_binary_name().unwrap());
+            let mut cache_dir = dirs::cache_dir().unwrap();
+            cache_dir.push(get_binary_name().unwrap());
+
+            Self {
+                data_directory: Some(data_dir),
+                cache_directory: Some(cache_dir)
+            }
+        }
+    }
 }
 
 impl From<StorageConfig> for PartialStorageConfig {

@@ -2,16 +2,16 @@ use crate::{cache::entity::{CachedAddressEntity, CachedPeerEntity, CachedPeerMod
 use futures::future::join_all;
 use tonic::{Request, Response, Status};
 
-use crate::proto::{cached_peer_service_server::{CachedPeerService, CachedPeerServiceServer}, CachedPeerListRequest, CachedPeerListResponse, CachedPeerMessage};
+use crate::proto::{cached_peer_service_server::{CachedPeerServiceServer}, CachedPeerListRequest, CachedPeerListResponse, CachedPeerMessage};
 use sea_orm::prelude::*;
 
 #[derive(Debug, Default)]
-pub struct CachedPeerServer {}
+pub struct CachedPeerService {}
 
 
 
 #[tonic::async_trait]
-impl CachedPeerService for CachedPeerServer {
+impl crate::proto::cached_peer_service_server::CachedPeerService for CachedPeerService {
     async fn list(&self, request: Request<CachedPeerListRequest>) -> Result<Response<CachedPeerListResponse>, Status> {
         println!("Got a request: {:?}", request);
         

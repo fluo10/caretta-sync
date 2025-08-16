@@ -16,17 +16,16 @@ pub use rpc::*;
 #[cfg(feature="desktop")]
 use clap::Args;
 
-pub trait Config: TryFrom<Self::PartialConfig>{
-    type PartialConfig: PartialConfig<Config = Self>;
-}
-pub trait PartialConfig: Emptiable + From<Self::Config> + Mergeable {
-    type Config: Config<PartialConfig = Self>;
-
+#[derive(Clone, Debug)]
+pub struct Config {
+    p2p: P2pConfig,
+    storage: StorageConfig,
+    rpc: RpcConfig,
 }
 
 #[cfg_attr(feature="desktop", derive(Args))]
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct BaseConfig {
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+pub struct PartialConfig {
     #[cfg_attr(feature="desktop", command(flatten))]
     p2p: PartialP2pConfig,
     #[cfg_attr(feature="desktop", command(flatten))]
@@ -35,7 +34,7 @@ pub struct BaseConfig {
     rpc: PartialRpcConfig,
 }
 
-impl BaseConfig {
+impl PartialConfig {
     fn new() -> Self {
         Self {
             p2p : PartialP2pConfig::empty().with_new_secret(),
@@ -84,53 +83,29 @@ impl BaseConfig {
     }
 }
 
+impl Emptiable for PartialConfig {
+    fn empty() -> Self {
+        Self {
+            p2p: PartialP2pConfig::empty(), 
+            storage: PartialStorageConfig::empty(),
+            rpc: PartialRpcConfig::empty()
+        }
+    }
+
+    fn is_empty(&self) -> bool {
+        self.p2p.is_empty() && self.rpc.is_empty() && self.storage.is_empty()
+    }
+}
+
 
 #[cfg(test)]
 mod tests {
-    use serde::{Deserialize, Serialize};
-
-    use crate::{tests::test_toml_serialize_deserialize, utils::{emptiable::Emptiable, mergeable::Mergeable}};
-
-    use super::{p2p::{P2pConfig, PartialP2pConfig}, PartialConfig};
-
-    #[derive(Debug, Deserialize, Serialize, PartialEq)]
-    pub struct TestConfig {
-        
-        p2p: Option<PartialP2pConfig>
-    }
-
-    impl Default for TestConfig {
-        fn default() -> Self {
-            Self {
-                p2p: Some(PartialP2pConfig::default()),
-            }
-        }
-    }
-    impl Emptiable for TestConfig {
-        fn empty() -> Self {
-            Self {
-                p2p: None,
-            }
-        }
-
-        fn is_empty(&self) -> bool {
-            self.p2p.is_none()
-        }
-    }
-    impl Mergeable for TestConfig {
-        fn merge(&mut self, other: Self) {
-            if let Some(p2p) = other.p2p {
-                self.p2p = Some(p2p);
-            }
-        }
-    }
+    use libp2p::identity;
+    use super::*;
+    use crate::{tests::test_toml_serialize_deserialize};
     
     #[tokio::test]
     async fn test_p2p_config_serialize_deserialize() {
-        test_toml_serialize_deserialize(TestConfig::empty());
-        test_toml_serialize_deserialize(TestConfig::default());
-        assert_eq!(TestConfig::empty(), toml::from_str("").unwrap());
-        assert_eq!("", &toml::to_string(&TestConfig::empty()).unwrap());
+        test_toml_serialize_deserialize(PartialConfig::empty());
     }
-    
 }
