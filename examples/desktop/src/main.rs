@@ -1,5 +1,11 @@
+use crate::cli::Cli;
+
 mod cli;
 mod ipc;
-fn main() {
-    dioxus::launch(caretta_examples_core::ui::plain::App);
+
+#[tokio::main]
+async fn main() {
+    let args = Cli::parse();
+    
+    
 }

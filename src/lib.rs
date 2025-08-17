@@ -1,5 +1,5 @@
 pub use caretta_core::*;
-#[cfg(desktop)]
+#[cfg(feature = "desktop")]
 pub use caretta_desktop::*;
-#[cfg(mobile)]
+#[cfg(feature = "mobile")]
 pub use caretta_mobile::*;

@@ -2,11 +2,11 @@ use std::path::PathBuf;
 
 mod args;
 mod device;
-mod server;
+mod peer;
 
 pub use args::*;
 pub use device::*;
-pub use server::*;
+pub use peer::*;
 
 pub trait RunnableCommand {
     async fn run(self);

@@ -1,5 +1,8 @@
+mod server;
 use clap::{Parser, Subcommand};
-use caretta_desktop::cli::*;
+use caretta::cli::*;
+pub use server::*;
+
 
 #[derive(Debug, Parser)]
 pub struct Cli {

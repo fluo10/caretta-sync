@@ -1,17 +1,9 @@
 [package]
-name = "caretta-examples-mobile"
+name = "caretta-example-mobile"
 version = "0.1.0"
 authors = ["fluo10 <fluo10.dev@fireturtle.net>"]
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 dioxus.workspace = true
-caretta-examples-core.path = "../core"
-
-[features]
-default = ["mobile"]
-web = ["dioxus/web"]
-desktop = ["dioxus/desktop"]
-mobile = ["dioxus/mobile"]
+caretta-example-core.path = "../core"

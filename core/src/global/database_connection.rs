@@ -44,12 +44,12 @@ pub use tests::*;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{cache::migration::CacheMigrator, data::migration::DataMigrator, global::STORAGE_CONFIG, tests::GlobalTestDefault};
+    use crate::{cache::migration::CacheMigrator, data::migration::DataMigrator, global::CONFIG, tests::GlobalTestDefault};
     
     pub async fn get_or_init_test_data_database() -> &'static DatabaseConnection{
-        DATA_DATABASE_CONNECTION.get_or_init(STORAGE_CONFIG.get_or_init_test_default().await.get_data_database_path(), DataMigrator).await
+        DATA_DATABASE_CONNECTION.get_or_init(CONFIG.get_or_init_test_default().await.storage.get_cache_database_path(), DataMigrator).await
     }
     pub async fn get_or_init_test_cache_database() -> &'static DatabaseConnection{
-        CACHE_DATABASE_CONNECTION.get_or_init(STORAGE_CONFIG.get_or_init_test_default().await.get_cache_database_path(), CacheMigrator).await
+        CACHE_DATABASE_CONNECTION.get_or_init(CONFIG.get_or_init_test_default()await.storage.get_cache_database_path(), CacheMigrator).await
     }
 }

@@ -29,20 +29,3 @@ pub trait TestDefault {
 pub trait GlobalTestDefault<T: 'static> {
     async fn get_or_init_test_default(&'static self) -> &'static T; 
 }
-
-pub fn test_cbor_serialize_deserialize<T>(src: T)
-where T: DeserializeOwned + Serialize + PartialEq + std::fmt::Debug
-{
-    let mut buf: Vec<u8> = Vec::new();
-    ciborium::into_writer(&src, &mut buf).unwrap();
-    let dst: T = ciborium::from_reader(buf.as_slice()).unwrap();
-    assert_eq!(src, dst);
-}
-
-pub fn test_toml_serialize_deserialize<T>(src: T)
-where T: DeserializeOwned + Serialize + PartialEq + std::fmt::Debug
-{
-    let buf = toml::to_string(&src).unwrap();
-    let dst: T = toml::from_str(&buf).unwrap();
-    assert_eq!(src, dst);
-}

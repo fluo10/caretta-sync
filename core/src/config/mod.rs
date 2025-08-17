@@ -18,37 +18,37 @@ use clap::Args;
 
 #[derive(Clone, Debug)]
 pub struct Config {
-    p2p: P2pConfig,
-    storage: StorageConfig,
-    rpc: RpcConfig,
+    pub p2p: P2pConfig,
+    pub storage: StorageConfig,
+    pub rpc: RpcConfig,
 }
 
 #[cfg_attr(feature="desktop", derive(Args))]
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct PartialConfig {
     #[cfg_attr(feature="desktop", command(flatten))]
-    p2p: PartialP2pConfig,
+    pub p2p: PartialP2pConfig,
     #[cfg_attr(feature="desktop", command(flatten))]
-    storage: PartialStorageConfig,
+    pub storage: PartialStorageConfig,
     #[cfg_attr(feature="desktop", command(flatten))]
-    rpc: PartialRpcConfig,
+    pub rpc: PartialRpcConfig,
 }
 
 impl PartialConfig {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             p2p : PartialP2pConfig::empty().with_new_secret(),
             storage: PartialStorageConfig::empty(),
             rpc: PartialRpcConfig::empty(),
         }
     }
-    fn from_toml(s: &str) -> Result<Self, toml::de::Error> {
+    pub fn from_toml(s: &str) -> Result<Self, toml::de::Error> {
         toml::from_str(s)
     }
-    fn into_toml(&self) -> Result<String, toml::ser::Error> {
+    pub fn into_toml(&self) -> Result<String, toml::ser::Error> {
         toml::to_string(self)
     }
-    async fn read_or_create<T>(path: T) -> Result<Self, ConfigError> 
+    pub async fn read_or_create<T>(path: T) -> Result<Self, ConfigError> 
     where
     T: AsRef<Path>
     {
@@ -57,7 +57,7 @@ impl PartialConfig {
         }
         Self::read_from(&path).await
     }
-    async fn read_from<T>(path:T) -> Result<Self, ConfigError> 
+    pub async fn read_from<T>(path:T) -> Result<Self, ConfigError> 
     where 
     T: AsRef<Path>
     {
@@ -67,7 +67,7 @@ impl PartialConfig {
         let config: Self = toml::from_str(&content)?;
         Ok(config)
     }
-    async fn write_to<T>(&self, path:T) -> Result<(), ConfigError> 
+    pub async fn write_to<T>(&self, path:T) -> Result<(), ConfigError> 
     where 
     T: AsRef<Path>
     {

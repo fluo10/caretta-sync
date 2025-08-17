@@ -1,5 +1,5 @@
 [package]
-name = "caretta-examples-core"
+name = "caretta-example-core"
 edition.workspace = true
 version.workspace = true
 description.workspace = true

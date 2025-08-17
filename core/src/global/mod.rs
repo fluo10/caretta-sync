@@ -58,7 +58,7 @@ impl<T> GlobalConstant<T> {
         self.inner.get()
     }
     pub fn get_and_unwrap(&'static self) -> &'static T {
-        self.get().expect(&format!("{} is uninitialized!", &stringify!(self)))
+        self.get().expect(&format!("{} is uninitialized!", self.name))
     }
 }
 
