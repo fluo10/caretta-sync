@@ -1,16 +1,16 @@
 use clap::Args;
 use crate::utils::runnable::Runnable;
-use crate::cli::{ConfigArgs, DeviceArgs};
+use crate::cli::{ConfigArgs, PeerArgs};
 
 #[derive(Debug, Args)]
-pub struct DeviceRemoveCommandArgs{
+pub struct PeerPingCommandArgs{
     #[command(flatten)]
-    device: DeviceArgs,
+    config: ConfigArgs,
     #[command(flatten)]
-    config: ConfigArgs
+    peer: PeerArgs,
 }
 
-impl Runnable for DeviceRemoveCommandArgs {
+impl Runnable for PeerPingCommandArgs {
     async fn run(self) {
         todo!()
     }

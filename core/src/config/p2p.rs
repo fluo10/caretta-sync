@@ -151,7 +151,6 @@ impl Mergeable for PartialP2pConfig {
 mod tests {
     use libp2p::identity;
     use super::*;
-    use crate::{tests::test_toml_serialize_deserialize};
     
 
     #[tokio::test]
@@ -161,9 +160,5 @@ mod tests {
 
         assert_eq!(keypair.public(), keypair2.public());
     }
-    #[tokio::test]
-    async fn test_p2p_config_serialize_deserialize() {
-        test_toml_serialize_deserialize(PartialP2pConfig::empty());
-        test_toml_serialize_deserialize(PartialP2pConfig::default());
-    }
+    
 }

@@ -16,9 +16,9 @@ impl crate::proto::cached_peer_service_server::CachedPeerService for CachedPeerS
         println!("Got a request: {:?}", request);
         
         let reply = CachedPeerListResponse { 
-            peers: join_all( CachedPeerEntity::find().all(CACHE_DATABASE_CONNECTION.get()).await.or_else(|e| Err(Status::from_error(Box::new(e))))?.iter().map(|x| async move {
+            peers: join_all( CachedPeerEntity::find().all(CACHE_DATABASE_CONNECTION.get_unchecked()).await.or_else(|e| Err(Status::from_error(Box::new(e))))?.iter().map(|x| async move {
                 let addresses = CachedAddressEntity::find()
-                    .all(CACHE_DATABASE_CONNECTION.get())
+                    .all(CACHE_DATABASE_CONNECTION.get_unchecked())
                     .await
                     .or_else(|e| Err(Status::from_error(Box::new(e))))?;
                 Ok::<CachedPeerMessage, Status>(CachedPeerMessage::from((x, &addresses)))

@@ -1,3 +1,5 @@
+use std::ffi::OsString;
+
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error("Base64 decode error: {0}")]
@@ -22,6 +24,8 @@ pub enum Error {
     Multiaddr(#[from] libp2p::multiaddr::Error),
     #[error("Noise error: {0}")]
     Noise(#[from] libp2p::noise::Error),
+    #[error("Parse OsString error: {0:?}")]
+    OsStringConvert(std::ffi::OsString),
     #[cfg(feature="desktop")]
     #[error("Parse args error: {0}")]
     ParseCommand(#[from] clap::Error),
@@ -31,4 +35,10 @@ pub enum Error {
     TomlSer(#[from] toml::ser::Error),
     #[error("Transport error: {0}")]
     Transport(#[from]libp2p::TransportError<std::io::Error>)
+}
+
+impl From<std::ffi::OsString> for Error {
+    fn from(s: OsString) -> Error {
+        Self::OsStringConvert(s)
+    }
 }

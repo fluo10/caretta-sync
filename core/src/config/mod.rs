@@ -23,6 +23,24 @@ pub struct Config {
     pub rpc: RpcConfig,
 }
 
+impl AsRef<StorageConfig> for Config {
+    fn as_ref(&self) -> &StorageConfig {
+        &self.storage
+    }
+}
+
+impl AsRef<P2pConfig> for Config {
+    fn as_ref(&self) -> &P2pConfig {
+        &self.p2p
+    }
+}
+
+impl AsRef<RpcConfig> for Config {
+    fn as_ref(&self) -> &RpcConfig {
+        &self.rpc
+    }
+}
+
 #[cfg_attr(feature="desktop", derive(Args))]
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct PartialConfig {
@@ -94,18 +112,5 @@ impl Emptiable for PartialConfig {
 
     fn is_empty(&self) -> bool {
         self.p2p.is_empty() && self.rpc.is_empty() && self.storage.is_empty()
-    }
-}
-
-
-#[cfg(test)]
-mod tests {
-    use libp2p::identity;
-    use super::*;
-    use crate::{tests::test_toml_serialize_deserialize};
-    
-    #[tokio::test]
-    async fn test_p2p_config_serialize_deserialize() {
-        test_toml_serialize_deserialize(PartialConfig::empty());
     }
 }

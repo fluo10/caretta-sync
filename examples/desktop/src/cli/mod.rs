@@ -12,8 +12,9 @@ pub struct Cli {
 
 #[derive(Debug, Subcommand)]
 pub enum CliCommand {
-    //Config(ConfigCommandArgs),
-    //Device(DeviceCommandArgs),
-    //Log(LogCommandArgs),
+    Config(ConfigCommandArgs),
+    Device(DeviceCommandArgs),
+    Logs(LogsCommandArgs),
+    Peer(PeerSubcommand),
     Server(ServerCommandArgs),
 }

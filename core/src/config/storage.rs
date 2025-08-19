@@ -12,9 +12,6 @@ use serde::{Deserialize, Serialize};
 static DATA_DATABASE_NAME: &str = "data.sqlite";
 static CACHE_DATABASE_NAME: &str = "cache.sqlite";
 
-#[cfg(any(test, feature="test"))]
-use crate::tests::{GlobalTestDefault, TestDefault};
-
 #[derive(Clone, Debug)]
 pub struct StorageConfig {
     pub data_directory: PathBuf,
@@ -30,14 +27,6 @@ impl StorageConfig {
     }
 }
 
-#[cfg(any(test, feature="test"))]
-impl TestDefault for StorageConfig {
-    fn test_default() -> Self {
-        
-        let temp_dir = tempdir().unwrap().keep();
-        Self { data_directory: temp_dir.clone(), cache_directory: temp_dir }
-    }
-}
 
 impl TryFrom<PartialStorageConfig> for StorageConfig {
     type Error = ConfigError;

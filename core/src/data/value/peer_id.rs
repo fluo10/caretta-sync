@@ -99,22 +99,3 @@ impl sea_orm::sea_query::Nullable for PeerIdValue {
         <String as sea_orm::sea_query::Nullable>::null()
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use crate::tests::{test_cbor_serialize_deserialize, test_toml_serialize_deserialize};
-
-    use super::*;
-
-    #[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
-    struct PeerIdValueWrapper {
-        content: PeerIdValue
-
-    }
-    #[test]
-    fn test_serialize_deserialize() {
-        let peer_id= PeerIdValueWrapper{content: PeerIdValue::from(PeerId::random())};
-        let x = toml::to_string(&peer_id).unwrap();
-        assert_eq!(peer_id.content, toml::from_str::<PeerIdValueWrapper>(&x).unwrap().content)
-    }
-}

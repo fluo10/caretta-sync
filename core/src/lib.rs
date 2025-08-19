@@ -11,3 +11,4 @@ pub mod rpc;
 #[cfg(any(test, feature="test"))]
 pub mod tests;
 pub mod utils;
+pub mod server;
