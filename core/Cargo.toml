@@ -40,6 +40,15 @@ tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 uuid.workspace = true
 prost-types = "0.14.1"
 
+[target.'cfg(target_os="android")'.dependencies]
+jni = "0.21.1"
+ndk = "0.9.0"
+
+[target.'cfg(target_os="ios")'.dependencies]
+objc = "0.2.7"
+objc-foundation = "0.1.1"
+objc_id = "0.1.1"
+
 [dev-dependencies]
 tempfile = "3.20.0"
 

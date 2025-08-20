@@ -20,7 +20,7 @@ pub use cached_address::{
 mod tests {
     use std::net::Ipv4Addr;
 
-    use crate::{cache::entity::cached_peer, global::get_or_init_test_cache_database};
+    use crate::{cache::entity::cached_peer, data::migration::DataMigrator, global::{DATABASE_CONNECTIONS}, tests::TEST_CONFIG};
 
     use super::*;
 
@@ -31,7 +31,8 @@ mod tests {
 
      #[tokio::test]
     async fn insert() {
-        let db = get_or_init_test_cache_database().await;
+
+        let db =         DATABASE_CONNECTIONS.get_or_init_unchecked(&*TEST_CONFIG, DataMigrator).await.cache;
         let peer_id = Keypair::generate_ed25519().public().to_peer_id();
         let multiaddr = Multiaddr::empty()
             .with(Ipv4Addr::new(127,0,0,1).into())

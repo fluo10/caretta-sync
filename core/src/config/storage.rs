@@ -9,24 +9,11 @@ use crate::{config::{ConfigError, PartialConfig}, utils::{emptiable::Emptiable, 
 use libp2p::mdns::Config;
 use serde::{Deserialize, Serialize};
 
-static DATA_DATABASE_NAME: &str = "data.sqlite";
-static CACHE_DATABASE_NAME: &str = "cache.sqlite";
-
 #[derive(Clone, Debug)]
 pub struct StorageConfig {
     pub data_directory: PathBuf,
     pub cache_directory: PathBuf,
 }
-
-impl StorageConfig {
-    pub fn get_data_database_path(&self) -> PathBuf{
-        self.data_directory.join(DATA_DATABASE_NAME)
-    }
-    pub fn get_cache_database_path(&self) -> PathBuf {
-        self.cache_directory.join(CACHE_DATABASE_NAME)
-    }
-}
-
 
 impl TryFrom<PartialStorageConfig> for StorageConfig {
     type Error = ConfigError;
@@ -47,19 +34,46 @@ pub struct PartialStorageConfig {
     pub cache_directory: Option<PathBuf>,
 }
 
-impl Default for PartialStorageConfig {
-    fn default() -> Self {
-        #[cfg(any(target_os="linux", target_os="macos", target_os="windows"))]
-        {
-            let mut data_dir = dirs::data_local_dir().unwrap();
-            data_dir.push(get_binary_name().unwrap());
-            let mut cache_dir = dirs::cache_dir().unwrap();
-            cache_dir.push(get_binary_name().unwrap());
+impl PartialStorageConfig {
+    #[cfg(not(any(target_os="android", target_os="ios")))]
+    fn default_desktop(app_name: &'static str) -> Self {
+    
+        let mut data_dir = dirs::data_local_dir().unwrap();
+        data_dir.push(app_name);
+        let mut cache_dir = dirs::cache_dir().unwrap();
+        cache_dir.push(app_name);
 
-            Self {
-                data_directory: Some(data_dir),
-                cache_directory: Some(cache_dir)
-            }
+        Self {
+            data_directory: Some(data_dir),
+            cache_directory: Some(cache_dir)
+        }
+    }
+    #[cfg(target_os="android")]
+    fn default_android() -> Self{
+            let ctx = ndk_context::android_context();
+            let vm = unsafe { jni::JavaVM::from_raw(ctx.vm().cast()) }?;
+            let mut env = vm.attach_current_thread()?;
+            let ctx = unsafe { jni::objects::JObject::from_raw(ctx.context().cast()) };
+            let cache_dir = env
+                .call_method(ctx, "getFilesDir", "()Ljava/io/File;", &[])?
+                .l()?;
+            let cache_dir: jni::objects::JString = env
+                .call_method(&cache_dir, "toString", "()Ljava/lang/String;", &[])?
+                .l()?
+                .try_into()?;
+            let cache_dir = env.get_string(&cache_dir)?;
+            let cache_dir = cache_dir.to_str()?;
+            Ok(cache_dir.to_string())
+
+    }
+    #[cfg(target_os="ios")]
+    fn default_ios(){
+        unsafe {
+            let file_manager: *mut Object = msg_send![Class::get("NSFileManager").unwrap(), defaultManager];
+            let paths: Id<Object> = msg_send![file_manager, URLsForDirectory:1 inDomains:1];
+            let first_path: *mut Object = msg_send![paths, firstObject];
+            let path: Id<NSString> = Id::from_ptr(msg_send![first_path, path]);
+            Some(path.as_str().to_string())
         }
     }
 }

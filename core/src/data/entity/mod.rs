@@ -17,7 +17,7 @@ pub use record_deletion::{
 
 #[cfg(test)]
 mod tests {
-    use crate::{data::value::PeerIdValue, global::{generate_uuid, get_or_init_test_data_database}};
+    use crate::{data::{migration::DataMigrator, value::PeerIdValue}, global::{generate_uuid, DATABASE_CONNECTIONS}, tests::TEST_CONFIG};
 
     use super::*;
 
@@ -26,7 +26,7 @@ mod tests {
 
      #[tokio::test]
     async fn check_insert() {
-        let db = get_or_init_test_data_database().await;
+        let db = DATABASE_CONNECTIONS.get_or_init_unchecked(&*TEST_CONFIG, DataMigrator).await.cache;
         
         let node = TrustedNodeActiveModel::new(PeerId::random(), "test note".to_owned()).insert(db).await.unwrap();
         let _ = RecordDeletionActiveModel::new(node.id, "test_table".to_string(), generate_uuid()).insert(db).await.unwrap();

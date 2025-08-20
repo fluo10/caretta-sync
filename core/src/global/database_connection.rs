@@ -2,66 +2,97 @@ use std::path::{Path, PathBuf};
 
 use sea_orm::{ConnectOptions, Database, DbErr, DatabaseConnection};
 use sea_orm_migration::MigratorTrait;
-use crate::{config::StorageConfig, error::Error};
+use crate::{cache::migration::CacheMigrator, config::StorageConfig, error::Error};
 use tokio::sync::OnceCell;
 
-enum StorageType {
-    Data,
-    Cache,
+pub static DATABASE_CONNECTIONS: GlobalDatabaseConnections = GlobalDatabaseConnections::const_new();
+
+pub struct DatabaseConnections<'a> {
+    pub data: &'a DatabaseConnection,
+    pub cache: &'a DatabaseConnection
 }
 
-impl std::fmt::Display for StorageType {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f,"{}", match self {
-            StorageType::Data => "data",
-            StorageType::Cache => "cache",
-        });
-        Ok(())
-    }
+pub struct GlobalDatabaseConnections {
+    data: OnceCell<DatabaseConnection>,
+    cache: OnceCell<DatabaseConnection>,
 }
 
-
-pub static DATA_DATABASE_CONNECTION: GlobalDatabaseConnection = GlobalDatabaseConnection::const_new(StorageType::Data);
-pub static CACHE_DATABASE_CONNECTION: GlobalDatabaseConnection = GlobalDatabaseConnection::const_new(StorageType::Cache);
-
-pub struct GlobalDatabaseConnection {
-    storage: StorageType,
-    inner: OnceCell<DatabaseConnection>
-}
-
-impl GlobalDatabaseConnection {
-    pub const fn const_new(storage: StorageType) -> Self {
+impl GlobalDatabaseConnections {
+    pub const fn const_new() -> Self {
         Self {
-            storage: storage,
-            inner: OnceCell::const_new()
+            data: OnceCell::const_new(),
+            cache: OnceCell::const_new()
         }
     }
-    pub fn get(&'static self) -> Option<&'static DatabaseConnection> {
-        self.inner.get()
+    
+    pub fn get_data(&'static self) -> Option<&'static DatabaseConnection> {
+        self.data.get()
     }
-    fn get_file_path<T>(&self, config: T) -> PathBuf 
+
+    pub fn get_data_unchecked(&'static self) -> &'static DatabaseConnection {
+        self.get_data().expect("Global data database connection should initialized before access!")
+    }
+    
+    pub fn get_cache(&'static self) -> Option<&'static DatabaseConnection> {
+        self.cache.get()
+    }
+
+    pub fn get_cache_unchecked(&'static self) -> &'static DatabaseConnection {
+        self.get_cache().expect("Global cache database connection should initialized before access!")
+    }
+    
+    fn get_data_file_path<T>(config: &T) -> PathBuf 
     where 
         T: AsRef<StorageConfig>
     {
-        match self.storage {
-            StorageType::Cache => config.as_ref().cache_directory.join("cache.db"),
-            StorageType::Data => config.as_ref().data_directory.join("data.db"),
-        }
+        config.as_ref().data_directory.join("data.db")
     }
-    pub fn get_unchecked(&'static self) -> &'static DatabaseConnection {
-        self.get().expect("Global database connection should initialized beforehand!")
+    
+    fn get_cache_file_path<T>(config: &T) -> PathBuf 
+    where 
+        T: AsRef<StorageConfig>
+    {
+        config.as_ref().cache_directory.join("cache.db")
     }
-    pub async fn get_or_try_init<T, U>(&'static self, config: T, _: U) -> Result<&'static DatabaseConnection, Error>
-    where
-        T: AsRef<StorageConfig>,
+
+    fn get_url_unchecked<T>(path: T) -> String
+    where 
+        T: AsRef<Path>
+    {
+        "sqlite://".to_string() + path.as_ref().as_os_str().to_str().expect("Failed to convert path to string!") + "?mode=rwc"
+    }
+
+    async fn get_or_init_database_connection_unchecked<T, U>(cell: &OnceCell<DatabaseConnection>, options: T, _: U ) -> &DatabaseConnection
+    where 
+        T: Into<ConnectOptions>,
         U: MigratorTrait
     {
-        let url = "sqlite://".to_string() + &self.get_file_path(config).into_os_string().into_string()? + "?mode=rwc";
-        Ok(self.inner.get_or_try_init(|| async {
-            let db = Database::connect(&url).await?;
-            U::up(&db, None).await?;
-            Ok::<DatabaseConnection, DbErr>(db)
-        }).await?)
+        cell.get_or_init(|| async {
+            let db = Database::connect(options.into()).await.unwrap();
+            U::up(&db, None).await.unwrap();
+            db
+        }).await
+    }
+
+
+    pub async fn get_or_init_unchecked<T, U>(&'static self, config: T, _migrator: U) -> DatabaseConnections
+    where
+        T: AsRef<StorageConfig>,
+        U: MigratorTrait,
+    {
+        DatabaseConnections{
+            data: Self::get_or_init_database_connection_unchecked(
+                &self.data,
+                Self::get_url_unchecked(Self::get_data_file_path(&config)),
+                _migrator
+            ).await,
+            cache: Self::get_or_init_database_connection_unchecked(
+                &self.cache,
+                Self::get_url_unchecked(Self::get_cache_file_path(&config)),
+                CacheMigrator
+            ).await,
+        }
+        
     }
 }
 
@@ -74,10 +105,8 @@ mod tests {
     use super::*;
     use crate::{cache::migration::CacheMigrator, data::migration::DataMigrator, global::CONFIG, tests::{TEST_CONFIG}};
     
-    pub async fn get_or_init_test_data_database() -> &'static DatabaseConnection{
-        DATA_DATABASE_CONNECTION.get_or_try_init(&*TEST_CONFIG, DataMigrator).await.unwrap()
-    }
-    pub async fn get_or_init_test_cache_database() -> &'static DatabaseConnection{
-        CACHE_DATABASE_CONNECTION.get_or_try_init(&*TEST_CONFIG, CacheMigrator).await.unwrap()
+    #[tokio::test]
+    pub async fn get_or_init_database() {
+        DATABASE_CONNECTIONS.get_or_init_unchecked(&*TEST_CONFIG, DataMigrator).await;
     }
 }

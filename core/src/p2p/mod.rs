@@ -4,7 +4,7 @@ use libp2p::{ identity::Keypair, mdns, ping, swarm, Multiaddr, PeerId};
 use sea_orm::{prelude::DateTimeUtc, ActiveModelTrait, ActiveValue::Set, ColumnTrait, EntityTrait, ModelTrait, QueryFilter};
 use tracing::{event, Level};
 
-use crate::{cache::entity::{CachedPeerActiveModel, CachedAddressActiveModel, CachedAddressColumn, CachedAddressEntity, CachedAddressModel, CachedPeerColumn, CachedPeerEntity, CachedPeerModel}, data::value::{MultiaddrValue, PeerIdValue}, error::Error, global::CACHE_DATABASE_CONNECTION};
+use crate::{cache::entity::{CachedPeerActiveModel, CachedAddressActiveModel, CachedAddressColumn, CachedAddressEntity, CachedAddressModel, CachedPeerColumn, CachedPeerEntity, CachedPeerModel}, data::value::{MultiaddrValue, PeerIdValue}, error::Error, global::DATABASE_CONNECTIONS};
 
 #[derive(swarm::NetworkBehaviour)]
 #[behaviour(to_swarm = "Event")]
@@ -69,34 +69,34 @@ impl From<ping::Event> for Event {
 
 async fn try_get_or_insert_cached_peer(peer_id: &PeerId, peer_addr: &Multiaddr) -> Result<(CachedPeerModel, CachedAddressModel), Error> {
     match (
-        CachedPeerEntity::find().filter(CachedPeerColumn::PeerId.eq(PeerIdValue::from(peer_id.clone()))).one(CACHE_DATABASE_CONNECTION.get_unchecked()).await?,
-        CachedAddressEntity::find().filter(CachedAddressColumn::Multiaddress.eq(MultiaddrValue::from(peer_addr.clone()))).one(CACHE_DATABASE_CONNECTION.get_unchecked()).await?,
+        CachedPeerEntity::find().filter(CachedPeerColumn::PeerId.eq(PeerIdValue::from(peer_id.clone()))).one(DATABASE_CONNECTIONS.get_cache_unchecked()).await?,
+        CachedAddressEntity::find().filter(CachedAddressColumn::Multiaddress.eq(MultiaddrValue::from(peer_addr.clone()))).one(DATABASE_CONNECTIONS.get_cache_unchecked()).await?,
     ) {
         (Some(x), Some(y) ) => {
             if x.id == y.cached_peer_id {
                 event!(Level::TRACE, "Known peer: {}, {}", peer_id, peer_addr);
                 let mut addr: CachedAddressActiveModel = y.into();
                 addr.updated_at = Set(Local::now().to_utc());
-                let updated = addr.update(CACHE_DATABASE_CONNECTION.get_unchecked()).await?;
+                let updated = addr.update(DATABASE_CONNECTIONS.get_cache_unchecked()).await?;
                 Ok((x, updated))
             } else {
-                y.delete(CACHE_DATABASE_CONNECTION.get().expect("Cache database should initialized beforehand!")).await?;
-                Ok((x.clone(), CachedAddressActiveModel::new(x.id, peer_addr.clone()).insert(CACHE_DATABASE_CONNECTION.get_unchecked()).await?))
+                y.delete(DATABASE_CONNECTIONS.get_cache().expect("Cache database should initialized beforehand!")).await?;
+                Ok((x.clone(), CachedAddressActiveModel::new(x.id, peer_addr.clone()).insert(DATABASE_CONNECTIONS.get_cache_unchecked()).await?))
             }
         }
         (Some(x), None) => {
             event!(Level::INFO, "New address {} for {}", peer_addr, peer_id);
-            Ok((x.clone(),CachedAddressActiveModel::new(x.id, peer_addr.clone()).insert(CACHE_DATABASE_CONNECTION.get_unchecked()).await?))
+            Ok((x.clone(),CachedAddressActiveModel::new(x.id, peer_addr.clone()).insert(DATABASE_CONNECTIONS.get_cache_unchecked()).await?))
         },
         (None, x) =>  {
             event!(Level::INFO, "Add new peer: {}", peer_id);
-            let inserted = CachedPeerActiveModel::new(peer_id.clone()).insert(CACHE_DATABASE_CONNECTION.get_unchecked()).await?;
+            let inserted = CachedPeerActiveModel::new(peer_id.clone()).insert(DATABASE_CONNECTIONS.get_cache_unchecked()).await?;
             if let Some(y) = x {
                 event!(Level::INFO, "Remove {} from {}", peer_addr, peer_id);
-                y.delete(CACHE_DATABASE_CONNECTION.get_unchecked()).await?;
+                y.delete(DATABASE_CONNECTIONS.get_cache_unchecked()).await?;
             };
             event!(Level::INFO, "Add address {} to {}", peer_addr, peer_id);
-            Ok((inserted.clone(), CachedAddressActiveModel::new(inserted.id, peer_addr.clone()).insert(CACHE_DATABASE_CONNECTION.get_unchecked()).await?))
+            Ok((inserted.clone(), CachedAddressActiveModel::new(inserted.id, peer_addr.clone()).insert(DATABASE_CONNECTIONS.get_cache_unchecked()).await?))
         },
 
 

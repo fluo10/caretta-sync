@@ -42,7 +42,7 @@ impl AsRef<RpcConfig> for Config {
 }
 
 #[cfg_attr(feature="desktop", derive(Args))]
-#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct PartialConfig {
     #[cfg_attr(feature="desktop", command(flatten))]
     pub p2p: PartialP2pConfig,

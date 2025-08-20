@@ -1,4 +1,4 @@
-use crate::{cache::entity::{CachedAddressEntity, CachedPeerEntity, CachedPeerModel}, global::{CACHE_DATABASE_CONNECTION, DATA_DATABASE_CONNECTION}, proto::CachedAddressMessage};
+use crate::{cache::entity::{CachedAddressEntity, CachedPeerEntity, CachedPeerModel}, global::{DATABASE_CONNECTIONS}, proto::CachedAddressMessage};
 use futures::future::join_all;
 use tonic::{Request, Response, Status};
 
@@ -16,9 +16,9 @@ impl crate::proto::cached_peer_service_server::CachedPeerService for CachedPeerS
         println!("Got a request: {:?}", request);
         
         let reply = CachedPeerListResponse { 
-            peers: join_all( CachedPeerEntity::find().all(CACHE_DATABASE_CONNECTION.get_unchecked()).await.or_else(|e| Err(Status::from_error(Box::new(e))))?.iter().map(|x| async move {
+            peers: join_all( CachedPeerEntity::find().all(DATABASE_CONNECTIONS.get_cache_unchecked()).await.or_else(|e| Err(Status::from_error(Box::new(e))))?.iter().map(|x| async move {
                 let addresses = CachedAddressEntity::find()
-                    .all(CACHE_DATABASE_CONNECTION.get_unchecked())
+                    .all(DATABASE_CONNECTIONS.get_cache_unchecked())
                     .await
                     .or_else(|e| Err(Status::from_error(Box::new(e))))?;
                 Ok::<CachedPeerMessage, Status>(CachedPeerMessage::from((x, &addresses)))
