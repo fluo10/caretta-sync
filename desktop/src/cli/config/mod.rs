@@ -15,8 +15,8 @@ pub struct ConfigCommandArgs {
 }
 
 impl Runnable for ConfigCommandArgs {
-    async fn run(self) {
-        self.command.run().await
+    async fn run(self, app_name: &'static str) {
+        self.command.run(app_name).await
     }
 }
 
@@ -27,10 +27,10 @@ pub enum ConfigSubcommand {
 }
 
 impl Runnable for ConfigSubcommand {
-    async fn run(self) {
+    async fn run(self, app_name: &'static str) {
         match self {
-            Self::Check(x) => x.run().await,
-            Self::List(x) => x.run().await,
+            Self::Check(x) => x.run(app_name).await,
+            Self::List(x) => x.run(app_name).await,
         }
     }
 }

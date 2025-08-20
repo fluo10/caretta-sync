@@ -1,5 +1,5 @@
 use clap::Args;
-use caretta::{error::Error, global::CONFIG, utils::runnable::Runnable};
+use caretta::{config::Config, error::Error, global::CONFIG, utils::runnable::Runnable};
 use libp2p::{noise, ping, swarm::{NetworkBehaviour, SwarmEvent}, tcp, yamux, Swarm};
 
 use super::ConfigArgs;
@@ -10,7 +10,8 @@ pub struct ServerCommandArgs {
     config: ConfigArgs,
 }
 impl Runnable for ServerCommandArgs {
-    async fn run(self) {
-        let config = CONFIG.get_or_init(self.config.try_into()?).await;
+    async fn run(self, app_name: &'static str) {
+        let config = CONFIG.get_or_init::<Config>(self.config.into_config_unchecked(app_name).await).await;
+
     }
 }

@@ -17,8 +17,8 @@ pub struct PeerCommandArgs {
 }
 
 impl Runnable for PeerCommandArgs {
-    async fn run(self) {
-        self.command.run().await
+    async fn run(self, app_name: &'static str) {
+        self.command.run(app_name).await
     }
 }
 
@@ -30,11 +30,11 @@ pub enum PeerSubcommand {
 }
 
 impl Runnable for PeerSubcommand {
-    async fn run(self) {
+    async fn run(self, app_name: &'static str) {
         match self {
-            Self::Info(x) => x.run().await,
-            Self::List(x) => x.run().await,
-            Self::Ping(x) => x.run().await,
+            Self::Info(x) => x.run(app_name).await,
+            Self::List(x) => x.run(app_name).await,
+            Self::Ping(x) => x.run(app_name).await,
         }
     }
 }

@@ -1,5 +1,5 @@
 use clap::Args;
-use crate::utils::runnable::Runnable;
+use caretta_core::utils::runnable::Runnable;
 use crate::cli::ConfigArgs;
 
 #[derive(Debug, Args)]
@@ -11,7 +11,7 @@ pub struct ConfigListCommandArgs{
 }
 
 impl Runnable for ConfigListCommandArgs {
-    async fn run(self) {
+    async fn run(self, app_name: &'static str) {
         todo!()
     }
 }

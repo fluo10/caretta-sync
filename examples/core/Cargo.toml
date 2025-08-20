@@ -8,3 +8,5 @@ repository.workspace = true
 
 [dependencies]
 caretta.path = "../.."
+libp2p.workspace = true
+tokio.workspace = true

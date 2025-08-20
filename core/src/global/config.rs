@@ -15,10 +15,10 @@ impl GlobalConfig {
             inner: OnceCell::const_new()
         }
     }
-    pub async fn get_or_init<T>(&'static self, config: T) -> &'static Config where 
-    T: AsRef<Config>{
+    pub async fn get_or_init<T>(&'static self, config: Config) -> &'static Config where 
+    T: Into<Config>{
         self.inner.get_or_init(|| async {
-            config.as_ref().clone()
+            config.into()
         }).await
     }
     pub async fn get_or_try_init<T, E>(&'static self, config: T) -> Result<&'static Config, <T as TryInto<Config>>::Error> where 

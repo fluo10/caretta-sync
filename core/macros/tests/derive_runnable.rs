@@ -4,7 +4,7 @@ use caretta_macros::Runnable;
 struct RunnableStruct1;
 
 impl Runnable for RunnableStruct1 {
-    async fn run(self) {
+    async fn run(self, app_name: &'static str) {
         print!("Run {}", stringify!(RunnableStruct1::run()))
     }
 }
@@ -25,7 +25,7 @@ async fn test() {
     let runnable = RunnableStruct2{
         runnable: RunnableEnum::Struct1(RunnableStruct1)
     };
-    runnable.run().await;
+    runnable.run("runnable_app").await;
 }
 
 

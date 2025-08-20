@@ -3,7 +3,7 @@ mod storage;
 mod p2p;
 mod rpc;
 
-use std::path::Path;
+use std::{path::Path, default::Default};
 use crate::{utils::{emptiable::Emptiable, mergeable::Mergeable}};
 pub use error::ConfigError;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
@@ -38,6 +38,17 @@ impl AsRef<P2pConfig> for Config {
 impl AsRef<RpcConfig> for Config {
     fn as_ref(&self) -> &RpcConfig {
         &self.rpc
+    }
+}
+
+impl TryFrom<PartialConfig> for Config {
+    type Error = crate::error::Error;
+    fn try_from(value: PartialConfig) -> Result<Self, Self::Error> {
+        Ok(Self{
+            rpc: value.rpc.try_into()?,
+            p2p: value.p2p.try_into()?,
+            storage: value.storage.try_into()?
+        })
     }
 }
 
@@ -99,6 +110,14 @@ impl PartialConfig {
         file.write_all(toml::to_string(self)?.as_bytes()).await?;
         Ok(())
     }
+    #[cfg(not(any(target_os="android", target_os="ios")))]
+    pub fn default_desktop(app_name: &'static str) -> Self {
+        Self {
+            p2p: PartialP2pConfig::default(),
+            rpc: PartialRpcConfig::default(),
+            storage: PartialStorageConfig::default(app_name),
+        }
+    }
 }
 
 impl Emptiable for PartialConfig {
@@ -112,5 +131,13 @@ impl Emptiable for PartialConfig {
 
     fn is_empty(&self) -> bool {
         self.p2p.is_empty() && self.rpc.is_empty() && self.storage.is_empty()
+    }
+}
+
+impl Mergeable for PartialConfig {
+    fn merge(&mut self, other: Self) {
+        self.p2p.merge(other.p2p);
+        self.rpc.merge(other.rpc);
+        self.storage.merge(other.storage);
     }
 }

@@ -71,7 +71,7 @@ impl P2pConfig {
 }
 
 impl TryFrom<PartialP2pConfig> for P2pConfig {
-    type Error = Error;
+    type Error = crate::error::Error;
     fn try_from(raw: PartialP2pConfig) -> Result<P2pConfig, Self::Error> {
         Ok(P2pConfig {
             secret: base64_to_keypair(&raw.secret.ok_or(Error::MissingConfig("secret"))?)?,

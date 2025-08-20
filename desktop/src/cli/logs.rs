@@ -8,7 +8,7 @@ pub struct LogsCommandArgs {
 }
 
 impl Runnable for LogsCommandArgs {
-     async fn run(self) {
+     async fn run(self, app_name: &'static str) {
         todo!()
     }
 }

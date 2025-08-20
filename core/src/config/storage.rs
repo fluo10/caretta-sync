@@ -36,7 +36,7 @@ pub struct PartialStorageConfig {
 
 impl PartialStorageConfig {
     #[cfg(not(any(target_os="android", target_os="ios")))]
-    fn default_desktop(app_name: &'static str) -> Self {
+    pub fn default(app_name: &'static str) -> Self {
     
         let mut data_dir = dirs::data_local_dir().unwrap();
         data_dir.push(app_name);

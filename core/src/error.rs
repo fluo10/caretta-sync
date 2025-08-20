@@ -8,6 +8,8 @@ pub enum Error {
     CiborDeserialize(#[from] ciborium::de::Error<std::io::Error>),
     #[error(transparent)]
     CiborSerialize(#[from] ciborium::ser::Error<std::io::Error>),
+    #[error("Config error: {0}")]
+    Config(#[from] crate::config::error::ConfigError),
     #[error("DB Error: {0}")]
     Db(#[from]sea_orm::DbErr),
     #[error("Dial Error: {0}")]
