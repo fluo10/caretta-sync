@@ -1,5 +1,5 @@
 use clap::Args;
-use caretta_core::utils::runnable::Runnable;
+use caretta_core::{config::PartialConfig, utils::runnable::Runnable};
 use crate::cli::ConfigArgs;
 
 #[derive(Debug, Args)]
@@ -12,6 +12,12 @@ pub struct ConfigListCommandArgs{
 
 impl Runnable for ConfigListCommandArgs {
     async fn run(self, app_name: &'static str) {
-        todo!()
+        let config: PartialConfig = if self.all {
+            self.config.into_config(app_name).await.into()
+        } else {
+            self.config.to_partial_config_without_default(app_name).await
+        };
+        println!("{}", config.into_toml().unwrap())
+
     }
 }

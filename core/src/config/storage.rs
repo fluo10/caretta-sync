@@ -109,3 +109,18 @@ impl Mergeable for PartialStorageConfig {
         };
     }
 }
+
+impl Mergeable for Option<PartialStorageConfig> {
+    fn merge(&mut self, mut other: Self) {
+        match other.take() {
+            Some(x) => {
+                if let Some(y) = self.as_mut() {
+                    y.merge(x);
+                } else {
+                    let _ = self.insert(x);
+                }
+            },
+            None => {}
+        };
+    }
+}

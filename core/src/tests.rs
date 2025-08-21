@@ -14,7 +14,7 @@ pub static TEST_CONFIG: LazyLock<Config> = LazyLock::new(|| {
 
 
     Config {
-        p2p: PartialP2pConfig::default().with_new_secret().try_into().unwrap(),
+        p2p: PartialP2pConfig::default().with_new_private_key().try_into().unwrap(),
         storage: StorageConfig {
             data_directory: data_dir,
             cache_directory: cache_dir,

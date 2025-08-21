@@ -33,14 +33,14 @@ fn base64_to_keypair(base64: &str) -> Result<Keypair, Error>  {
 
 #[derive(Clone, Debug)]
 pub struct P2pConfig {
-    pub secret: Keypair,
+    pub private_key: Keypair,
     pub listen_ips: Vec<IpAddr>,
     pub port: u16,
 }
 
 impl P2pConfig {
     async fn try_into_swarm (self) -> Result<Swarm<p2p::Behaviour>, Error> {
-        let mut swarm = libp2p::SwarmBuilder::with_existing_identity(self.secret)
+        let mut swarm = libp2p::SwarmBuilder::with_existing_identity(self.private_key)
             .with_tokio()
             .with_tcp(
                 tcp::Config::default(),
@@ -74,7 +74,7 @@ impl TryFrom<PartialP2pConfig> for P2pConfig {
     type Error = crate::error::Error;
     fn try_from(raw: PartialP2pConfig) -> Result<P2pConfig, Self::Error> {
         Ok(P2pConfig {
-            secret: base64_to_keypair(&raw.secret.ok_or(Error::MissingConfig("secret"))?)?,
+            private_key: base64_to_keypair(&raw.private_key.ok_or(Error::MissingConfig("secret"))?)?,
             listen_ips: raw.listen_ips.ok_or(Error::MissingConfig("listen_ips"))?,
             port: raw.port.ok_or(Error::MissingConfig("port"))?
         })
@@ -85,23 +85,26 @@ impl TryFrom<PartialP2pConfig> for P2pConfig {
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct PartialP2pConfig {
     #[cfg_attr(feature="desktop",arg(long))]
-    pub secret: Option<String>,
+    pub private_key: Option<String>,
     #[cfg_attr(feature="desktop",arg(long))]
     pub listen_ips: Option<Vec<IpAddr>>,
     #[cfg_attr(feature="desktop",arg(long))]
     pub port: Option<u16>,
 }
 impl PartialP2pConfig {
-    pub fn with_new_secret(mut self) -> Self {
-        self.secret = Some(keypair_to_base64(&Keypair::generate_ed25519()));
+    pub fn with_new_private_key(mut self) -> Self {
+        self.private_key = Some(keypair_to_base64(&Keypair::generate_ed25519()));
         self
+    }
+    pub fn init_private_key(&mut self) {
+        let _ = self.private_key.insert(keypair_to_base64(&Keypair::generate_ed25519()));
     }
 }
 
 impl From<P2pConfig> for PartialP2pConfig {
     fn from(config: P2pConfig) -> Self {
         Self {
-            secret: Some(keypair_to_base64(&config.secret)),
+            private_key: Some(keypair_to_base64(&config.private_key)),
             listen_ips: Some(config.listen_ips),
             port: Some(config.port)
         }
@@ -111,7 +114,7 @@ impl From<P2pConfig> for PartialP2pConfig {
 impl Default for PartialP2pConfig {
     fn default() -> Self {
         Self {
-            secret: None,
+            private_key: None,
             listen_ips: Some(Vec::from(DEFAULT_P2P_LISTEN_IPS)),
             port: Some(DEFAULT_P2P_PORT),
         }
@@ -121,27 +124,41 @@ impl Default for PartialP2pConfig {
 impl Emptiable for PartialP2pConfig {
     fn empty() -> Self {
         Self{
-            secret: None,
+            private_key: None,
             listen_ips: None,
             port: None
         }
     }
 
     fn is_empty(&self) -> bool {
-        self.secret.is_none() && self.listen_ips.is_none() && self.port.is_none()
+        self.private_key.is_none() && self.listen_ips.is_none() && self.port.is_none()
     }
 }
 
 impl Mergeable for PartialP2pConfig {
     fn merge(&mut self, mut other: Self) {
-        if let Some(x) = other.secret.take() {
-            let _ = self.secret.insert(x);
+        if let Some(x) = other.private_key.take() {
+            let _ = self.private_key.insert(x);
         };
         if let Some(x) = other.listen_ips.take() {
             let _ = self.listen_ips.insert(x);
         };
         if let Some(x) = other.port.take() {
             let _ = self.port.insert(x);
+        };
+    }
+}
+impl Mergeable for Option<PartialP2pConfig> {
+    fn merge(&mut self, mut other: Self) {
+        match other.take() {
+            Some(x) => {
+                if let Some(y) = self.as_mut() {
+                    y.merge(x);
+                } else {
+                    let _ = self.insert(x);
+                }
+            },
+            None => {}
         };
     }
 }

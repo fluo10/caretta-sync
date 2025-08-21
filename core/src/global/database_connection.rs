@@ -45,14 +45,14 @@ impl GlobalDatabaseConnections {
     where 
         T: AsRef<StorageConfig>
     {
-        config.as_ref().data_directory.join("data.db")
+        config.as_ref().data_directory.join("data.sqlite")
     }
     
     fn get_cache_file_path<T>(config: &T) -> PathBuf 
     where 
         T: AsRef<StorageConfig>
     {
-        config.as_ref().cache_directory.join("cache.db")
+        config.as_ref().cache_directory.join("cache.sqlite")
     }
 
     fn get_url_unchecked<T>(path: T) -> String

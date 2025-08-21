@@ -11,7 +11,7 @@ pub struct ServerCommandArgs {
 }
 impl Runnable for ServerCommandArgs {
     async fn run(self, app_name: &'static str) {
-        let config = CONFIG.get_or_init::<Config>(self.config.into_config_unchecked(app_name).await).await;
+        let config = CONFIG.get_or_init::<Config>(self.config.into_config(app_name).await).await;
 
     }
 }

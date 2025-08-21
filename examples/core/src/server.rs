@@ -7,7 +7,7 @@ impl ServerTrait for Server {
     where 
         T: AsRef<P2pConfig> 
     {
-        let mut swarm = libp2p::SwarmBuilder::with_existing_identity(config.as_ref().secret.clone())
+        let mut swarm = libp2p::SwarmBuilder::with_existing_identity(config.as_ref().private_key.clone())
             .with_tokio()
             .with_tcp(
                 tcp::Config::default(),

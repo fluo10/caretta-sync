@@ -10,6 +10,7 @@ pub struct ConfigCheckCommandArgs{
 
 impl Runnable for ConfigCheckCommandArgs {
     async fn run(self, app_name: &'static str) {
-        todo!()
+        let _ = self.config.into_config(app_name).await;
+        println!("Ok");
     }
 }

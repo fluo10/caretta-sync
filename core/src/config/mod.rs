@@ -45,9 +45,9 @@ impl TryFrom<PartialConfig> for Config {
     type Error = crate::error::Error;
     fn try_from(value: PartialConfig) -> Result<Self, Self::Error> {
         Ok(Self{
-            rpc: value.rpc.try_into()?,
-            p2p: value.p2p.try_into()?,
-            storage: value.storage.try_into()?
+            rpc: value.rpc.ok_or(crate::error::Error::MissingConfig("rpc"))?.try_into()?,
+            p2p: value.p2p.ok_or(crate::error::Error::MissingConfig("p2p"))?.try_into()?,
+            storage: value.storage.ok_or(crate::error::Error::MissingConfig("storage"))?.try_into()?
         })
     }
 }
@@ -56,19 +56,19 @@ impl TryFrom<PartialConfig> for Config {
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct PartialConfig {
     #[cfg_attr(feature="desktop", command(flatten))]
-    pub p2p: PartialP2pConfig,
+    pub p2p: Option<PartialP2pConfig>,
     #[cfg_attr(feature="desktop", command(flatten))]
-    pub storage: PartialStorageConfig,
+    pub storage: Option<PartialStorageConfig>,
     #[cfg_attr(feature="desktop", command(flatten))]
-    pub rpc: PartialRpcConfig,
+    pub rpc: Option<PartialRpcConfig>,
 }
 
 impl PartialConfig {
     pub fn new() -> Self {
         Self {
-            p2p : PartialP2pConfig::empty().with_new_secret(),
-            storage: PartialStorageConfig::empty(),
-            rpc: PartialRpcConfig::empty(),
+            p2p : Some(PartialP2pConfig::empty().with_new_private_key()),
+            storage: Some(PartialStorageConfig::empty()),
+            rpc: Some(PartialRpcConfig::empty()),
         }
     }
     pub fn from_toml(s: &str) -> Result<Self, toml::de::Error> {
@@ -90,6 +90,12 @@ impl PartialConfig {
     where 
     T: AsRef<Path>
     {
+        if !path.as_ref().exists() {
+            if let Some(x) = path.as_ref().parent() {
+                std::fs::create_dir_all(x)?;
+            };
+            let _ = File::create(&path).await?;
+        }
         let mut file = File::open(path.as_ref()).await?;
         let mut content = String::new();
         file.read_to_string(&mut content).await?;
@@ -113,9 +119,19 @@ impl PartialConfig {
     #[cfg(not(any(target_os="android", target_os="ios")))]
     pub fn default_desktop(app_name: &'static str) -> Self {
         Self {
-            p2p: PartialP2pConfig::default(),
-            rpc: PartialRpcConfig::default(),
-            storage: PartialStorageConfig::default(app_name),
+            p2p: Some(PartialP2pConfig::default()),
+            rpc: Some(PartialRpcConfig::default()),
+            storage: Some(PartialStorageConfig::default(app_name)),
+        }
+    }
+}
+
+impl From<Config> for PartialConfig {
+    fn from(value: Config) -> Self {
+        Self {
+            p2p: Some(value.p2p.into()),
+            storage: Some(value.storage.into()),
+            rpc: Some(value.rpc.into())
         }
     }
 }
@@ -123,9 +139,9 @@ impl PartialConfig {
 impl Emptiable for PartialConfig {
     fn empty() -> Self {
         Self {
-            p2p: PartialP2pConfig::empty(), 
-            storage: PartialStorageConfig::empty(),
-            rpc: PartialRpcConfig::empty()
+            p2p: None, 
+            storage: None,
+            rpc: None,
         }
     }
 
