@@ -1,5 +1,12 @@
-use caretta::{config::P2pConfig, server::ServerTrait};
+use caretta::{
+    config::P2pConfig,
+    proto::cached_peer_service_server::CachedPeerServiceServer,
+    server::ServerTrait,
+    rpc::service::cached_peer::CachedPeerService
+};
 use libp2p::{futures::StreamExt, noise, swarm::SwarmEvent, tcp, yamux};
+use tokio::net::UnixListener;
+use tokio_stream::wrappers::UnixListenerStream;
 pub struct Server{}
 
 impl ServerTrait for Server {
@@ -34,6 +41,21 @@ impl ServerTrait for Server {
     
     async fn serve_rpc<T>(config: &T) -> Result<(), caretta::error::Error>
     where T: AsRef<caretta::config::RpcConfig> {
-        todo!()
+        let path = config.as_ref().socket_path.clone();
+        if let Some(x) = path.parent() {
+            if !x.exists() {
+                std::fs::create_dir_all(x).expect("Failed to create directory for socket file!");
+            }
+        }
+        if path.exists() {
+            std::fs::remove_file(&path).expect("Failed to remove existing socket file!")
+        }
+        let uds = UnixListener::bind(path).unwrap();
+        let uds_stream = UnixListenerStream::new(uds);
+        tonic::transport::Server::builder()
+            .add_service(CachedPeerServiceServer::new(CachedPeerService::default()))
+            .serve_with_incoming(uds_stream)
+            .await.unwrap();
+        Ok(())
     }
 }

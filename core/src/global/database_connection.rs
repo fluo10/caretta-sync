@@ -1,5 +1,6 @@
 use std::path::{Path, PathBuf};
 
+use dirs::cache_dir;
 use sea_orm::{ConnectOptions, Database, DbErr, DatabaseConnection};
 use sea_orm_migration::MigratorTrait;
 use crate::{cache::migration::CacheMigrator, config::StorageConfig, error::Error};
@@ -80,15 +81,23 @@ impl GlobalDatabaseConnections {
         T: AsRef<StorageConfig>,
         U: MigratorTrait,
     {
+        let data_path = Self::get_data_file_path(&config);
+        if let Some(x) = data_path.parent() {
+            std::fs::create_dir_all(x).expect("Failed to create directory for data database");
+        }
+        let cache_path = Self::get_cache_file_path(&config);
+        if let Some(x) = cache_path.parent() {
+            std::fs::create_dir_all(x).expect("Failed to create directory for cache database"); 
+        }
         DatabaseConnections{
             data: Self::get_or_init_database_connection_unchecked(
                 &self.data,
-                Self::get_url_unchecked(Self::get_data_file_path(&config)),
+                Self::get_url_unchecked(data_path),
                 _migrator
             ).await,
             cache: Self::get_or_init_database_connection_unchecked(
                 &self.cache,
-                Self::get_url_unchecked(Self::get_cache_file_path(&config)),
+                Self::get_url_unchecked(cache_path),
                 CacheMigrator
             ).await,
         }

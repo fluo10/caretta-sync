@@ -120,7 +120,7 @@ impl PartialConfig {
     pub fn default_desktop(app_name: &'static str) -> Self {
         Self {
             p2p: Some(PartialP2pConfig::default()),
-            rpc: Some(PartialRpcConfig::default()),
+            rpc: Some(PartialRpcConfig::default(app_name)),
             storage: Some(PartialStorageConfig::default(app_name)),
         }
     }

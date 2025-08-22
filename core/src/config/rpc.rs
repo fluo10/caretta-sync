@@ -30,10 +30,11 @@ pub struct PartialRpcConfig {
     pub socket_path: Option<PathBuf>,
 }
 
-impl Default for PartialRpcConfig {
-    fn default() -> Self {
+impl PartialRpcConfig {
+    pub fn default(app_name: &'static str) -> Self {
+        let username = whoami::username();
         Self{
-            socket_path: Some(PathBuf::from_str(DEFAULT_SOCKET_PATH).unwrap()),
+            socket_path: Some(std::env::temp_dir().join(username).join(String::from(app_name) + ".sock")),
         }
     }
 }
