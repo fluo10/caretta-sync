@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-#[cfg(feature="desktop")]
+#[cfg(feature="cli")]
 use clap::Args;
 
 #[cfg(any(test, feature="test"))]
@@ -25,12 +25,12 @@ impl TryFrom<PartialStorageConfig> for StorageConfig {
         })
     }
 }
-#[cfg_attr(feature="desktop", derive(Args))]
+#[cfg_attr(feature="cli", derive(Args))]
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct PartialStorageConfig {
-    #[cfg_attr(feature="desktop", arg(long))]
+    #[cfg_attr(feature="cli", arg(long))]
     pub data_directory: Option<PathBuf>,
-    #[cfg_attr(feature="desktop", arg(long))]
+    #[cfg_attr(feature="cli", arg(long))]
     pub cache_directory: Option<PathBuf>,
 }
 

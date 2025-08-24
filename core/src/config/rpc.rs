@@ -1,5 +1,5 @@
 use std::{net::{IpAddr, Ipv4Addr, SocketAddr, TcpListener}, path::PathBuf, str::FromStr};
-#[cfg(feature="desktop")]
+#[cfg(feature="cli")]
 use clap::Args;
 use crate::{config::PartialConfig, utils::{emptiable::Emptiable, mergeable::Mergeable}};
 use libp2p::mdns::Config;
@@ -24,7 +24,7 @@ impl TryFrom<PartialRpcConfig> for RpcConfig {
     }
 }
 
-#[cfg_attr(feature="desktop", derive(Args))]
+#[cfg_attr(feature="cli", derive(Args))]
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct PartialRpcConfig {
     pub socket_path: Option<PathBuf>,

@@ -1,6 +1,6 @@
-use caretta_sync_example_core::server::Server;
+use caretta_sync_demo_core::server::Server;
 use clap::{Parser, Subcommand};
-use caretta::{cli::*, utils::runnable::Runnable};
+use caretta_sync::{cli::*, utils::runnable::Runnable};
 
 
 #[derive(Debug, Parser, Runnable)]

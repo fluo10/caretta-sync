@@ -7,9 +7,11 @@ license.workspace = true
 repository.workspace = true
 
 [features]
-default = ["dep:caretta-sync-macros"]
+default = ["macros"]
 mobile = ["dep:caretta-sync-mobile"]
-desktop = ["dep:caretta-sync-cli"]
+cli = ["dep:caretta-sync-cli"]
+desktop = ["cli"]
+macros = ["dep:caretta-sync-macros"]
 test = ["caretta-sync-core/test"]
 
 [dependencies]

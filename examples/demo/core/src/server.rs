@@ -1,4 +1,4 @@
-use caretta::{
+use caretta_sync::{
     config::P2pConfig,
     proto::cached_peer_service_server::CachedPeerServiceServer,
     server::ServerTrait,
@@ -12,7 +12,7 @@ use tokio_stream::wrappers::UnixListenerStream;
 pub struct Server{}
 
 impl ServerTrait for Server {
-    async fn serve_p2p<T>(config: &T) -> Result<(), caretta::error::Error>
+    async fn serve_p2p<T>(config: &T) -> Result<(), caretta_sync::error::Error>
     where 
         T: AsRef<P2pConfig> 
     {
@@ -23,7 +23,7 @@ impl ServerTrait for Server {
                 noise::Config::new,
                 yamux::Config::default,
             )?
-            .with_behaviour(|keypair| caretta::p2p::Behaviour::try_from(keypair).unwrap())?
+            .with_behaviour(|keypair| caretta_sync::p2p::Behaviour::try_from(keypair).unwrap())?
             .build();
             swarm.listen_on("/ip4/0.0.0.0/tcp/0".parse()?)?;
         loop{
@@ -41,8 +41,8 @@ impl ServerTrait for Server {
         }
     }
     
-    async fn serve_rpc<T>(config: &T) -> Result<(), caretta::error::Error>
-    where T: AsRef<caretta::config::RpcConfig> {
+    async fn serve_rpc<T>(config: &T) -> Result<(), caretta_sync::error::Error>
+    where T: AsRef<caretta_sync::config::RpcConfig> {
         let path = config.as_ref().socket_path.clone();
         if let Some(x) = path.parent() {
             if !x.exists() {

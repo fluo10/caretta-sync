@@ -6,7 +6,7 @@ pub use info::*;
 pub use list::*;
 pub use ping::*;
 
-use caretta_core::utils::runnable::Runnable;
+use caretta_sync_core::utils::runnable::Runnable;
 use clap::{Args, Subcommand};
 
 

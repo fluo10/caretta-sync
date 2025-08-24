@@ -1,7 +1,7 @@
 use std::{net::{IpAddr, Ipv4Addr}, ops, path::{Path, PathBuf}};
 
 use base64::{prelude::BASE64_STANDARD, Engine};
-#[cfg(feature="desktop")]
+#[cfg(feature="cli")]
 use clap::Args;
 use futures::StreamExt;
 use libp2p::{identity::{self, DecodingError, Keypair}, noise, ping, swarm::SwarmEvent, tcp, yamux, Swarm};
@@ -81,14 +81,14 @@ impl TryFrom<PartialP2pConfig> for P2pConfig {
     }
 }
 
-#[cfg_attr(feature="desktop",derive(Args))]
+#[cfg_attr(feature="cli",derive(Args))]
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct PartialP2pConfig {
-    #[cfg_attr(feature="desktop",arg(long))]
+    #[cfg_attr(feature="cli",arg(long))]
     pub private_key: Option<String>,
-    #[cfg_attr(feature="desktop",arg(long))]
+    #[cfg_attr(feature="cli",arg(long))]
     pub listen_ips: Option<Vec<IpAddr>>,
-    #[cfg_attr(feature="desktop",arg(long))]
+    #[cfg_attr(feature="cli",arg(long))]
     pub port: Option<u16>,
 }
 impl PartialP2pConfig {

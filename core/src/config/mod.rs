@@ -13,7 +13,7 @@ pub use storage::{StorageConfig, PartialStorageConfig};
 pub use p2p::{P2pConfig, PartialP2pConfig};
 pub use rpc::*;
 
-#[cfg(feature="desktop")]
+#[cfg(feature="cli")]
 use clap::Args;
 
 #[derive(Clone, Debug)]
@@ -52,14 +52,14 @@ impl TryFrom<PartialConfig> for Config {
     }
 }
 
-#[cfg_attr(feature="desktop", derive(Args))]
+#[cfg_attr(feature="cli", derive(Args))]
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct PartialConfig {
-    #[cfg_attr(feature="desktop", command(flatten))]
+    #[cfg_attr(feature="cli", command(flatten))]
     pub p2p: Option<PartialP2pConfig>,
-    #[cfg_attr(feature="desktop", command(flatten))]
+    #[cfg_attr(feature="cli", command(flatten))]
     pub storage: Option<PartialStorageConfig>,
-    #[cfg_attr(feature="desktop", command(flatten))]
+    #[cfg_attr(feature="cli", command(flatten))]
     pub rpc: Option<PartialRpcConfig>,
 }
 

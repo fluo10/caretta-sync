@@ -1,5 +1,5 @@
-use caretta::utils::runnable::Runnable;
-use caretta_sync_example_core::global::APP_NAME;
+use caretta_sync::utils::runnable::Runnable;
+use caretta_sync_demo_core::global::APP_NAME;
 use clap::Parser;
 
 use crate::cli::Cli;
