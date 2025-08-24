@@ -1,0 +1,29 @@
+[package]
+name = "caretta-sync-cli"
+edition.workspace = true
+version.workspace = true
+description.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[features]
+default = []
+test = ["caretta-sync-core/test"]
+
+[dependencies]
+ciborium.workspace = true
+clap.workspace = true
+dirs = "6.0.0"
+caretta-sync-core = { workspace = true, features = ["cli"] }
+libp2p.workspace = true
+sea-orm.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tonic.workspace = true
+
+uuid.workspace = true
+
+[dev-dependencies]
+caretta-sync-core = {workspace = true, features = ["test"]}
+

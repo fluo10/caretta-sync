@@ -1,6 +1,6 @@
 use sea_orm::{prelude::*, query::*, sea_query::SimpleExpr, *};
 #[cfg(feature="macros")]
-pub use caretta_macros::SyncableModel;
+pub use caretta_sync_macros::SyncableModel;
 pub trait SyncableModel: ModelTrait<Entity = Self::SyncableEntity> {
     type SyncableEntity: SyncableEntity<SyncableModel = Self>;
     fn get_timestamp(&self) -> DateTimeUtc;

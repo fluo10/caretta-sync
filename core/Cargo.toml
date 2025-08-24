@@ -1,5 +1,5 @@
 [package]
-name = "caretta-core"
+name = "caretta-sync-core"
 edition.workspace = true
 version.workspace = true
 description.workspace = true
@@ -8,14 +8,11 @@ repository.workspace = true
 
 [features]
 default = []
-desktop = ["dep:clap", "macros"]
-mobile = ["macros"]
-macros = ["dep:caretta-macros"]
-test = ["dep:tempfile", "macros"]
+cli = ["dep:clap"]
+test = ["dep:tempfile", ]
 
 [dependencies]
 base64 = "0.22.1"
-caretta-macros = { path = "macros", optional = true }
 chrono.workspace = true
 chrono-tz = "0.10.3"
 ciborium.workspace = true

@@ -1,14 +1,10 @@
 [package]
-name = "caretta-sync-mobile"
+name = "caretta-sync-demo-mobile"
 edition.workspace = true
 version.workspace = true
 description.workspace = true
 license.workspace = true
 repository.workspace = true
 
-[features]
-default = []
-test = ["caretta-sync-core/test"]
-
 [dependencies]
-caretta-sync-core.workspace = true
+caretta-sync-demo-core.path = "../core"

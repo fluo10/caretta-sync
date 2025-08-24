@@ -1,9 +1,0 @@
-[package]
-name = "caretta-example-mobile"
-version = "0.1.0"
-authors = ["fluo10 <fluo10.dev@fireturtle.net>"]
-edition = "2021"
-
-[dependencies]
-dioxus.workspace = true
-caretta-example-core.path = "../core"

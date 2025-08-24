@@ -10,7 +10,7 @@ pub mod runnable;
 /// use chrono::Utc;
 /// use std::time::SystemTime;
 /// use prost_types::Timestamp;
-/// use caretta_core::utils::utc_to_timestamp;
+/// use caretta_sync_core::utils::utc_to_timestamp;
 /// 
 /// let now_utc = Utc::now();
 /// let now_timestamp = utc_to_timestamp(&now_utc);
@@ -27,7 +27,7 @@ pub fn utc_to_timestamp(utc: &DateTime<Utc>) -> Timestamp {
 /// ```
 /// use std::time::SystemTime;
 /// use prost_types::Timestamp;
-/// use caretta_core::utils::timestamp_to_utc;
+/// use caretta_sync_core::utils::timestamp_to_utc;
 ///  
 /// let now_timestamp = Timestamp::from(SystemTime::now());
 /// let now_utc = timestamp_to_utc(&now_timestamp);

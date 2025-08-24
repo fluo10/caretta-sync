@@ -1,5 +1,5 @@
 [package]
-name = "caretta"
+name = "caretta-sync"
 edition.workspace = true
 version.workspace = true
 description.workspace = true
@@ -7,21 +7,22 @@ license.workspace = true
 repository.workspace = true
 
 [features]
-default = []
-mobile = ["dep:caretta-mobile"]
-desktop = ["dep:caretta-desktop"]
-test = ["caretta-core/test"]
+default = ["dep:caretta-sync-macros"]
+mobile = ["dep:caretta-sync-mobile"]
+desktop = ["dep:caretta-sync-cli"]
+test = ["caretta-sync-core/test"]
 
 [dependencies]
-caretta-core.workspace = true
-caretta-desktop = { path="desktop", optional = true }
-caretta-mobile = { path = "mobile", optional = true }
+caretta-sync-core.workspace = true
+caretta-sync-cli = { path="cli", optional = true }
+caretta-sync-mobile = { path = "mobile", optional = true }
+caretta-sync-macros = { path="macros", optional = true}
 
 [dev-dependencies]
-caretta-core = {workspace = true, features = ["test"]}
+caretta-sync-core = {workspace = true, features = ["test"]}
 
 [workspace]
-members = [ ".", "core", "core/macros", "desktop", "mobile", "examples/*" ]
+members = [ ".", "core", "macros", "cli", "mobile", "examples/demo/*" ]
 resolver = "3"
 
 [workspace.package]
@@ -36,7 +37,7 @@ chrono = "0.4.41"
 ciborium = "0.2.2"
 clap = { version = "4.5.38", features = ["derive"] }
 dioxus = { version = "0.6.0", features = [] }
-caretta-core.path = "core"
+caretta-sync-core.path = "core"
 libp2p = { version = "0.55.0", features = ["macros", "mdns", "noise", "ping", "tcp", "tokio", "yamux" ] }
 sea-orm = { version = "1.1.11", features = ["sqlx-sqlite", "runtime-tokio-native-tls", "macros", "with-chrono", "with-uuid"] } 
 sea-orm-migration = { version = "1.1.0", features = ["runtime-tokio-rustls", "sqlx-postgres"] }

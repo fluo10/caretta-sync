@@ -28,7 +28,7 @@ pub enum Error {
     Noise(#[from] libp2p::noise::Error),
     #[error("Parse OsString error: {0:?}")]
     OsStringConvert(std::ffi::OsString),
-    #[cfg(feature="desktop")]
+    #[cfg(feature="cli")]
     #[error("Parse args error: {0}")]
     ParseCommand(#[from] clap::Error),
     #[error("toml deserialization error: {0}")]

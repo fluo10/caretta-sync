@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 #[cfg(feature="macros")]
-pub use caretta_macros::Emptiable;
+pub use caretta_sync_macros::Emptiable;
 
 pub trait Emptiable{
     fn empty() -> Self;
