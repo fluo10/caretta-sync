@@ -5,9 +5,11 @@ mod config;
 mod device;
 mod logs;
 mod peer;
+mod serve;
 
 pub use args::*;
 pub use config::*;
 pub use device::*;
 pub use logs::*;
 pub use peer::*;
+pub use serve::*;

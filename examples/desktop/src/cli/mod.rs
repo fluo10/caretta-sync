@@ -1,7 +1,6 @@
-mod server;
+use caretta_example_core::server::Server;
 use clap::{Parser, Subcommand};
 use caretta::{cli::*, utils::runnable::Runnable};
-pub use server::*;
 
 
 #[derive(Debug, Parser, Runnable)]
@@ -17,5 +16,5 @@ pub enum CliCommand {
     Device(DeviceCommandArgs),
     Logs(LogsCommandArgs),
     Peer(PeerCommandArgs),
-    Server(ServerCommandArgs),
+    Serve(ServeCommandArgs<Server>),
 }

@@ -7,6 +7,8 @@ use caretta::{
 use libp2p::{futures::StreamExt, noise, swarm::SwarmEvent, tcp, yamux};
 use tokio::net::UnixListener;
 use tokio_stream::wrappers::UnixListenerStream;
+
+#[derive(Debug)]
 pub struct Server{}
 
 impl ServerTrait for Server {
