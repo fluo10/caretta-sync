@@ -206,8 +206,8 @@ pub fn runnable(input: TokenStream) -> TokenStream {
 
             quote!{
                 impl Runnable for #type_ident {
-                    async fn run(self, app_name: &'static str) {
-                        <#field_type as Runnable>::run(self.#field_ident, app_name).await                        
+                    fn run(self, app_name: &'static str) {
+                        <#field_type as Runnable>::run(self.#field_ident, app_name)                        
                     }
                 }
             }.into()
@@ -216,12 +216,12 @@ pub fn runnable(input: TokenStream) -> TokenStream {
             let quote_vec = extract_idents_and_types_from_enum_struct(&variants);
             let quote_iter = quote_vec.iter().map(|(variant_ident, variant_type)|{
                 quote!{
-                    Self::#variant_ident(x) => <#variant_type as Runnable>::run(x, app_name).await,
+                    Self::#variant_ident(x) => <#variant_type as Runnable>::run(x, app_name),
                 }
             });
             quote!{
                 impl Runnable for #type_ident {
-                    async fn run(self, app_name: &'static str) {
+                    fn run(self, app_name: &'static str) {
                         match self {
                             #(#quote_iter)*
                         }

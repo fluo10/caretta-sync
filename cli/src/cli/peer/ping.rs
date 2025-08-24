@@ -11,6 +11,7 @@ pub struct PeerPingCommandArgs{
 }
 
 impl Runnable for PeerPingCommandArgs {
+    #[tokio::main]
     async fn run(self, app_name: &'static str) {
         todo!()
     }

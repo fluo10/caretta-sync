@@ -11,7 +11,7 @@ pub struct DeviceRemoveCommandArgs{
 }
 
 impl Runnable for DeviceRemoveCommandArgs {
-    async fn run(self, app_name: &'static str) {
+    fn run(self, app_name: &'static str) {
         todo!()
     }
 }

@@ -9,6 +9,7 @@ pub struct ConfigCheckCommandArgs{
 }
 
 impl Runnable for ConfigCheckCommandArgs {
+    #[tokio::main]
     async fn run(self, app_name: &'static str) {
         let _ = self.config.into_config(app_name).await;
         println!("Ok");

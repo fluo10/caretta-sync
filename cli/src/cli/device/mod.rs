@@ -22,8 +22,8 @@ pub struct DeviceCommandArgs {
 }
 
 impl Runnable for DeviceCommandArgs {
-    async fn run(self, app_name: &'static str) {
-        self.command.run(app_name).await
+    fn run(self, app_name: &'static str) {
+        self.command.run(app_name)
     }
 }
 
@@ -37,13 +37,13 @@ pub enum DeviceSubcommand {
 }
 
 impl Runnable for DeviceSubcommand {
-    async fn run(self, app_name: &'static str) {
+    fn run(self, app_name: &'static str) {
         match self {
-            Self::Add(x) => x.run(app_name).await,
-            Self::List(x) => x.run(app_name).await,
-            Self::Ping(x) => x.run(app_name).await,
-            Self::Remove(x) => x.run(app_name).await,
-            Self::Scan(x) => x.run(app_name).await,
+            Self::Add(x) => x.run(app_name),
+            Self::List(x) => x.run(app_name),
+            Self::Ping(x) => x.run(app_name),
+            Self::Remove(x) => x.run(app_name),
+            Self::Scan(x) => x.run(app_name),
         }
     }
 }

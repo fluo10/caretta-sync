@@ -20,6 +20,7 @@ impl<T> Runnable for ServeCommandArgs<T>
 where 
     T: ServerTrait
 {
+    #[tokio::main]
     async fn run(self, app_name: &'static str) {
         let config = CONFIG.get_or_init::<Config>(self.config.into_config(app_name).await).await;
         let _ = DATABASE_CONNECTIONS.get_or_init_unchecked(&config, DataMigrator).await;

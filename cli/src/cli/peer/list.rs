@@ -12,6 +12,7 @@ pub struct PeerListCommandArgs{
 }
 
 impl Runnable for PeerListCommandArgs {
+    #[tokio::main]
     async fn run(self, app_name: &'static str) {
         let config = self.config.into_config(app_name).await;
         let path = String::from("unix://") + config.rpc.socket_path.as_os_str().to_str().expect("Invalid string");

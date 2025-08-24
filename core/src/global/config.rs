@@ -32,4 +32,7 @@ impl GlobalConfig {
     pub fn get(&'static self) -> Option<&'static Config> {
         self.inner.get()
     }
+    pub fn get_unchecked(&'static self) -> &'static Config {
+        self.get().expect("Config must be initialized before use!")
+    }
 }

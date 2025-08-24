@@ -16,7 +16,7 @@ pub struct DeviceAddCommandArgs {
 }
 
 impl Runnable for DeviceAddCommandArgs {
-    async fn run(self, app_name: &'static str) {
+    fn run(self, app_name: &'static str) {
         todo!()
     }
 }

@@ -11,7 +11,7 @@ pub struct DevicePingCommandArgs{
 }
 
 impl Runnable for DevicePingCommandArgs {
-    async fn run(self, app_name: &'static str) {
+    fn run(self, app_name: &'static str) {
         todo!()
     }
 }

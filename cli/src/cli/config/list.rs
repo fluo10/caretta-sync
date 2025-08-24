@@ -11,6 +11,7 @@ pub struct ConfigListCommandArgs{
 }
 
 impl Runnable for ConfigListCommandArgs {
+    #[tokio::main]
     async fn run(self, app_name: &'static str) {
         let config: PartialConfig = if self.all {
             self.config.into_config(app_name).await.into()

@@ -18,7 +18,7 @@ chrono-tz = "0.10.3"
 ciborium.workspace = true
 clap = {workspace = true, optional = true}
 dirs = "6.0.0"
-futures = "0.3.31"
+futures.workspace = true
 libp2p.workspace = true
 libp2p-core = { version = "0.43.0", features = ["serde"] }
 libp2p-identity = { version = "0.2.11", features = ["ed25519", "peerid", "rand", "serde"] }
