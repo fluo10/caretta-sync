@@ -1,5 +1,5 @@
 [package]
-name = "caretta-sync-demo-core"
+name = "caretta-sync-example-core"
 edition.workspace = true
 version.workspace = true
 description.workspace = true
@@ -8,7 +8,7 @@ repository.workspace = true
 
 [dependencies]
 bevy.workspace = true
-caretta-sync = { path = "../../..", features = ["bevy"] }
+caretta-sync = { path = "../..", features = ["bevy"] }
 libp2p.workspace = true
 tokio.workspace = true
 tokio-stream = { version = "0.1.17", features = ["net"] }

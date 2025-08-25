@@ -1,5 +1,5 @@
 [package]
-name = "caretta-sync-demo-mobile"
+name = "caretta-sync-example-mobile"
 edition.workspace = true
 version.workspace = true
 description.workspace = true
@@ -7,4 +7,4 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-caretta-sync-demo-core.path = "../core"
+caretta-sync-example-core.path = "../core"

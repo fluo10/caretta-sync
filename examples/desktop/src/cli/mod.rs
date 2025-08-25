@@ -1,4 +1,4 @@
-use caretta_sync_demo_core::{gui::Gui, server::Server};
+use caretta_sync_example_core::{gui::Gui, server::Server};
 use clap::{Parser, Subcommand};
 use caretta_sync::{cli::*, config::Config, data::migration::DataMigrator, global::{CONFIG, DATABASE_CONNECTIONS}, utils::Runnable};
 

@@ -1,5 +1,5 @@
 [package]
-name = "caretta-sync-demo-desktop"
+name = "caretta-sync-example-desktop"
 edition.workspace = true
 version.workspace = true
 description.workspace = true
@@ -10,7 +10,7 @@ repository.workspace = true
 
 [dependencies]
 clap.workspace = true
-caretta-sync = { path = "../../..", features = ["cli", "bevy", "test"] }
-caretta-sync-demo-core.path = "../core"
+caretta-sync = { path = "../..", features = ["cli", "bevy", "test"] }
+caretta-sync-example-core.path = "../core"
 libp2p.workspace = true
 tokio.workspace = true
