@@ -4,9 +4,6 @@ use clap::Parser;
 
 use crate::cli::Cli;
 
-mod cli;
-mod ipc;
-
 fn main() {
     let args = Cli::parse();
     args.run(APP_NAME);

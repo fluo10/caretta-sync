@@ -66,7 +66,7 @@ impl PartialStorageConfig {
             Ok(cache_dir.to_string())
 
     }
-    #[cfg(target_os="ios")]
+    #[cfg(false)]
     fn default_ios(){
         unsafe {
             let file_manager: *mut Object = msg_send![Class::get("NSFileManager").unwrap(), defaultManager];

@@ -37,7 +37,7 @@ license = "MIT OR Apache-2.0"
 repository = "https://forgejo.fireturlte.net/lazy-supplements" 
 
 [workspace.dependencies]
-bevy = "0.16.1"
+bevy = { git = "https://github.com/bevyengine/bevy.git", rev="16ffdaea0daec11e4347d965f56c9c8e1122a488"  }
 chrono = "0.4.41"
 ciborium = "0.2.2"
 clap = { version = "4.5.38", features = ["derive"] }

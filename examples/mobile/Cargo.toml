@@ -6,5 +6,15 @@ description.workspace = true
 license.workspace = true
 repository.workspace = true
 
+[[bin]]
+name = "caretta_sync_example"
+path = "src/main.rs"
+
+[lib]
+name = "caretta_sync_example"
+crate-type = ["lib", "cdylib"]
+
 [dependencies]
+bevy.workspace = true
 caretta-sync-example-core.path = "../core"
+caretta-sync.path = "../.."
