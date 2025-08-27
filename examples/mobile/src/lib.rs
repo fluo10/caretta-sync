@@ -6,6 +6,7 @@ use bevy::{
     window::{AppLifecycle, ScreenEdge, WindowMode},
     winit::WinitSettings,
 };
+use caretta_sync::config::PartialStorageConfig;
 
 #[bevy_main]
 pub fn main() {
@@ -59,7 +60,7 @@ fn setup_scene(
             }
         ))
         .with_child((
-            Text::new(format!( "{:?}", std::fs::read_dir(std::env::current_dir().unwrap()).unwrap().map(|x| x.unwrap().path()).collect::<Vec<std::path::PathBuf>>())),
+            Text::new(format!("{:?}", PartialStorageConfig::default())),
             TextFont {
                 font_size: 16.0,
                 ..default()

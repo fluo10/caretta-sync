@@ -49,7 +49,7 @@ impl PartialStorageConfig {
         }
     }
     #[cfg(target_os="android")]
-    fn default_android() -> Self{
+    pub fn default_android() -> Self{
             let ctx = ndk_context::android_context();
             let vm = unsafe { jni::JavaVM::from_raw(ctx.vm().cast()) }?;
             let mut env = vm.attach_current_thread()?;
@@ -66,15 +66,22 @@ impl PartialStorageConfig {
             Ok(cache_dir.to_string())
 
     }
-    #[cfg(false)]
-    fn default_ios(){
-        unsafe {
-            let file_manager: *mut Object = msg_send![Class::get("NSFileManager").unwrap(), defaultManager];
-            let paths: Id<Object> = msg_send![file_manager, URLsForDirectory:1 inDomains:1];
-            let first_path: *mut Object = msg_send![paths, firstObject];
-            let path: Id<NSString> = Id::from_ptr(msg_send![first_path, path]);
-            Some(path.as_str().to_string())
+    #[cfg(target_os="ios")]
+    pub fn default() -> Self{
+        
+        use objc2::rc::Retained;
+        use objc2::msg_send;
+        use objc2_foundation::*;
+
+        let home_dir: Retained<NSString> = unsafe {NSHomeDirectory()};
+        
+        let path = PathBuf::from(home_dir.to_string());
+        Self {
+            data_directory: Some(path.clone()),
+            cache_directory: Some(path.clone()),
         }
+
+    
     }
 }
 
