@@ -36,7 +36,7 @@ impl ConfigArgs {
         }).await.clone()
     }
     pub async fn to_partial_config_with_default(&self, app_name: &'static str) -> PartialConfig {
-        let mut default = PartialConfig::default_desktop(app_name);
+        let mut default = PartialConfig::default(app_name);
         default.merge(self.to_partial_config_without_default(app_name).await);
         default
     }

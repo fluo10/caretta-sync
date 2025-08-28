@@ -6,10 +6,41 @@ use bevy::{
     window::{AppLifecycle, ScreenEdge, WindowMode},
     winit::WinitSettings,
 };
-use caretta_sync::config::PartialStorageConfig;
+use caretta_sync::{config::{Config, PartialConfig, PartialP2pConfig, PartialStorageConfig, StorageConfig}, server::ServerTrait, utils::{Emptiable, Mergeable}};
+use caretta_sync_example_core::{global::APP_NAME, server::Server};
+
+#[tokio::main]
+pub async fn init_config() {
+    let storage_config: StorageConfig = PartialStorageConfig::default(APP_NAME).try_into().unwrap();
+    let config_path = storage_config.data_directory.join("config.toml");
+    let mut config = PartialConfig::read_from(&config_path).await.unwrap();
+    if let Some(x) = if let Some(y) = config.p2p.as_mut() {
+        if y.private_key.is_none() {
+            Some(y.clone().with_new_private_key())
+        } else {
+            None
+        }
+        
+    } else {
+        Some(PartialP2pConfig::empty().with_new_private_key())
+    } {
+        config.p2p = Some(x);
+        config.write_to(&config_path).await.unwrap()
+    }
+    let mut default = PartialConfig::default(APP_NAME);
+    default.merge(config);
+    let config2 : Config = default.try_into().unwrap();
+    Server::serve_all(&config2).await;
+    
+}
 
 #[bevy_main]
 pub fn main() {
+
+    //init_config();
+
+
+    
     let mut app = App::new();
     app.add_plugins(
         DefaultPlugins.set(LogPlugin {
@@ -60,7 +91,7 @@ fn setup_scene(
             }
         ))
         .with_child((
-            Text::new(format!("{:?}", PartialStorageConfig::default())),
+            Text::new(format!("{:?}", PartialConfig::default(APP_NAME))),
             TextFont {
                 font_size: 16.0,
                 ..default()

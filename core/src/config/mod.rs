@@ -116,8 +116,7 @@ impl PartialConfig {
         file.write_all(toml::to_string(self)?.as_bytes()).await?;
         Ok(())
     }
-    #[cfg(not(any(target_os="android", target_os="ios")))]
-    pub fn default_desktop(app_name: &'static str) -> Self {
+    pub fn default(app_name: &'static str) -> Self {
         Self {
             p2p: Some(PartialP2pConfig::default()),
             rpc: Some(PartialRpcConfig::default(app_name)),

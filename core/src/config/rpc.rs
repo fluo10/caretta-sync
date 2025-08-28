@@ -31,10 +31,17 @@ pub struct PartialRpcConfig {
 }
 
 impl PartialRpcConfig {
+    #[cfg(not(target_os="ios"))]
     pub fn default(app_name: &'static str) -> Self {
         let username = whoami::username();
         Self{
             socket_path: Some(std::env::temp_dir().join(username).join(String::from(app_name) + ".sock")),
+        }
+    }
+    #[cfg(target_os="ios")]
+    pub fn default(app_name: &'static str) -> Self {
+        Self{
+            socket_path: Some(std::env::temp_dir().join(String::from(app_name) + ".sock")),
         }
     }
 }

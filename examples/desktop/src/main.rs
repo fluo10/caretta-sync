@@ -1,3 +1,4 @@
+mod cli;
 use caretta_sync::utils::Runnable;
 use caretta_sync_example_core::global::APP_NAME;
 use clap::Parser;

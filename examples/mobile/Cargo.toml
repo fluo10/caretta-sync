@@ -18,3 +18,4 @@ crate-type = ["lib", "cdylib"]
 bevy.workspace = true
 caretta-sync-example-core.path = "../core"
 caretta-sync.path = "../.."
+tokio.workspace = true

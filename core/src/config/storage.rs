@@ -67,7 +67,7 @@ impl PartialStorageConfig {
 
     }
     #[cfg(target_os="ios")]
-    pub fn default() -> Self{
+    pub fn default(_: &'static str) -> Self{
         
         use objc2::rc::Retained;
         use objc2::msg_send;
@@ -77,8 +77,8 @@ impl PartialStorageConfig {
         
         let path = PathBuf::from(home_dir.to_string());
         Self {
-            data_directory: Some(path.clone()),
-            cache_directory: Some(path.clone()),
+            data_directory: Some(path.join("Library")),
+            cache_directory: Some(path.join("Library").join("Cache")),
         }
 
     
