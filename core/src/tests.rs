@@ -3,6 +3,7 @@ use std::{path::PathBuf, sync::LazyLock};
 use sea_orm::{sea_query::{FromValueTuple, IntoValueTuple, ValueType}, ActiveModelBehavior, ActiveModelTrait, ColumnTrait, Condition, DatabaseConnection, EntityTrait, IntoActiveModel, ModelTrait, PrimaryKeyToColumn, PrimaryKeyTrait, Value};
 use sea_orm::QueryFilter;
 use tempfile::TempDir;
+use url::Url;
 use crate::{ config::{Config, PartialConfig, PartialP2pConfig, PartialRpcConfig, RpcConfig, StorageConfig}, message::Message};
 
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
@@ -20,7 +21,7 @@ pub static TEST_CONFIG: LazyLock<Config> = LazyLock::new(|| {
             cache_directory: cache_dir,
         },
         rpc: RpcConfig{
-            socket_path: test_dir.join("socket.sock"),
+            endpoint_url: Url::parse(&(String::from("unix://") + test_dir.join("socket.sock").to_str().unwrap())).unwrap(),
         },
     }
 });

@@ -23,6 +23,7 @@ libp2p.workspace = true
 libp2p-core = { version = "0.43.0", features = ["serde"] }
 libp2p-identity = { version = "0.2.11", features = ["ed25519", "peerid", "rand", "serde"] }
 prost = "0.14.1"
+prost-types = "0.14.1"
 sea-orm.workspace = true
 sea-orm-migration.workspace = true
 serde.workspace = true
@@ -35,7 +36,7 @@ tonic-prost = "0.14.0"
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 uuid.workspace = true
-prost-types = "0.14.1"
+url.workspace = true
 sysinfo = "0.37.0"
 whoami = "1.6.1"
 

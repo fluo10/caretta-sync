@@ -30,16 +30,14 @@ pub async fn init_config() {
     let mut default = PartialConfig::default(APP_NAME);
     default.merge(config);
     let config2 : Config = default.try_into().unwrap();
-    Server::serve_all(&config2).await;
+    Server::serve_all(&config2);
     
 }
 
 #[bevy_main]
 pub fn main() {
 
-    //init_config();
-
-
+    init_config();
     
     let mut app = App::new();
     app.add_plugins(

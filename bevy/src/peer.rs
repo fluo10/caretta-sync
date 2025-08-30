@@ -17,8 +17,8 @@ pub struct PeerAddress(String);
 #[tokio::main]
 async fn add_cached_peers(mut commands: Commands) {
     let config = CONFIG.get_unchecked();
-    let path = String::from("unix://") + config.rpc.socket_path.as_os_str().to_str().expect("Invalid string");
-    let mut client = caretta_sync_core::proto::cached_peer_service_client::CachedPeerServiceClient::connect(path).await.expect("Unix socket should be accessible");
+    let url = config.rpc.endpoint_url.to_string();
+    let mut client = caretta_sync_core::proto::cached_peer_service_client::CachedPeerServiceClient::connect(url).await.expect("Unix socket should be accessible");
     let request = tonic::Request::new(CachedPeerListRequest {});
     let response = client.list(request).await.expect("Faild to request/response");
     let peers = response.into_inner().peers;
