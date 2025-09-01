@@ -24,8 +24,6 @@ libp2p-core = { version = "0.43.0", features = ["serde"] }
 libp2p-identity = { version = "0.2.11", features = ["ed25519", "peerid", "rand", "serde"] }
 prost = "0.14.1"
 prost-types = "0.14.1"
-sea-orm.workspace = true
-sea-orm-migration.workspace = true
 serde.workspace = true
 tempfile = { version = "3.20.0", optional = true }
 thiserror.workspace = true
@@ -39,6 +37,7 @@ uuid.workspace = true
 url.workspace = true
 sysinfo = "0.37.0"
 whoami = "1.6.1"
+rusqlite = { version = "0.37.0", features = ["bundled"] }
 
 [target.'cfg(target_os="android")'.dependencies]
 jni = "0.21.1"

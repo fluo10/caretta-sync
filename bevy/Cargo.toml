@@ -10,6 +10,5 @@ repository.workspace = true
 bevy.workspace = true
 caretta-sync-core.workspace = true
 futures.workspace = true
-sea-orm.workspace = true
 tokio.workspace = true
 tonic.workspace = true

@@ -16,7 +16,6 @@ clap.workspace = true
 dirs = "6.0.0"
 caretta-sync-core = { workspace = true, features = ["cli"] }
 libp2p.workspace = true
-sea-orm.workspace = true
 serde.workspace = true
 thiserror.workspace = true
 tokio.workspace = true

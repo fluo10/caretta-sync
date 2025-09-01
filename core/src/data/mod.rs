@@ -1,4 +1,2 @@
-pub mod entity;
-pub mod migration;
-pub mod syncable;
-pub mod value;
+pub mod distributed;
+pub mod local;
