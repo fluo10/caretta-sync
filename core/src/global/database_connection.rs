@@ -1,106 +1,51 @@
-use std::path::{Path, PathBuf};
+use std::{path::{Path, PathBuf}, sync::OnceLock};
 
 use dirs::cache_dir;
-use sea_orm::{ConnectOptions, Database, DbErr, DatabaseConnection};
-use sea_orm_migration::MigratorTrait;
-use crate::{cache::migration::CacheMigrator, config::StorageConfig, error::Error};
+use rusqlite::Connection;
+use crate::{cache::migration::CacheMigrator, config::StorageConfig, data::local::migration::migrate, error::Error};
 use tokio::sync::OnceCell;
 
-pub static DATABASE_CONNECTIONS: GlobalDatabaseConnections = GlobalDatabaseConnections::const_new();
+pub static LOCAL_DATABASE_CONNECTION: GlobalDatabaseConnection = GlobalDatabaseConnection::const_new();
 
-pub struct DatabaseConnections<'a> {
-    pub data: &'a DatabaseConnection,
-    pub cache: &'a DatabaseConnection
+pub struct GlobalDatabaseConnection {
+    inner: OnceLock<Connection>
 }
 
-pub struct GlobalDatabaseConnections {
-    data: OnceCell<DatabaseConnection>,
-    cache: OnceCell<DatabaseConnection>,
-}
-
-impl GlobalDatabaseConnections {
+impl GlobalDatabaseConnection {
     pub const fn const_new() -> Self {
         Self {
-            data: OnceCell::const_new(),
-            cache: OnceCell::const_new()
+            inner: OnceLock::new()
         }
     }
     
-    pub fn get_data(&'static self) -> Option<&'static DatabaseConnection> {
-        self.data.get()
+    pub fn get(&'static self) -> Option<&'static Connection> {
+        self.inner.get()
     }
 
-    pub fn get_data_unchecked(&'static self) -> &'static DatabaseConnection {
-        self.get_data().expect("Global data database connection should initialized before access!")
+    pub fn get_unchecked(&'static self) -> &'static Connection {
+        self.get().expect("local data database connection should initialized before access!")
     }
     
-    pub fn get_cache(&'static self) -> Option<&'static DatabaseConnection> {
-        self.cache.get()
-    }
-
-    pub fn get_cache_unchecked(&'static self) -> &'static DatabaseConnection {
-        self.get_cache().expect("Global cache database connection should initialized before access!")
-    }
-    
-    fn get_data_file_path<T>(config: &T) -> PathBuf 
+    fn get_file_path<T>(config: &T) -> PathBuf 
     where 
         T: AsRef<StorageConfig>
     {
-        config.as_ref().data_directory.join("data.sqlite")
-    }
-    
-    fn get_cache_file_path<T>(config: &T) -> PathBuf 
-    where 
-        T: AsRef<StorageConfig>
-    {
-        config.as_ref().cache_directory.join("cache.sqlite")
+        config.as_ref().data_directory.join("local.sqlite")
     }
 
-    fn get_url_unchecked<T>(path: T) -> String
-    where 
-        T: AsRef<Path>
-    {
-        "sqlite://".to_string() + path.as_ref().as_os_str().to_str().expect("Failed to convert path to string!") + "?mode=rwc"
-    }
-
-    async fn get_or_init_database_connection_unchecked<T, U>(cell: &OnceCell<DatabaseConnection>, options: T, _: U ) -> &DatabaseConnection
-    where 
-        T: Into<ConnectOptions>,
-        U: MigratorTrait
-    {
-        cell.get_or_init(|| async {
-            let db = Database::connect(options.into()).await.unwrap();
-            U::up(&db, None).await.unwrap();
-            db
-        }).await
-    }
-
-
-    pub async fn get_or_init_unchecked<T, U>(&'static self, config: T, _migrator: U) -> DatabaseConnections
+    pub async fn get_or_init_unchecked<T, U>(&'static self, config: T) -> Connection
     where
         T: AsRef<StorageConfig>,
-        U: MigratorTrait,
     {
-        let data_path = Self::get_data_file_path(&config);
-        if let Some(x) = data_path.parent() {
-            std::fs::create_dir_all(x).expect("Failed to create directory for data database");
+        let path = Self::get_file_path(&config);
+        if let Some(x) = path.parent() {
+            std::fs::create_dir_all(x).expect("Failed to create directory for local database");
         }
-        let cache_path = Self::get_cache_file_path(&config);
-        if let Some(x) = cache_path.parent() {
-            std::fs::create_dir_all(x).expect("Failed to create directory for cache database"); 
-        }
-        DatabaseConnections{
-            data: Self::get_or_init_database_connection_unchecked(
-                &self.data,
-                Self::get_url_unchecked(data_path),
-                _migrator
-            ).await,
-            cache: Self::get_or_init_database_connection_unchecked(
-                &self.cache,
-                Self::get_url_unchecked(cache_path),
-                CacheMigrator
-            ).await,
-        }
+        self.inner.get_or_init(|| {
+            let db = Connection::open(path)?;
+            migrate(&db).unwrap();
+            db
+        })
         
     }
 }
@@ -112,10 +57,10 @@ pub use tests::*;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{cache::migration::CacheMigrator, data::migration::DataMigrator, global::CONFIG, tests::{TEST_CONFIG}};
+    use crate::{cache::migration::CacheMigrator, global::CONFIG, tests::{TEST_CONFIG}};
     
     #[tokio::test]
     pub async fn get_or_init_database() {
-        DATABASE_CONNECTIONS.get_or_init_unchecked(&*TEST_CONFIG, DataMigrator).await;
+        LOCAL_DATABASE_CONNECTION.get_or_init_unchecked(&*TEST_CONFIG).await;
     }
 }
