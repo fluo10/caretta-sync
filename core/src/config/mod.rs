@@ -8,7 +8,7 @@ use crate::{utils::{emptiable::Emptiable, mergeable::Mergeable}};
 pub use error::ConfigError;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
-use tokio::{fs::File, io::{AsyncReadExt, AsyncWriteExt}};
+use tokio::{io::{AsyncReadExt, AsyncWriteExt}};
 pub use storage::{StorageConfig, PartialStorageConfig};
 pub use p2p::{P2pConfig, PartialP2pConfig};
 pub use rpc::*;

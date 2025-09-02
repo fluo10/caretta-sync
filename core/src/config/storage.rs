@@ -15,6 +15,12 @@ pub struct StorageConfig {
     pub cache_directory: PathBuf,
 }
 
+impl StorageConfig {
+    pub fn get_local_database_path(&self) -> PathBuf {
+        self.data_directory.join("local.sqlite")
+    }
+}
+
 impl TryFrom<PartialStorageConfig> for StorageConfig {
     type Error = ConfigError;
 
@@ -83,6 +89,7 @@ impl PartialStorageConfig {
 
     
     }
+
 }
 
 impl From<StorageConfig> for PartialStorageConfig {

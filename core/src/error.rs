@@ -10,8 +10,6 @@ pub enum Error {
     CiborSerialize(#[from] ciborium::ser::Error<std::io::Error>),
     #[error("Config error: {0}")]
     Config(#[from] crate::config::error::ConfigError),
-    #[error("DB Error: {0}")]
-    Db(#[from]sea_orm::DbErr),
     #[error("Dial Error: {0}")]
     Dial(#[from] libp2p::swarm::DialError),
     #[error("Decoding identity error: {0}")]
