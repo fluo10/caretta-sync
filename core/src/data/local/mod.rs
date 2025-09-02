@@ -25,24 +25,21 @@ where
     })
 }
 
-fn migrate_once(conn: &Connection) -> () {
+fn migrate_once(conn: &mut Connection) -> () {
     *MIGRATE_RESULT.get_or_init(|| {
         migrate(conn).expect("Local database migration should be done correctly")
     })
 
 }
-pub trait LocalDatabaseConnection {
+pub trait LocalDatabaseConnection: Sized {
     fn from_path<P>(path: &P) -> Self
     where 
         P: AsRef<Path>;
-    fn from_storage_config<T>(config: &T) -> Self
-    where 
-        T: AsRef<StorageConfig>
-    {
-        Self::from_path(&config.as_ref().get_local_database_path())
+    fn from_storage_config(config: &StorageConfig) -> Self {
+        Self::from_path(&config.get_local_database_path())
     }
     fn from_global_storage_config() -> Self {
-        Self::from_storage_config(CONFIG.get_unchecked())
+        Self::from_storage_config(&CONFIG.get_unchecked().storage)
     }
 }
 
@@ -52,8 +49,8 @@ impl LocalDatabaseConnection for Connection {
         P: AsRef<Path>
     {
         initialize_parent_directory(path);
-        let conn = Connection::open(path).expect("local database connection must be opened without error");
-        migrate_once(&conn);
+        let mut conn = Connection::open(path).expect("local database connection must be opened without error");
+        migrate_once(&mut conn);
         conn        
     }
 }

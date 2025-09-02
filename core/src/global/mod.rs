@@ -6,7 +6,6 @@ use tokio::sync::{OnceCell, RwLock, RwLockReadGuard, RwLockWriteGuard};
 
 mod config;
 pub use config::*;
-mod database_connection;
 use uuid::{ContextV7, Timestamp, Uuid};
 
 pub fn generate_uuid() -> Uuid {

@@ -1,9 +1,9 @@
 mod v1;
 
-use rusqlite::{ffi::Error, Connection};
+use rusqlite::{Error, Connection};
 use tracing::{event, Level};
 
-pub fn migrate(con: &Connection) -> Result<(), Error>{
+pub fn migrate(con: &mut Connection) -> Result<(), Error>{
     let version: u32 = con.pragma_query_value(None,"user_version", |row| row.get(0)).expect("Failed to get user_version");
     if version < 1 {
         event!(Level::INFO, "Migrate local db to version 1");
