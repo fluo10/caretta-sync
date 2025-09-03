@@ -3,7 +3,6 @@ use std::{net::{IpAddr, Ipv4Addr, SocketAddr, TcpListener}, path::PathBuf, str::
 use clap::Args;
 use url::Url;
 use crate::{config::PartialConfig, utils::{emptiable::Emptiable, mergeable::Mergeable}};
-use libp2p::mdns::Config;
 use serde::{Deserialize, Serialize};
 
 use crate::config::error::ConfigError;

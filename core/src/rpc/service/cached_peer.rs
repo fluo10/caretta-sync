@@ -1,9 +1,8 @@
-use crate::{cache::entity::{CachedAddressEntity, CachedPeerEntity, CachedPeerModel}, global::{DATABASE_CONNECTIONS}, proto::CachedAddressMessage};
+use crate::{global::{DATABASE_CONNECTION}, proto::CachedAddressMessage};
 use futures::future::join_all;
 use tonic::{Request, Response, Status};
 
 use crate::proto::{cached_peer_service_server::{CachedPeerServiceServer}, CachedPeerListRequest, CachedPeerListResponse, CachedPeerMessage};
-use sea_orm::prelude::*;
 
 #[derive(Debug, Default)]
 pub struct CachedPeerService {}

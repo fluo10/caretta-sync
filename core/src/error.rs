@@ -10,20 +10,14 @@ pub enum Error {
     CiborSerialize(#[from] ciborium::ser::Error<std::io::Error>),
     #[error("Config error: {0}")]
     Config(#[from] crate::config::error::ConfigError),
-    #[error("Dial Error: {0}")]
-    Dial(#[from] libp2p::swarm::DialError),
-    #[error("Decoding identity error: {0}")]
-    IdentityDecoding(#[from] libp2p::identity::DecodingError),
     #[error("Infallible: {0}")]
     Infallible(#[from] std::convert::Infallible),
     #[error("IO Error: {0}")]
     Io(#[from]std::io::Error),
+    #[error("Iroh bind error: {0}")]
+    IrohBind(#[from] iroh::endpoint::BindError),
     #[error("mandatory config `{0}` is missing")]
     MissingConfig(&'static str),
-    #[error("Multiaddr error: {0}")]
-    Multiaddr(#[from] libp2p::multiaddr::Error),
-    #[error("Noise error: {0}")]
-    Noise(#[from] libp2p::noise::Error),
     #[error("Parse OsString error: {0:?}")]
     OsStringConvert(std::ffi::OsString),
     #[cfg(feature="cli")]
@@ -33,8 +27,6 @@ pub enum Error {
     TomlDe(#[from] toml::de::Error),
     #[error("toml serialization error: {0}")]
     TomlSer(#[from] toml::ser::Error),
-    #[error("Transport error: {0}")]
-    Transport(#[from]libp2p::TransportError<std::io::Error>)
 }
 
 impl From<std::ffi::OsString> for Error {

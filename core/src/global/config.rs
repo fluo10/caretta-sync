@@ -2,7 +2,7 @@
 use tempfile::TempDir;
 use tokio::sync::OnceCell;
 
-use crate::{config::{Config, ConfigError, PartialP2pConfig, PartialRpcConfig, PartialStorageConfig, StorageConfig}, error::Error};
+use crate::{config::{Config, ConfigError, PartialIrohConfig, PartialRpcConfig, PartialStorageConfig, StorageConfig}, error::Error};
 
 pub static CONFIG: GlobalConfig = GlobalConfig::const_new();
 pub struct GlobalConfig {

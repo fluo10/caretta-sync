@@ -43,7 +43,6 @@ ciborium = "0.2.2"
 clap = { version = "4.5.38", features = ["derive"] }
 caretta-sync-core.path = "core"
 futures = { version = "0.3.31", features = ["executor"] }
-libp2p = { version = "0.55.0", features = ["macros", "mdns", "noise", "ping", "tcp", "tokio", "yamux" ] }
 serde = { version = "1.0.219", features = ["derive"] }
 thiserror = "2.0.12"
 tokio = { version = "1.45.0", features = ["macros", "rt", "rt-multi-thread"] }

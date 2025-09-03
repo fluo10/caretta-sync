@@ -3,10 +3,10 @@ use std::path::PathBuf;
 #[cfg(feature="cli")]
 use clap::Args;
 
+use rusqlite::Connection;
 #[cfg(any(test, feature="test"))]
 use tempfile::tempdir;
-use crate::{config::{ConfigError, PartialConfig}, utils::{emptiable::Emptiable, get_binary_name, mergeable::Mergeable}};
-use libp2p::mdns::Config;
+use crate::{config::{ConfigError, PartialConfig}, data::local::LocalDatabaseConnection, utils::{emptiable::Emptiable, get_binary_name, mergeable::Mergeable}};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug)]
@@ -18,6 +18,9 @@ pub struct StorageConfig {
 impl StorageConfig {
     pub fn get_local_database_path(&self) -> PathBuf {
         self.data_directory.join("local.sqlite")
+    }
+    pub fn create_local_database_connection(&self) -> Connection {
+        Connection::from_storage_config(self)
     }
 }
 
@@ -31,6 +34,7 @@ impl TryFrom<PartialStorageConfig> for StorageConfig {
         })
     }
 }
+
 #[cfg_attr(feature="cli", derive(Args))]
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct PartialStorageConfig {

@@ -10,5 +10,4 @@ repository.workspace = true
 clap.workspace = true
 caretta-sync = { path = "../..", features = ["cli", "bevy", "test"] }
 caretta-sync-example-core.path = "../core"
-libp2p.workspace = true
 tokio.workspace = true
