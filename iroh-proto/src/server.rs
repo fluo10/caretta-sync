@@ -1,40 +1,44 @@
 use std::pin::Pin;
 
-use iroh::{Endpoint, NodeId};
+use iroh::{endpoint, Endpoint, NodeId};
 use tonic::{Response, Request, Status};
 use tokio_stream::Stream;
 
 use crate::proto::{RemoteInfoIterRequest, RemoteInfoMessage, RemoteInfoRequest, RemoteInfoResponse};
 
-#[tonic::async_trait]
-pub trait AsEndpoint: Send + Sync + 'static {
-    async fn as_endpoint(&self) -> &Endpoint;
-}
-pub struct IrohServer<T>
+pub struct IrohServer
 where 
-    T: AsEndpoint
 {
-    endpoint: T
+    endpoint: Endpoint
+}
+
+impl From<Endpoint> for IrohServer {
+    fn from(endpoint: Endpoint) -> Self {
+        Self{endpoint: endpoint}
+    }
 }
 
 #[tonic::async_trait]
-impl<T> crate::proto::iroh_server::Iroh for IrohServer<T> 
-where 
-    T: AsEndpoint
-{
+impl crate::proto::iroh_server::Iroh for IrohServer {
     type RemoteInfoIterStream = Pin<Box<dyn Stream<Item = Result<RemoteInfoResponse, Status>> + Send>>;
     async fn remote_info(&self, request: Request<RemoteInfoRequest>) -> Result<Response<RemoteInfoResponse>, Status> {
         let node_id = NodeId::try_from(request.into_inner()).or_else(|e| {
             Err(Status::from_error(Box::new(e)))
         })?;
-        let remote_info: Option<RemoteInfoMessage> = self.endpoint.as_endpoint().await.remote_info(node_id).map(|x| x.try_into()).transpose().or_else(|e| {
+        let remote_info: Option<RemoteInfoMessage> = self.endpoint.remote_info(node_id).map(|x| x.try_into()).transpose().or_else(|e| {
             Err(Status::from_error(Box::new(e)))
         })?;
         Ok(Response::new(RemoteInfoResponse::from(remote_info)))
     } 
-    async fn remote_info_iter(&self, _: Request<RemoteInfoIterRequest>) -> Result<Response<Self::RemoteInfoIterStream>, Status> {
-        let iter = self.endpoint.as_endpoint().await.remote_info_iter();
+    async fn remote_info_iter(&self, _: Request<RemoteInfoIterRequest>) 
+        -> Result<Response<Self::RemoteInfoIterStream>, Status> {
+        let iter = self.endpoint.remote_info_iter()
+            .map(|x| {
+                RemoteInfoMessage::try_from(x).map(|x| RemoteInfoResponse::from(x)).or_else(|e| {
+                    Err(Status::from_error(Box::new(e)))
+                })
+            });
         let stream = futures::stream::iter(iter);
-        todo!()
+        Ok(Response::new(Box::pin(stream)))
     }
 }

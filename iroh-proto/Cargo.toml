@@ -17,5 +17,10 @@ tonic.workspace = true
 tonic-prost.workspace = true
 thiserror.workspace = true
 
+[dev-dependencies]
+clap.workspace = true
+url.workspace = true
+tokio.workspace = true
+
 [build-dependencies]
 tonic-prost-build.workspace = true
