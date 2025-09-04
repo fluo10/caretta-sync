@@ -1,4 +1,4 @@
-use std::ffi::OsString;
+use std::{array::TryFromSliceError, ffi::OsString};
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
@@ -23,6 +23,10 @@ pub enum Error {
     #[cfg(feature="cli")]
     #[error("Parse args error: {0}")]
     ParseCommand(#[from] clap::Error),
+    #[error("Signature error: {0}")]
+    Signature(#[from] ed25519_dalek::SignatureError),
+    #[error("slice parse error: {0}")]
+    SliceTryFrom(#[from] TryFromSliceError),
     #[error("toml deserialization error: {0}")]
     TomlDe(#[from] toml::de::Error),
     #[error("toml serialization error: {0}")]

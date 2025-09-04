@@ -4,18 +4,22 @@ import "google/protobuf/timestamp.proto";
 import "google/protobuf/duration.proto";
 
 service Iroh {
-    rpc RemoteInfo(RemoteInfoRequest) returns (RemoteInfoMessage);
-    rpc RemoteInfoIter(RemoteInfoIterRequest) returns (stream RemoteInfoMessage);
+    rpc RemoteInfo(RemoteInfoRequest) returns (RemoteInfoResponse);
+    rpc RemoteInfoIter(RemoteInfoIterRequest) returns (stream RemoteInfoResponse);
 }
 
 message RemoteInfoRequest {
-    string node_id = 1;
+    bytes node_id = 1;
 }
 
 message RemoteInfoIterRequest {}
 
+message RemoteInfoResponse {
+    RemoteInfoMessage remote_info = 1;
+}
+
 message RemoteInfoMessage {
-    string node_id = 1;
+    bytes node_id = 1;
     string relay_url = 2;
     repeated DirectAddrInfoMessage addrs = 3;
     string conn_type = 4;

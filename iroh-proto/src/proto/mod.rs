@@ -3,6 +3,7 @@ mod last_control_message;
 mod remote_info_iter_request;
 mod remote_info_message;
 mod remote_info_request;
+mod remote_info_response;
 mod source_message;
 
 tonic::include_proto!("iroh");

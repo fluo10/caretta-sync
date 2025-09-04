@@ -1,4 +1,4 @@
-use crate::proto::iroh::RemoteInfoIterRequest;
+use crate::proto::RemoteInfoIterRequest;
 
 impl RemoteInfoIterRequest {
     pub fn new() -> Self {

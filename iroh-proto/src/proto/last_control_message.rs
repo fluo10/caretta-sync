@@ -3,7 +3,7 @@ use std::time::Duration;
 use iroh::endpoint::ControlMsg;
 use prost_types::DurationError;
 
-use crate::proto::iroh::LastControlMessage;
+use crate::proto::LastControlMessage;
 
 impl TryFrom<(Duration, ControlMsg)> for LastControlMessage {
     type Error = DurationError;
