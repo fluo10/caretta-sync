@@ -3,10 +3,10 @@ use std::time::Duration;
 use iroh::endpoint::ControlMsg;
 use prost_types::DurationError;
 
-use crate::proto::LastControlMessage;
+use crate::proto::{error::ProtoSerializeError, LastControlMessage};
 
 impl TryFrom<(Duration, ControlMsg)> for LastControlMessage {
-    type Error = DurationError;
+    type Error = ProtoSerializeError;
     fn try_from(value: (Duration, ControlMsg)) -> Result<Self, Self::Error> {
         Ok(LastControlMessage {
             duration: Some(value.0.try_into()?),

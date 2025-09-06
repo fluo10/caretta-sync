@@ -2,9 +2,7 @@ pub mod config;
 pub mod data;
 pub mod error;
 pub mod global;
-pub mod p2p;
 pub mod proto;
-pub mod rpc;
 #[cfg(any(test, feature="test"))]
 pub mod tests;
 pub mod utils;

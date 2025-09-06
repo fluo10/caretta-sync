@@ -2,10 +2,10 @@ use std::time::Duration;
 
 use iroh::endpoint::Source;
 
-use crate::{error::Error, proto::SourceMessage};
+use crate::{error::Error, proto::{error::ProtoSerializeError, SourceMessage}};
 
 impl TryFrom<(Source, Duration)> for SourceMessage {
-    type Error = Error;
+    type Error = ProtoSerializeError;
     fn try_from(src: (Source, Duration)) -> Result<Self, Self::Error> {
         let (source, duration )= src;
         Ok(Self {

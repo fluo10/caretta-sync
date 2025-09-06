@@ -37,6 +37,8 @@ uuid.workspace = true
 url.workspace = true
 whoami = "1.6.1"
 rand = "0.8.5"
+ed25519-dalek = { version = "2.2.0", features = ["signature"] }
+tokio-stream.workspace = true
 
 [target.'cfg(target_os="android")'.dependencies]
 jni = "0.21.1"

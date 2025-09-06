@@ -4,7 +4,9 @@ use crate::{config::{StorageConfig}, error::Error };
 use tokio::sync::{OnceCell, RwLock, RwLockReadGuard, RwLockWriteGuard};
 
 mod config;
+mod iroh_endpoint;
 pub use config::*;
+pub use iroh_endpoint::*;
 use uuid::{ContextV7, Timestamp, Uuid};
 
 pub fn generate_uuid() -> Uuid {

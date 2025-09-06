@@ -12,7 +12,7 @@ use tracing_subscriber::EnvFilter;
 
 use crate::{
     config::PartialConfig,
-    error::Error, p2p, utils::{emptiable::Emptiable, mergeable::Mergeable}
+    error::Error, utils::{emptiable::Emptiable, mergeable::Mergeable}
 };
 
 #[derive(Clone, Debug)]
