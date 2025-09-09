@@ -1,8 +1,7 @@
 use std::marker::PhantomData;
 
 use clap::Args;
-use caretta_sync_core::{config::Config, data::migration::DataMigrator, global::{CONFIG, DATABASE_CONNECTIONS}, server::ServerTrait, utils::runnable::Runnable};
-use libp2p::{noise, ping, swarm::{NetworkBehaviour, SwarmEvent}, tcp, yamux, Swarm};
+use caretta_sync_core::{config::Config, global::{CONFIG, LOCAL_DATABASE_CONNECTION}, server::ServerTrait, utils::runnable::Runnable};
 
 use super::ConfigArgs;
 
@@ -23,7 +22,7 @@ where
     #[tokio::main]
     async fn run(self, app_name: &'static str) {
         let config = CONFIG.get_or_init::<Config>(self.config.into_config(app_name).await).await;
-        let _ = DATABASE_CONNECTIONS.get_or_init_unchecked(&config, DataMigrator).await;
+        let _ = LOCAL_DATABASE_CONNECTION.get_or_init(&config.storage.get_local_database_path() );
         T::serve_all(config).await.unwrap();
     }
 }

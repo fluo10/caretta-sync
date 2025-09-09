@@ -6,7 +6,6 @@ mod scan;
 
 pub use add::DeviceAddCommandArgs;
 use caretta_sync_core::utils::runnable::Runnable;
-use libp2p::{Multiaddr, PeerId};
 pub use list::DeviceListCommandArgs;
 pub use ping::DevicePingCommandArgs;
 pub use remove::DeviceRemoveCommandArgs;

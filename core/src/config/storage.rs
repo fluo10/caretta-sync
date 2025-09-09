@@ -6,7 +6,7 @@ use clap::Args;
 use rusqlite::Connection;
 #[cfg(any(test, feature="test"))]
 use tempfile::tempdir;
-use crate::{config::{ConfigError, PartialConfig}, data::local::LocalDatabaseConnection, utils::{emptiable::Emptiable, get_binary_name, mergeable::Mergeable}};
+use crate::{config::{ConfigError, PartialConfig}, utils::{emptiable::Emptiable, get_binary_name, mergeable::Mergeable}};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug)]
@@ -16,11 +16,17 @@ pub struct StorageConfig {
 }
 
 impl StorageConfig {
+    pub fn get_global_data_directory(&self) -> PathBuf {
+        self.data_directory.join("global")
+    }
+    pub fn get_global_root_document_path(&self) -> PathBuf {
+        self.data_directory.join("global.bin")
+    }
+    pub fn get_local_data_directory(&self) -> PathBuf {
+        self.data_directory.join("local")
+    }
     pub fn get_local_database_path(&self) -> PathBuf {
         self.data_directory.join("local.sqlite")
-    }
-    pub fn create_local_database_connection(&self) -> Connection {
-        Connection::from_storage_config(self)
     }
 }
 
