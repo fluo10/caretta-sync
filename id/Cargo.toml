@@ -1,0 +1,13 @@
+[package]
+name = "caretta-id"
+edition.workspace = true
+version = "0.1.0-alpha"
+description.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[features]
+
+[dependencies]
+rand.workspace = true
+thiserror.workspace = true

@@ -10,26 +10,29 @@ use iroh::NodeId;
 pub use request::*;
 pub use response::*;
 use rusqlite::{params, types::FromSqlError, Connection};
+use uuid::Uuid;
 
 use crate::data::local::RusqliteRecord;
 
 /// On going authorization
 pub struct Authorization {
+    request_id: Uuid,
     node_id: NodeId,
-    passcode: String,
+    node_info: Option<String>,
+    passcode: Option<String>,
     created_at: DateTime<Local>,
     updated_at: DateTime<Local>,
 }
 static TABLE_NAME: &str = "authorization";
-static DEFAULT_COLUMNS: [&str;4] = [
+static DEFAULT_COLUMNS: [&str;5] = [
+    "request_id",
     "node_id",
-    "passcode",
     "created_at",
     "updated_at"
 ];
 
 impl Authorization {
-    pub fn new(node_id: NodeId, passcode: String) -> Self {
+    pub fn new_sent(node_id: NodeId, passcode: String) -> Self {
         let timestamp = Local::now();
         Self {
             node_id: node_id,
@@ -38,6 +41,7 @@ impl Authorization {
             updated_at: timestamp
         }
     }
+    pub fn new_received(node_id:)
     pub fn get_by_node_id(node_id: NodeId, connection: &Connection) -> Result<Self, rusqlite::Error> {
         connection.query_row(
             "SELECT node_id, passcode, created_at, updated_at FROM authorizaation WHRE node_id=(?1)",

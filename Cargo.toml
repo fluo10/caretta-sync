@@ -26,7 +26,7 @@ caretta-sync-macros = { path="macros", optional = true}
 caretta-sync-core = {workspace = true, features = ["test"]}
 
 [workspace]
-members = [ ".", "core", "macros", "cli", "mobile", "examples/*" , "bevy"]
+members = [ ".", "core", "macros", "cli", "mobile", "examples/*" , "bevy", "id"]
 resolver = "3"
 
 [workspace.package]
@@ -43,6 +43,7 @@ ciborium = "0.2.2"
 clap = { version = "4.5.38", features = ["derive"] }
 caretta-sync-core.path = "core"
 futures = { version = "0.3.31", features = ["executor"] }
+rand = "0.8.5"
 serde = { version = "1.0.219", features = ["derive"] }
 thiserror = "2.0.12"
 tokio = { version = "1.45.0", features = ["macros", "rt", "rt-multi-thread"] }
@@ -55,6 +56,7 @@ prost = "0.14.1"
 prost-types = "0.14.1"
 tonic-prost-build = "0.14.0"
 tonic-prost = "0.14.0"
+
 
 [profile.dev]
 opt-level = 1
