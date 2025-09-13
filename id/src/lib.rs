@@ -2,13 +2,13 @@ mod single;
 mod double;
 mod error;
 mod triple;
+mod utils;
 
 use rand::Rng;
 pub use single::*;
 pub use double::*;
 pub use triple::*;
 pub use error::*;
-
 
 const DOUBLE_ID_SIZE: u32 = (SingleId::SIZE as u32).pow(2);
 const TRIPLE_ID_SIZE: u64 = (SingleId::SIZE as u64).pow(3);
@@ -18,4 +18,7 @@ pub trait Id {
     const NIL: Self;
     const MAX: Self;
     const SIZE: Self::SizeType;
+    #[cfg(test)]
+    fn is_valid(&self) -> bool;
 }
+

@@ -90,7 +90,10 @@ fn str_to_u16(s: &str) -> Result<u16, Error> {
 }
 fn u16_to_string(int: u16) -> Result<String, Error> {
     if int >= CUBED_BASE {
-        return Err(Error::OutsideOfRange(int as u64))
+        return Err(Error::OutsideOfRange{
+            expected: CUBED_BASE as usize,
+            found: int as usize
+        })
     }
     let first_char = char::from(CHARACTERS[usize::try_from(int / SQUARED_BASE).unwrap()]);
     let second_char = char::from(CHARACTERS[usize::try_from((int % SQUARED_BASE)/ BASE).unwrap()]);
@@ -103,12 +106,6 @@ pub struct SingleId{
     inner: u16
 }
 
-impl SingleId {
-    #[cfg(test)]
-    pub fn validate(&self) -> bool {
-        self.inner < Self::SIZE 
-    }
-}
 
 impl Id for SingleId {
     type SizeType = u16;
@@ -135,8 +132,11 @@ impl Id for SingleId {
     const MAX: SingleId = SingleId{
         inner: Self::SIZE-1
     };
-    
-    
+
+    #[cfg(test)]
+    fn is_valid(&self) -> bool {
+        self.inner < Self::SIZE 
+    }
 }
 
 impl Display for SingleId {
@@ -170,7 +170,10 @@ impl TryFrom<u16> for SingleId {
         if value < Self::SIZE {
             Ok(Self{inner: value})
         } else {
-            Err(Error::OutsideOfRange(value as u64))
+            Err(Error::OutsideOfRange{
+                expected: Self::SIZE as usize,
+                found: value as usize
+            })
         }
     }
 }
@@ -192,12 +195,11 @@ mod tests {
         R: Rng
     {
         let chunk: SingleId = rand.r#gen();
-        assert!(chunk.validate());
+        assert!(chunk.is_valid());
         let s = chunk.to_string();
         assert_eq!(chunk,SingleId::from_str(&s).unwrap());
         let i = u16::from(chunk.clone());
         assert_eq!(chunk, SingleId::try_from(i).unwrap());
-
     }
     #[test]
     fn random_x10() {

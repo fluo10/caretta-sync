@@ -2,20 +2,12 @@ use std::{fmt::Display, str::FromStr};
 
 use rand::{distributions::Standard, prelude::Distribution, Rng};
 
-use crate::{Error, Id, SingleId};
+use crate::{utils::is_delimiter, Error, Id, SingleId};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct DoubleId{
     inner: (SingleId, SingleId)
 }
-
-impl DoubleId {
-    #[cfg(test)]
-    pub fn validate(&self) -> bool {
-        self.inner.0.validate() && self.inner.1.validate() && (u32::from(self.clone()) < Self::SIZE)
-    }
-}
-
 
 impl Id for DoubleId{
     type SizeType = u32;
@@ -41,6 +33,11 @@ impl Id for DoubleId{
     const MAX: Self = Self{
         inner: (SingleId::MAX, SingleId::MAX) 
     };
+
+    #[cfg(test)]
+    fn is_valid(&self) -> bool {
+        self.inner.0.is_valid() && self.inner.1.is_valid() && (u32::from(self.clone()) < Self::SIZE)
+    }
 }
 
 impl Display for DoubleId {
@@ -56,20 +53,25 @@ impl FromStr for DoubleId {
         Ok(Self {
             inner : match s.len() {
                 7 => {
-                    match s.chars().nth(3).unwrap() {
-                        '-' =>  {
-                            Ok((SingleId::from_str(&s[0..3])?, SingleId::from_str(&s[4..7])?))
-                        }, 
-                        x => {
-                            Err(Error::InvalidDelimiter(x))
-                        }
+                    let delimiter = s[3..4].chars().next().unwrap();
+                    if is_delimiter(delimiter) {
+                        Ok((SingleId::from_str(&s[0..3])?,SingleId::from_str(&s[4..7])?))
+                    } else {
+                        Err(Error::InvalidDelimiter{
+                            found: vec![delimiter],
+                            raw: s.to_string()
+                        })
                     }
                     
                 }
                 6 => {
                     Ok((SingleId::from_str(&s[0..3])?,SingleId::from_str(&s[3..6])?))
                 }
-                _ => Err(Error::InvalidLength(s.to_string()))
+                x => Err(Error::InvalidLength{
+                    expected: (6, 7),
+                    found: x,
+                    raw: s.to_string()
+                })
             }?
         })
     }
@@ -95,7 +97,10 @@ impl TryFrom<u32> for DoubleId {
                     SingleId::try_from(u16::try_from(value % (SingleId::SIZE as u32)).unwrap())?
                 )})
         } else {
-            Err(Error::OutsideOfRange(value as u64))
+            Err(Error::OutsideOfRange{
+                expected: Self::SIZE as usize,
+                found: value as usize
+            })
         }
     }
 }
@@ -114,9 +119,10 @@ mod tests {
     where
         R: Rng
     {
-        let chunk: SingleId = rand.r#gen();
-        let s = chunk.to_string();
-        assert_eq!(chunk,SingleId::from_str(&s).unwrap())
+        let id: DoubleId = rand.r#gen();
+        assert!(id.is_valid());
+        assert_eq!(id,DoubleId::from_str(&id.to_string()).unwrap());
+        assert_eq!(id, DoubleId::try_from(u32::from(id.clone())).unwrap())
     }
     #[test]
     fn random_x10() {

@@ -1,12 +1,28 @@
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    #[error("Outside of range: {0}")]
-    OutsideOfRange(u64),
+    #[error("expected under {expected}, found {found}")]
+    OutsideOfRange{
+        expected: usize,
+        found: usize,
+    },
     #[error("Invalid chunk: {0}")]
     InvalidChunk(String),
-    #[error("Invalid delemeter: {0}")]
-    InvalidDelimiter(char),
-    #[error("Invalid length: {0}")]
-    InvalidLength(String)
+    #[error("Length of id expected {} or {} but found {found}: {raw}", .expected.0, .expected.1 )]
+    InvalidLength{
+        expected: (u8, u8),
+        found: usize,
+        raw: String
+    },
+    #[error("Number of chunks expected {expected} but  {found}: {raw}")]
+    InvalidLengthOfChunks{
+        expected: u8,
+        found: usize,
+        raw: String,
+    },
+    #[error("Delimiter expected '-' or '_' but '{found:?}' found: {raw}")]
+    InvalidDelimiter{
+        found: Vec<char>,
+        raw: String,
+    }
 }
 
