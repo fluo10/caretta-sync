@@ -36,7 +36,7 @@ impl Id for DoubleId{
 
     #[cfg(test)]
     fn is_valid(&self) -> bool {
-        self.inner.0.is_valid() && self.inner.1.is_valid() && (u32::from(self.clone()) < Self::SIZE)
+        self.inner.0.is_valid() && self.inner.1.is_valid() && (u32::from(self) < Self::SIZE)
     }
 }
 
@@ -105,9 +105,9 @@ impl TryFrom<u32> for DoubleId {
     }
 }
 
-impl From<DoubleId> for u32 {
-    fn from(value: DoubleId) -> Self {
-        u32::from(u16::from(value.inner.0)) * u32::from(SingleId::SIZE) + u32::from(u16::from(value.inner.1))
+impl From<&DoubleId> for u32 {
+    fn from(value: &DoubleId) -> Self {
+        u32::from(u16::from(&value.inner.0)) * u32::from(SingleId::SIZE) + u32::from(u16::from(&value.inner.1))
     }
 }
 
@@ -122,7 +122,7 @@ mod tests {
         let id: DoubleId = rand.r#gen();
         assert!(id.is_valid());
         assert_eq!(id,DoubleId::from_str(&id.to_string()).unwrap());
-        assert_eq!(id, DoubleId::try_from(u32::from(id.clone())).unwrap())
+        assert_eq!(id, DoubleId::try_from(u32::from(&id)).unwrap())
     }
     #[test]
     fn random_x10() {

@@ -38,7 +38,7 @@ impl Id for TripleId{
 
     #[cfg(test)]
     fn is_valid(&self) -> bool {
-        self.inner.0.is_valid() && self.inner.1.is_valid() && self.inner.2.is_valid() && (u64::from(self.clone()) < Self::SIZE)
+        self.inner.0.is_valid() && self.inner.1.is_valid() && self.inner.2.is_valid() && (u64::from(self) < Self::SIZE)
     }
 }
 
@@ -113,11 +113,11 @@ impl TryFrom<u64> for TripleId {
     }
 }
 
-impl From<TripleId> for u64 {
-    fn from(value: TripleId) -> Self {
-        (u16::from(value.inner.0) as u64) * (DoubleId::SIZE as u64)
-        + (u16::from(value.inner.1) as u64) * (SingleId::SIZE as u64)
-        + (u16::from(value.inner.2) as u64)
+impl From<&TripleId> for u64 {
+    fn from(value: &TripleId) -> Self {
+        (u16::from(&value.inner.0) as u64) * (DoubleId::SIZE as u64)
+        + (u16::from(&value.inner.1) as u64) * (SingleId::SIZE as u64)
+        + (u16::from(&value.inner.2) as u64)
     }
 }
 
@@ -132,7 +132,7 @@ mod tests {
         let id: TripleId = rand.r#gen();
         assert!(id.is_valid());
         assert_eq!(id, TripleId::from_str(&id.to_string()).unwrap());
-        assert_eq!(id, TripleId::try_from(u64::from(id.clone())).unwrap());
+        assert_eq!(id, TripleId::try_from(u64::from(&id)).unwrap());
     }
     #[test]
     fn random_x10() {

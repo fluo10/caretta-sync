@@ -178,8 +178,8 @@ impl TryFrom<u16> for SingleId {
     }
 }
 
-impl From<SingleId> for u16 {
-    fn from(value: SingleId) -> Self {
+impl From<&SingleId> for u16 {
+    fn from(value: &SingleId) -> Self {
         value.inner
     }
 }
@@ -198,7 +198,7 @@ mod tests {
         assert!(chunk.is_valid());
         let s = chunk.to_string();
         assert_eq!(chunk,SingleId::from_str(&s).unwrap());
-        let i = u16::from(chunk.clone());
+        let i = u16::from(&chunk);
         assert_eq!(chunk, SingleId::try_from(i).unwrap());
     }
     #[test]

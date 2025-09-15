@@ -38,12 +38,14 @@ repository = "https://forgejo.fireturlte.net/lazy-supplements"
 
 [workspace.dependencies]
 bevy = { git = "https://github.com/bevyengine/bevy.git", rev="16ffdaea0daec11e4347d965f56c9c8e1122a488"  }
+caretta-id = {path="./id", features=["rusqlite", "serde"]}
 chrono = "0.4.41"
 ciborium = "0.2.2"
 clap = { version = "4.5.38", features = ["derive"] }
 caretta-sync-core.path = "core"
 futures = { version = "0.3.31", features = ["executor"] }
 rand = "0.8.5"
+rusqlite = "0.37.0"
 serde = { version = "1.0.219", features = ["derive"] }
 thiserror = "2.0.12"
 tokio = { version = "1.45.0", features = ["macros", "rt", "rt-multi-thread"] }

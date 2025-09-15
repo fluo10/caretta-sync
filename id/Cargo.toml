@@ -7,7 +7,14 @@ license.workspace = true
 repository.workspace = true
 
 [features]
+default=[]
+rusqlite = ["dep:rusqlite"]
+serde = ["dep:serde"]
 
 [dependencies]
 rand.workspace = true
+rusqlite = {workspace = true, optional = true}
+serde = {workspace = true, optional = true}
 thiserror.workspace = true
+
+
