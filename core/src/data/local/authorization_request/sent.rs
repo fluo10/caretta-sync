@@ -3,7 +3,7 @@ use chrono::{DateTime, Local, NaiveDateTime};
 use iroh::{NodeId, PublicKey};
 use rusqlite::types::FromSqlError;
 
-use crate::{data::local::LocalModel, global::LOCAL_DATABASE_CONNECTION};
+use crate::{data::local::LocalRecord, global::LOCAL_DATABASE_CONNECTION};
 
 /// Request of node authentication.
 #[derive(Debug, Clone)]
@@ -12,10 +12,10 @@ pub struct SentAuthorizationRequest {
     public_key: PublicKey,
     passcode: String,
     created_at: DateTime<Local>,
-    sent_at: Option<DateTime<Local>>,
+    responded_at: Option<DateTime<Local>>,
 }
 
-impl LocalModel for SentAuthorizationRequest {
+impl LocalRecord for SentAuthorizationRequest {
 
     const TABLE_NAME: &str = "sent_authorization";
     const DEFAULT_COLUMNS: &[&str] = &[
@@ -23,17 +23,20 @@ impl LocalModel for SentAuthorizationRequest {
         "public_key",
         "passcode",
         "created_at",
-        "sent_at"
+        "responded_at"
     ];
+    type DefaultParams<'a> = (&'a SingleId, &'a [u8;32], &'a str, NaiveDateTime, Option<NaiveDateTime>)
+        where 
+            Self: 'a;
     fn from_default_row(row: &rusqlite::Row<'_>) -> Result<Self, rusqlite::Error> {
         let created_at: NaiveDateTime = row.get(2)?;
-        let sent_at: Option<NaiveDateTime> = row.get(3)?;
+        let responded_at: Option<NaiveDateTime> = row.get(3)?;
         Ok(Self {
             request_id: row.get(0)?,
             public_key: PublicKey::from_bytes(&row.get(1)?).map_err(|e| FromSqlError::Other(Box::new(e)))?,
             passcode: row.get(2)?,
             created_at: DateTime::from(created_at.and_utc()),
-            sent_at: sent_at.map(|x| DateTime::from(x.and_utc())),
+            responded_at: responded_at.map(|x| DateTime::from(x.and_utc())),
         })
     }
     fn insert(&self) -> Result<(), rusqlite::Error> {
@@ -45,7 +48,7 @@ impl LocalModel for SentAuthorizationRequest {
                 &self.public_key.as_bytes(),
                 &self.passcode,
                 &self.created_at.naive_utc(),
-                &self.sent_at.map(|x| x.naive_utc())
+                &self.responded_at.map(|x| x.naive_utc())
             ),
         )?;
         Ok(())
@@ -63,5 +66,9 @@ impl LocalModel for SentAuthorizationRequest {
             result.push(row?);
         }
         Ok(result)
+    }
+    
+    fn as_default_params<'a>(&'a self) -> Self::DefaultParams<'a> {
+        (&self.request_id, &self.public_key.as_bytes(), &self.passcode, self.created_at.naive_utc(), self.responded_at.map(|x| x.naive_utc()))
     }
 }

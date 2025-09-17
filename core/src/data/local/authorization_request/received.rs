@@ -2,7 +2,7 @@ use caretta_id::{DoubleId, SingleId};
 use chrono::{DateTime, Local, NaiveDateTime};
 use iroh::{NodeId, PublicKey};
 
-use crate::{data::local::LocalModel, global::LOCAL_DATABASE_CONNECTION};
+use crate::{data::local::LocalRecord, global::LOCAL_DATABASE_CONNECTION};
 
 /// Response of node authentication.
 #[derive(Debug, Clone)]
@@ -28,7 +28,7 @@ impl ReceivedAuthorizationRequest {
     }
 }
 
-impl LocalModel for ReceivedAuthorizationRequest {
+impl LocalRecord for ReceivedAuthorizationRequest {
     const TABLE_NAME: &str = "received_authorization_request";
     const DEFAULT_COLUMNS: &[&str] = &[
         "request_id",
@@ -37,6 +37,14 @@ impl LocalModel for ReceivedAuthorizationRequest {
         "created_at",
         "responded_at",
     ];
+
+    type DefaultParams<'a> = (&'a SingleId, &'a [u8;32], &'a str, NaiveDateTime, Option<NaiveDateTime>)
+    where 
+        Self: 'a;
+    
+    fn as_default_params<'a>(&'a self) -> Self::DefaultParams<'a> {
+        (&self.request_id,&self.public_key.as_bytes(), &self.node_info, self.created_at.naive_utc(), self.responded_at.map(|x| x.naive_utc()))
+    }
     fn from_default_row(row: &rusqlite::Row<'_>) -> Result<Self, rusqlite::Error> {
         let created_at: NaiveDateTime = row.get(3)?;
         let responded_at: Option<NaiveDateTime> = row.get(4)?;
@@ -77,4 +85,6 @@ impl LocalModel for ReceivedAuthorizationRequest {
         }
         Ok(result)
     }
+    
+
 }
