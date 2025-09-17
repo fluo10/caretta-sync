@@ -1,46 +1,43 @@
-use rusqlite::{Error, Connection};
+use rusqlite::{Connection, Error, Transaction};
 
-pub fn migrate(con: &mut Connection) -> Result<(), Error>{
-    let tx = con.transaction()?;
+pub fn migrate(tx: &Transaction) -> Result<(), Error>{
     tx.execute_batch(
         "CREATE TABLE peer (
-                id            INTEGER PRIMARY KEY,
-                local_peer_id INTEGER NOT NULL UNIQUE,
-                public_key    BLOB UNIQUE NOT NULL
+                id         INTEGER PRIMARY KEY,
+                uid        INTEGER NOT NULL UNIQUE,
+                public_key BLOB UNIQUE NOT NULL
+            );
+            CREATE TABLE authorization_request (
+                id           INTEGER PRIMARY KEY,
+                uid          INTEGER NOT NULL UNIQUE,
+                peer_id      INTEGER NOT NULL UNIQUE,
+                created_at   TEXT NOT NULL,
+                closed_at    TEXT,
+                FOREIGN KEY(peer_id) REFERENCES peer(id)
             );
             CREATE TABLE received_authorization_request (
-                id           INTEGER PRIMARY KEY,
-                request_id   INTEGER NOT NULL UNIQUE,
-                public_key   BLOB NOT NULL UNIQUE,
-                node_info    TEXT,
-                created_at   TEXT NOT NULL,
-                responded_at TEXT
+                id                       INTEGER PRIMARY KEY  
+                authorization_request_id INTEGER NOT NULL UNIQUE
+                peer_note                TEXT,
+                FOREIGN KEY(authorization_request_id) REFERENCES authorization_request(id)
             );
             CREATE TABLE sent_authorization_request (
-                id           INTEGER PRIMARY KEY,
-                request_id   INTEGER NOT NULL UNIQUE,
-                public_key   BLOB NOT NULL UNIQUE,
-                passcode     TEXT NOT NULL,
-                created_at   TEXT NOT NULL,
-                responded_at TEXT
+                id                       INTEGER PRIMARY KEY,
+                authorization_request_id INTEGER NOT NULL UNIQUE,
+                passcode                 TEXT NOT NULL,
+                FOREIGN KEY(authorization_request_id) REFERENCES authorization_request(id)
             );
             CREATE TABLE authorized_peer (
                 id                       INTEGER PRIMARY KEY,
-                node_id                  BLOB NOT NULL UNIQUE,
+                uid                      INTEGER NOT NULL UNIQUE,
+                public_key               BLOB NOT NULL UNIQUE,
+                note                     TEXT NOT NULL,
                 last_synced_at           TEXT,
                 last_sent_version_vector BLOB,
                 created_at               TEXT NOT NULL,
                 updated_at               TEXT NOT NULL
-            );
-            CREATE TABLE authorization (
-                id         INTEGER PRIMARY KEY,
-                node_id    BLOB UNIQUE NOT NULL,
-                passcode   TEXT NOT NULL,
-                created_at TEXT NOT NULL,
-                updated_at TEXT NOT NULL
             );",
     )?;
-    tx.pragma_update(None,  "user_version", 1)?;
-    tx.commit()?;
+
     Ok(())
 }

@@ -15,34 +15,45 @@ pub use authorization_request::*;
 /// use LOCAL_DATABASE_CONNECTION for database connection.
 pub trait LocalRecord: Sized {
     const TABLE_NAME: &str;
-    const DEFAULT_COLUMNS: &[&str];
+    const SELECT_COLUMNS: &[&str];
+    const INSERT_COLUMNS: &[&str];
 
-    const DEFAULT_SELECT_STATEMENT: LazyLock<String> = LazyLock::new(|| {
-        String::from("SELECT ") + &Self::DEFAULT_COLUMNS.join(", ") + " FROM " + Self::TABLE_NAME
+    const SELECT_STATEMENT: LazyLock<String> = LazyLock::new(|| {
+        String::from("SELECT ") + &Self::SELECT_COLUMNS.join(", ") + " FROM " + Self::TABLE_NAME
     });
 
-    const DEFAULT_PLACEHOLDER: LazyLock<String> = LazyLock::new(|| {
+    const SELECT_PLACEHOLDER: LazyLock<String> = LazyLock::new(|| {
         let mut result : Vec<String> = Vec::new();
-        for i in 0..Self::DEFAULT_COLUMNS.len() {
+        for i in 0..Self::SELECT_COLUMNS.len() {
+            result.push(String::from("?") + &(i+1).to_string());
+        }
+        result.join(", ")
+    });
+    const INSERT_PLACEHOLDER: LazyLock<String> = LazyLock::new(|| {
+        let mut result : Vec<String> = Vec::new();
+        for i in 0..Self::INSERT_COLUMNS.len() {
             result.push(String::from("?") + &(i+1).to_string());
         }
         result.join(", ")
     });
 
-    type DefaultParams<'a>: Params
+    type InsertParams<'a>: Params
     where 
         Self: 'a;
     
-    fn as_default_params<'a>(&'a self) -> Self::DefaultParams<'a>;
-
-    fn insert(&self) -> Result<(), rusqlite::Error> {
+    fn insert(params: Self::InsertParams<'_>) -> Result<Self, rusqlite::Error>
+     {
         let connection = LOCAL_DATABASE_CONNECTION.get_unchecked();
         
-        connection.execute(
-            &("INSERT INTO ".to_owned() + Self::TABLE_NAME + " (" + &Self::DEFAULT_COLUMNS.join(", ") + ") VALUES (" + &*Self::DEFAULT_PLACEHOLDER + ")"),
-            self.as_default_params()
-        )?;
-        Ok(())
+        Ok(connection.query_row(
+            &[
+                "INSERT INTO ", Self::TABLE_NAME,  "(" , &Self::INSERT_COLUMNS.join(", "),  ")", 
+                "VALUES (" , &*Self::INSERT_PLACEHOLDER , ")",
+                "RETURNING", &Self::SELECT_COLUMNS.join(", ")
+            ].join(" "),
+            params,
+            Self::from_row
+        )?)
     }
     
     fn get_one_where<P>(where_statement: &str, params: P) -> Result<Option<Self>, rusqlite::Error> 
@@ -50,26 +61,39 @@ pub trait LocalRecord: Sized {
     {
         let connection = LOCAL_DATABASE_CONNECTION.get_unchecked();
         Ok(connection.query_row(
-            &(String::new() + &Self::DEFAULT_SELECT_STATEMENT + " " + where_statement),
+            &(String::new() + &Self::SELECT_STATEMENT + " " + where_statement),
             params,
-            Self::from_default_row
+            Self::from_row
         ).optional()?)
     }
 
-    fn get_one_by<T>(field_name: &str, field_value: T) -> Result<Option<Self>, rusqlite::Error> 
+    fn get_one_by_field<T>(field_name: &str, field_value: T) -> Result<Option<Self>, rusqlite::Error> 
     where 
         T: ToSql
     {
         let connection = LOCAL_DATABASE_CONNECTION.get_unchecked();
         Ok(Some(connection.query_row(
-            &("SELECT ".to_string() + &Self::DEFAULT_COLUMNS.join(", ") + " FROM " + Self::TABLE_NAME + " WHERE " + field_name + "=(?1)"),
+            &("SELECT ".to_string() + &Self::SELECT_COLUMNS.join(", ") + " FROM " + Self::TABLE_NAME + " WHERE " + field_name + "= ?1"),
             params![field_value],
-            Self::from_default_row
+            Self::from_row
         )?))
     }
     fn get_one_by_id(id: u32) -> Result<Option<Self>, rusqlite::Error> {
-        Self::get_one_by("id", id )
+        Self::get_one_by_field("id", id )
     }
-    fn from_default_row(row: &Row<'_>) -> Result<Self, rusqlite::Error>;
-    fn get_all() -> Result<Vec<Self>, rusqlite::Error>;
+    fn from_row(row: &Row<'_>) -> Result<Self, rusqlite::Error>;
+    fn get_all() -> Result<Vec<Self>, rusqlite::Error> {
+        let connection = LOCAL_DATABASE_CONNECTION.get_unchecked();
+        let mut stmt = connection.prepare(&("SELECT ".to_string() + &Self::SELECT_COLUMNS.join(", ") + " FROM " + Self::TABLE_NAME))?;
+        let rows = stmt.query_map(
+            [],
+            Self::from_row
+        )?;
+        let mut result= Vec::new();
+        for row in rows {
+            result.push(row?);
+        }
+        Ok(result)
+    
+    }
 }
