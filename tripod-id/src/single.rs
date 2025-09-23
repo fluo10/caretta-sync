@@ -1,8 +1,8 @@
 use std::{fmt::Display, str::FromStr};
 
-use rand::{distributions::{uniform::UniformInt, Standard}, prelude::Distribution, Rng};
+use rand::{distributions::Standard, prelude::Distribution, Rng};
 
-use crate::{error::Error, Id};
+use crate::{error::Error, TripodId};
 
 const CHARACTERS: &[u8;33] = b"0123456789abcdefghjkmnpqrstuvwxyz";
 const BASE: u16 = 33;
@@ -102,34 +102,34 @@ fn u16_to_string(int: u16) -> Result<String, Error> {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct SingleId{
+pub struct Single{
     inner: u16
 }
 
 
-impl Id for SingleId {
+impl TripodId for Single {
     type SizeType = u16;
     const SIZE: Self::SizeType = CUBED_BASE;
 
     /// ```
-    /// use caretta_id::{SingleId, Id};
+    /// use tripod_id::{Single, TripodId};
     /// use std::str::FromStr;
     /// 
-    /// assert_eq!(SingleId::NIL, SingleId::from_str("000").unwrap());
-    /// assert_eq!(SingleId::NIL, SingleId::try_from(0).unwrap());
+    /// assert_eq!(Single::NIL, Single::from_str("000").unwrap());
+    /// assert_eq!(Single::NIL, Single::try_from(0).unwrap());
     /// ```
-    const NIL: SingleId = SingleId{
+    const NIL: Single = Single{
         inner: 0
     };
 
     /// ```
-    /// use caretta_id::{Id, SingleId};
+    /// use tripod_id::{TripodId, Single};
     /// use std::str::FromStr;
     /// 
-    /// assert_eq!(SingleId::MAX, SingleId::from_str("zzz").unwrap());
-    /// assert_eq!(SingleId::MAX, SingleId::try_from(35936).unwrap());
+    /// assert_eq!(Single::MAX, Single::from_str("zzz").unwrap());
+    /// assert_eq!(Single::MAX, Single::try_from(35936).unwrap());
     /// ```
-    const MAX: SingleId = SingleId{
+    const MAX: Single = Single{
         inner: Self::SIZE-1
     };
 
@@ -139,13 +139,13 @@ impl Id for SingleId {
     }
 }
 
-impl Display for SingleId {
+impl Display for Single {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", u16_to_string(self.inner).unwrap())
     }
 }
 
-impl FromStr for SingleId {
+impl FromStr for Single {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -155,15 +155,15 @@ impl FromStr for SingleId {
     }
 }
 
-impl Distribution<SingleId> for Standard {
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> SingleId {
-        SingleId {
-            inner: rng.gen_range(0..SingleId::SIZE)
+impl Distribution<Single> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Single {
+        Single {
+            inner: rng.gen_range(0..Single::SIZE)
         }
     }
 }
 
-impl TryFrom<u16> for SingleId {
+impl TryFrom<u16> for Single {
     type Error = Error;
 
     fn try_from(value: u16) -> Result<Self, Self::Error> {
@@ -178,8 +178,8 @@ impl TryFrom<u16> for SingleId {
     }
 }
 
-impl From<&SingleId> for u16 {
-    fn from(value: &SingleId) -> Self {
+impl From<&Single> for u16 {
+    fn from(value: &Single) -> Self {
         value.inner
     }
 }
@@ -194,12 +194,12 @@ mod tests {
     where
         R: Rng
     {
-        let chunk: SingleId = rand.r#gen();
+        let chunk: Single = rand.r#gen();
         assert!(chunk.is_valid());
         let s = chunk.to_string();
-        assert_eq!(chunk,SingleId::from_str(&s).unwrap());
+        assert_eq!(chunk,Single::from_str(&s).unwrap());
         let i = u16::from(&chunk);
-        assert_eq!(chunk, SingleId::try_from(i).unwrap());
+        assert_eq!(chunk, Single::try_from(i).unwrap());
     }
     #[test]
     fn random_x10() {

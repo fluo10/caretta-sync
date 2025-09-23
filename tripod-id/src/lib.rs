@@ -13,7 +13,10 @@ pub use double::*;
 pub use triple::*;
 pub use error::*;
 
-pub trait Id {
+#[cfg(feature="prost")]
+pub mod prost;
+
+pub trait TripodId {
     type SizeType;
     const NIL: Self;
     const MAX: Self;

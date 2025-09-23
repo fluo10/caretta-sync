@@ -1,8 +1,8 @@
 use rusqlite::{types::FromSql, Error, ToSql};
 
-use crate::{DoubleId, SingleId, TripleId};
+use crate::{Double, Single, Triple};
 
-impl FromSql for SingleId {
+impl FromSql for Single {
     fn column_result(value: rusqlite::types::ValueRef<'_>) -> rusqlite::types::FromSqlResult<Self> {
         let int = u16::column_result(value)?;
         Self::try_from(int).or_else(|e| {
@@ -11,13 +11,13 @@ impl FromSql for SingleId {
     }
 }
 
-impl ToSql for SingleId {
+impl ToSql for Single {
     fn to_sql(&self) -> rusqlite::Result<rusqlite::types::ToSqlOutput<'_>> {
         Ok(u16::from(self).into())
     }
 }
 
-impl FromSql for DoubleId {
+impl FromSql for Double {
     fn column_result(value: rusqlite::types::ValueRef<'_>) -> rusqlite::types::FromSqlResult<Self> {
         let int = u32::column_result(value)?;
         Self::try_from(int).or_else(|e| {
@@ -26,13 +26,13 @@ impl FromSql for DoubleId {
     }
 }
 
-impl ToSql for DoubleId {
+impl ToSql for Double {
     fn to_sql(&self) -> rusqlite::Result<rusqlite::types::ToSqlOutput<'_>> {
         Ok(u32::from(self).into())
     }
 }
 
-impl FromSql for TripleId {
+impl FromSql for Triple {
     fn column_result(value: rusqlite::types::ValueRef<'_>) -> rusqlite::types::FromSqlResult<Self> {
         let int = u64::column_result(value)?;
         Self::try_from(int).or_else(|e| {
@@ -41,7 +41,7 @@ impl FromSql for TripleId {
     }
 }
 
-impl ToSql for TripleId {
+impl ToSql for Triple {
     fn to_sql(&self) -> rusqlite::Result<rusqlite::types::ToSqlOutput<'_>> {
         Ok(rusqlite::types::ToSqlOutput::Owned(rusqlite::types::Value::Integer(
             i64::try_from(u64::from(self)).map_err(

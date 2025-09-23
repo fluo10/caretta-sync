@@ -2,36 +2,36 @@ use std::{fmt::Display, str::FromStr};
 
 use rand::{distributions::Standard, prelude::Distribution, Rng};
 
-use crate::{utils::is_delimiter, Error, Id, SingleId};
+use crate::{utils::is_delimiter, Error, TripodId, Single};
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct DoubleId{
-    inner: (SingleId, SingleId)
+pub struct Double{
+    inner: (Single, Single)
 }
 
-impl Id for DoubleId{
+impl TripodId for Double{
     type SizeType = u32;
-    const SIZE: Self::SizeType = (SingleId::SIZE as u32).pow(2);
+    const SIZE: Self::SizeType = (Single::SIZE as u32).pow(2);
     /// ```
-    /// use caretta_id::{Id, DoubleId};
+    /// use tripod_id::{TripodId, Double};
     /// use std::str::FromStr;
     /// 
-    /// assert_eq!(DoubleId::NIL, DoubleId::from_str("000-000").unwrap());
-    /// assert_eq!(DoubleId::NIL, DoubleId::try_from(0).unwrap());
+    /// assert_eq!(Double::NIL, Double::from_str("000-000").unwrap());
+    /// assert_eq!(Double::NIL, Double::try_from(0).unwrap());
     /// ```
     const NIL: Self = Self{
-        inner: (SingleId::NIL, SingleId::NIL)
+        inner: (Single::NIL, Single::NIL)
     };
 
     /// ```
-    /// use caretta_id::{Id, DoubleId};
+    /// use tripod_id::{TripodId, Double};
     /// use std::str::FromStr;
     ///
-    /// assert_eq!(DoubleId::MAX, DoubleId::from_str("zzz-zzz").unwrap());
-    /// assert_eq!(DoubleId::MAX, DoubleId::try_from(1291467968).unwrap());
+    /// assert_eq!(Double::MAX, Double::from_str("zzz-zzz").unwrap());
+    /// assert_eq!(Double::MAX, Double::try_from(1291467968).unwrap());
     /// ```
     const MAX: Self = Self{
-        inner: (SingleId::MAX, SingleId::MAX) 
+        inner: (Single::MAX, Single::MAX) 
     };
 
     #[cfg(test)]
@@ -40,13 +40,13 @@ impl Id for DoubleId{
     }
 }
 
-impl Display for DoubleId {
+impl Display for Double {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}-{}", self.inner.0, self.inner.1)
     }
 }
 
-impl FromStr for DoubleId {
+impl FromStr for Double {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -55,7 +55,7 @@ impl FromStr for DoubleId {
                 7 => {
                     let delimiter = s[3..4].chars().next().unwrap();
                     if is_delimiter(delimiter) {
-                        Ok((SingleId::from_str(&s[0..3])?,SingleId::from_str(&s[4..7])?))
+                        Ok((Single::from_str(&s[0..3])?,Single::from_str(&s[4..7])?))
                     } else {
                         Err(Error::InvalidDelimiter{
                             found: vec![delimiter],
@@ -65,7 +65,7 @@ impl FromStr for DoubleId {
                     
                 }
                 6 => {
-                    Ok((SingleId::from_str(&s[0..3])?,SingleId::from_str(&s[3..6])?))
+                    Ok((Single::from_str(&s[0..3])?,Single::from_str(&s[3..6])?))
                 }
                 x => Err(Error::InvalidLength{
                     expected: (6, 7),
@@ -78,23 +78,23 @@ impl FromStr for DoubleId {
 }
 
 
-impl Distribution<DoubleId> for Standard {
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> DoubleId {
-        DoubleId {
+impl Distribution<Double> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Double {
+        Double {
             inner: (rng.r#gen(), rng.r#gen())
         }
     }
 }
 
-impl TryFrom<u32> for DoubleId {
+impl TryFrom<u32> for Double {
     type Error = Error;
 
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         if value < Self::SIZE {
             Ok(Self{
                 inner: (
-                    SingleId::try_from(u16::try_from(value/(SingleId::SIZE as u32)).unwrap())?,
-                    SingleId::try_from(u16::try_from(value % (SingleId::SIZE as u32)).unwrap())?
+                    Single::try_from(u16::try_from(value/(Single::SIZE as u32)).unwrap())?,
+                    Single::try_from(u16::try_from(value % (Single::SIZE as u32)).unwrap())?
                 )})
         } else {
             Err(Error::OutsideOfRange{
@@ -105,9 +105,9 @@ impl TryFrom<u32> for DoubleId {
     }
 }
 
-impl From<&DoubleId> for u32 {
-    fn from(value: &DoubleId) -> Self {
-        u32::from(u16::from(&value.inner.0)) * u32::from(SingleId::SIZE) + u32::from(u16::from(&value.inner.1))
+impl From<&Double> for u32 {
+    fn from(value: &Double) -> Self {
+        u32::from(u16::from(&value.inner.0)) * u32::from(Single::SIZE) + u32::from(u16::from(&value.inner.1))
     }
 }
 
@@ -119,10 +119,10 @@ mod tests {
     where
         R: Rng
     {
-        let id: DoubleId = rand.r#gen();
+        let id: Double = rand.r#gen();
         assert!(id.is_valid());
-        assert_eq!(id,DoubleId::from_str(&id.to_string()).unwrap());
-        assert_eq!(id, DoubleId::try_from(u32::from(&id)).unwrap())
+        assert_eq!(id,Double::from_str(&id.to_string()).unwrap());
+        assert_eq!(id, Double::try_from(u32::from(&id)).unwrap())
     }
     #[test]
     fn random_x10() {

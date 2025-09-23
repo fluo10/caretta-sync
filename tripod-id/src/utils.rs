@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use crate::SingleId;
+use crate::Single;
 
 
 pub fn is_delimiter(c: char) -> bool {

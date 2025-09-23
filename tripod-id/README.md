@@ -1,5 +1,6 @@
-# Carreta ID
-Random user-friendly id for distubuted system for personal data.
+# Tripod ID
+Distributable user-friendly id.
+
 ## Examples
 
 - `123` : shortest version

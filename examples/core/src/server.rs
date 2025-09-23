@@ -4,7 +4,7 @@ use caretta_sync::{
     config::P2pConfig,
     proto::cached_peer_service_server::CachedPeerServiceServer,
     server::ServerTrait,
-    rpc::service::cached_peer::CachedPeerService
+    rpc::service::iroh::CachedPeerService
 };
 use libp2p::{futures::StreamExt, noise, swarm::SwarmEvent, tcp, yamux};
 use tokio::net::UnixListener;

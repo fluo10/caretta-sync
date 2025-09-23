@@ -13,7 +13,7 @@ test = ["dep:tempfile", ]
 
 [dependencies]
 base64 = "0.22.1"
-caretta-id.workspace = true
+tripod-id.workspace = true
 chrono.workspace = true
 chrono-tz = "0.10.3"
 ciborium.workspace = true

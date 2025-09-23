@@ -1,0 +1,17 @@
+syntax = "proto3";
+package fireturtle.tripod_id;
+
+// Single size tripod id message
+message Single {
+    uint32 id = 1;
+}
+
+// Double size tripod id message
+message Double {
+    uint32 id = 1;
+}
+
+// Triple size tripod id message
+message Triple {
+    uint64 id = 1;
+}
