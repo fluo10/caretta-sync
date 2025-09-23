@@ -13,7 +13,7 @@ impl FromSql for Single {
 
 impl ToSql for Single {
     fn to_sql(&self) -> rusqlite::Result<rusqlite::types::ToSqlOutput<'_>> {
-        Ok(u16::from(self).into())
+        Ok(u16::from(*self).into())
     }
 }
 
@@ -28,7 +28,7 @@ impl FromSql for Double {
 
 impl ToSql for Double {
     fn to_sql(&self) -> rusqlite::Result<rusqlite::types::ToSqlOutput<'_>> {
-        Ok(u32::from(self).into())
+        Ok(u32::from(*self).into())
     }
 }
 
@@ -44,7 +44,7 @@ impl FromSql for Triple {
 impl ToSql for Triple {
     fn to_sql(&self) -> rusqlite::Result<rusqlite::types::ToSqlOutput<'_>> {
         Ok(rusqlite::types::ToSqlOutput::Owned(rusqlite::types::Value::Integer(
-            i64::try_from(u64::from(self)).map_err(
+            i64::try_from(u64::from(*self)).map_err(
                 |err| Error::ToSqlConversionFailure(err.into())
             )?
         )))

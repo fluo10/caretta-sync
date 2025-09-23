@@ -91,8 +91,8 @@ fn str_to_u16(s: &str) -> Result<u16, Error> {
 fn u16_to_string(int: u16) -> Result<String, Error> {
     if int >= CUBED_BASE {
         return Err(Error::OutsideOfRange{
-            expected: CUBED_BASE as usize,
-            found: int as usize
+            expected: CUBED_BASE as u64,
+            found: int as u64
         })
     }
     let first_char = char::from(CHARACTERS[usize::try_from(int / SQUARED_BASE).unwrap()]);
@@ -101,7 +101,7 @@ fn u16_to_string(int: u16) -> Result<String, Error> {
     Ok(format!("{}{}{}", first_char, second_char, third_char))
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Single{
     inner: u16
 }
@@ -171,15 +171,15 @@ impl TryFrom<u16> for Single {
             Ok(Self{inner: value})
         } else {
             Err(Error::OutsideOfRange{
-                expected: Self::SIZE as usize,
-                found: value as usize
+                expected: Self::SIZE as u64,
+                found: value as u64
             })
         }
     }
 }
 
-impl From<&Single> for u16 {
-    fn from(value: &Single) -> Self {
+impl From<Single> for u16 {
+    fn from(value: Single) -> Self {
         value.inner
     }
 }
@@ -190,16 +190,29 @@ impl From<&Single> for u16 {
 mod tests {
     use super::*;
 
+    #[cfg(feature="prost")]
+    fn assert_prost(id: Single) {
+        use crate::SingleMessage;
+        let message = SingleMessage::from(*id);
+        assert_eq!(message.is_valid());
+        let result = Single::try_from(message).unwrap();
+        assert_eq!(id, result);
+    }
+
+    fn assert_id(id: Single) {
+        assert!(id.is_valid());
+        let s = id.to_string();
+        assert_eq!(id,Single::from_str(&s).unwrap());
+        let i = u16::from(id);
+        assert_eq!(id, Single::try_from(i).unwrap());
+    }
+
     fn assert_random<R>(rand: &mut  R)
     where
         R: Rng
     {
         let chunk: Single = rand.r#gen();
-        assert!(chunk.is_valid());
-        let s = chunk.to_string();
-        assert_eq!(chunk,Single::from_str(&s).unwrap());
-        let i = u16::from(&chunk);
-        assert_eq!(chunk, Single::try_from(i).unwrap());
+        
     }
     #[test]
     fn random_x10() {

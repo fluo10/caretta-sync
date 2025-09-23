@@ -6,7 +6,7 @@ use rand::{distributions::Standard, prelude::Distribution, Rng};
 
 use crate::TripodId;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Triple {
     inner: (Single, Single, Single)
 }
@@ -38,7 +38,7 @@ impl TripodId for Triple{
 
     #[cfg(test)]
     fn is_valid(&self) -> bool {
-        self.inner.0.is_valid() && self.inner.1.is_valid() && self.inner.2.is_valid() && (u64::from(self) < Self::SIZE)
+        self.inner.0.is_valid() && self.inner.1.is_valid() && self.inner.2.is_valid() && (u64::from(*self) < Self::SIZE)
     }
 }
 
@@ -106,18 +106,18 @@ impl TryFrom<u64> for Triple {
                 )})
         } else {
             Err(Error::OutsideOfRange{
-                expected: Self::SIZE as usize,
-                found: value as usize
+                expected: Self::SIZE as u64,
+                found: value as u64
             })
         }
     }
 }
 
-impl From<&Triple> for u64 {
-    fn from(value: &Triple) -> Self {
-        (u16::from(&value.inner.0) as u64) * (Double::SIZE as u64)
-        + (u16::from(&value.inner.1) as u64) * (Single::SIZE as u64)
-        + (u16::from(&value.inner.2) as u64)
+impl From<Triple> for u64 {
+    fn from(value: Triple) -> Self {
+        (u16::from(value.inner.0) as u64) * (Double::SIZE as u64)
+        + (u16::from(value.inner.1) as u64) * (Single::SIZE as u64)
+        + (u16::from(value.inner.2) as u64)
     }
 }
 
@@ -132,7 +132,7 @@ mod tests {
         let id: Triple = rand.r#gen();
         assert!(id.is_valid());
         assert_eq!(id, Triple::from_str(&id.to_string()).unwrap());
-        assert_eq!(id, Triple::try_from(u64::from(&id)).unwrap());
+        assert_eq!(id, Triple::try_from(u64::from(id)).unwrap());
     }
     #[test]
     fn random_x10() {

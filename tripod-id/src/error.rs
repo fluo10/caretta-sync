@@ -2,8 +2,8 @@
 pub enum Error {
     #[error("expected under {expected}, found {found}")]
     OutsideOfRange{
-        expected: usize,
-        found: usize,
+        expected: u64,
+        found: u64,
     },
     #[error("Invalid chunk: {0}")]
     InvalidChunk(String),
