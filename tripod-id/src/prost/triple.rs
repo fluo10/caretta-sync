@@ -12,7 +12,7 @@ impl Triple {
     pub fn is_valid(&self) -> bool {
         use crate::TripodId;
 
-        self.id < crate::Triple::SIZE
+        self.id < crate::Triple::CAPACITY
     }
 }
 

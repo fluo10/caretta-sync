@@ -12,8 +12,8 @@ pub struct Triple {
 }
 
 impl TripodId for Triple{
-    type SizeType = u64;
-    const SIZE: Self::SizeType = (Single::SIZE as u64).pow(3);
+    type Integer = u64;
+    const CAPACITY: Self::Integer = (Single::CAPACITY as u64).pow(3);
     /// ```
     /// use tripod_id::{TripodId, Triple};
     /// use std::str::FromStr;
@@ -37,8 +37,11 @@ impl TripodId for Triple{
     };
 
     #[cfg(test)]
-    fn is_valid(&self) -> bool {
-        self.inner.0.is_valid() && self.inner.1.is_valid() && self.inner.2.is_valid() && (u64::from(*self) < Self::SIZE)
+    fn validate_inner(self) -> bool {
+        self.inner.0.validate_inner() 
+            && self.inner.1.validate_inner()
+            && self.inner.2.validate_inner()
+            && (u64::from(self) < Self::CAPACITY)
     }
 }
 
@@ -97,16 +100,16 @@ impl TryFrom<u64> for Triple {
     type Error = Error;
 
     fn try_from(value: u64) -> Result<Self, Self::Error> {
-        if value < Self::SIZE {
+        if value < Self::CAPACITY {
             Ok(Self{
                 inner: (
-                    Single::try_from(u16::try_from(value / (Double::SIZE as u64)).unwrap())?,
-                    Single::try_from(u16::try_from((value % (Double::SIZE as u64)) /(Single::SIZE as u64)).unwrap())?,
-                    Single::try_from(u16::try_from(value % (Single::SIZE as u64)).unwrap())?
+                    Single::try_from(u16::try_from(value / (Double::CAPACITY as u64)).unwrap())?,
+                    Single::try_from(u16::try_from((value % (Double::CAPACITY as u64)) /(Single::CAPACITY as u64)).unwrap())?,
+                    Single::try_from(u16::try_from(value % (Single::CAPACITY as u64)).unwrap())?
                 )})
         } else {
             Err(Error::OutsideOfRange{
-                expected: Self::SIZE as u64,
+                expected: Self::CAPACITY as u64,
                 found: value as u64
             })
         }
@@ -115,31 +118,62 @@ impl TryFrom<u64> for Triple {
 
 impl From<Triple> for u64 {
     fn from(value: Triple) -> Self {
-        (u16::from(value.inner.0) as u64) * (Double::SIZE as u64)
-        + (u16::from(value.inner.1) as u64) * (Single::SIZE as u64)
+        (u16::from(value.inner.0) as u64) * (Double::CAPACITY as u64)
+        + (u16::from(value.inner.1) as u64) * (Single::CAPACITY as u64)
         + (u16::from(value.inner.2) as u64)
     }
 }
 
+impl PartialEq<u64> for Triple {
+    fn eq(&self, other: &u64) -> bool {
+        &u64::from(*self) == other
+    }
+}
+
+impl PartialEq<String> for Triple {
+    fn eq(&self, other: &String) -> bool {
+        match Self::from_str(other) {
+            Ok(x) => *self == x,
+            Err(_) => false
+        }
+    }
+}
+
+
 #[cfg(test)]
 mod tests {
-    use super::*;
+use crate::tests::{assert_id_eq_int, assert_id_eq_str};
 
-    fn assert_random<R>(rand: &mut  R)
-    where
-        R: Rng
-    {
-        let id: Triple = rand.r#gen();
-        assert!(id.is_valid());
-        assert_eq!(id, Triple::from_str(&id.to_string()).unwrap());
-        assert_eq!(id, Triple::try_from(u64::from(id)).unwrap());
-    }
+    use super::*;
     #[test]
-    fn random_x10() {
+    fn nil() {
+        assert!(Triple::NIL.validate_all().unwrap());
+        assert_eq!(Triple::NIL, 0);
+        assert_eq!(Triple::NIL, "000000000".to_string());
+        assert_eq!(Triple::NIL, "000-000-000".to_string());
+
+    }
+
+    #[test]
+    fn max() {
+        assert!(Triple::MAX.validate_all().unwrap());
+        assert_eq!(Triple::MAX, Triple::CAPACITY-1);
+        assert_eq!(Triple::MAX, "zzzzzzzzz".to_string());
+        assert_eq!(Triple::MAX, "ZZZ-ZZZ-ZZZ".to_string());
+    }
+
+    #[test]
+    #[should_panic]
+    fn over_sized() {
+        Triple::try_from(Triple::CAPACITY).unwrap();
+    }
+
+    #[test]
+    fn random() {
         let mut rng = rand::thread_rng();
         for _ in 0..10 {
-            assert_random(&mut rng);
+            let id: Triple = rng.r#gen();
+            assert!(id.validate_all().unwrap());
         }
-
     }
 }

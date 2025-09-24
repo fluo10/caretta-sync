@@ -12,7 +12,7 @@ impl Single {
     pub fn is_valid(&self) -> bool {
         use crate::TripodId;
 
-        self.id < u32::from(crate::Single::SIZE)
+        self.id < u32::from(crate::Single::CAPACITY) 
     }
 }
 
@@ -29,7 +29,7 @@ impl TryFrom<Single> for crate::Single {
     fn try_from(value: Single) -> Result<Self, Self::Error> {
         Self::try_from(
             u16::try_from(value.id).or(Err(Error::OutsideOfRange {
-                expected: u64::from(crate::Single::SIZE),
+                expected: u64::from(crate::Single::CAPACITY),
                 found: u64::from(value.id) 
             }))?
         )

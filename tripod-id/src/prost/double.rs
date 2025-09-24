@@ -12,7 +12,7 @@ impl Double {
     pub fn is_valid(&self) -> bool {
         use crate::TripodId;
 
-        self.id < u32::from(crate::Double::SIZE)
+        self.id < u32::from(crate::Double::CAPACITY)
     }
 }
 

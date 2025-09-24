@@ -108,16 +108,10 @@ pub struct Single{
 
 
 impl TripodId for Single {
-    type SizeType = u16;
-    const SIZE: Self::SizeType = CUBED_BASE;
+    type Integer = u16;
+    const CAPACITY: Self::Integer = CUBED_BASE;
 
-    /// ```
-    /// use tripod_id::{Single, TripodId};
-    /// use std::str::FromStr;
-    /// 
-    /// assert_eq!(Single::NIL, Single::from_str("000").unwrap());
-    /// assert_eq!(Single::NIL, Single::try_from(0).unwrap());
-    /// ```
+
     const NIL: Single = Single{
         inner: 0
     };
@@ -130,12 +124,12 @@ impl TripodId for Single {
     /// assert_eq!(Single::MAX, Single::try_from(35936).unwrap());
     /// ```
     const MAX: Single = Single{
-        inner: Self::SIZE-1
+        inner: Self::CAPACITY-1
     };
 
     #[cfg(test)]
-    fn is_valid(&self) -> bool {
-        self.inner < Self::SIZE 
+    fn validate_inner(self) -> bool {
+        self.inner < Self::CAPACITY
     }
 }
 
@@ -158,7 +152,7 @@ impl FromStr for Single {
 impl Distribution<Single> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Single {
         Single {
-            inner: rng.gen_range(0..Single::SIZE)
+            inner: rng.gen_range(0..Single::CAPACITY)
         }
     }
 }
@@ -167,11 +161,11 @@ impl TryFrom<u16> for Single {
     type Error = Error;
 
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        if value < Self::SIZE {
+        if value < Self::CAPACITY {
             Ok(Self{inner: value})
         } else {
             Err(Error::OutsideOfRange{
-                expected: Self::SIZE as u64,
+                expected: Self::CAPACITY as u64,
                 found: value as u64
             })
         }
@@ -184,42 +178,57 @@ impl From<Single> for u16 {
     }
 }
 
+impl PartialEq<u16> for Single {
+    fn eq(&self, other: &u16) -> bool {
+        &u16::from(*self) == other
+    }
+}
+
+impl PartialEq<String> for Single {
+    fn eq(&self, other: &String) -> bool {
+        match Self::from_str(other) {
+            Ok(x) => *self == x,
+            Err(_) => false
+        }
+    }
+}
+
 
 
 #[cfg(test)]
 mod tests {
+    use crate::tests::{assert_id_eq_int, assert_id_eq_str};
+
     use super::*;
-
-    #[cfg(feature="prost")]
-    fn assert_prost(id: Single) {
-        use crate::SingleMessage;
-        let message = SingleMessage::from(*id);
-        assert_eq!(message.is_valid());
-        let result = Single::try_from(message).unwrap();
-        assert_eq!(id, result);
-    }
-
-    fn assert_id(id: Single) {
-        assert!(id.is_valid());
-        let s = id.to_string();
-        assert_eq!(id,Single::from_str(&s).unwrap());
-        let i = u16::from(id);
-        assert_eq!(id, Single::try_from(i).unwrap());
-    }
-
-    fn assert_random<R>(rand: &mut  R)
-    where
-        R: Rng
-    {
-        let chunk: Single = rand.r#gen();
-        
-    }
     #[test]
-    fn random_x10() {
+    fn nil() {
+        assert!(Single::NIL.validate_all().unwrap());
+        assert_eq!(Single::NIL, 0);
+        assert_eq!(Single::NIL, "000".to_string());
+    }
+
+    #[test]
+    fn max() {
+        assert!(Single::MAX.validate_all().unwrap());
+        assert_eq!(Single::MAX, Single::CAPACITY-1);
+        assert_eq!(Single::MAX, "zzz".to_string());
+        assert_eq!(Single::MAX, "ZZZ".to_string());
+    }
+
+    #[test]
+    #[should_panic]
+    fn over_sized() {
+        Single::try_from(Single::CAPACITY).unwrap();
+    }
+
+    #[test]
+    fn random() {
         let mut rng = rand::thread_rng();
         for _ in 0..10 {
-            assert_random(&mut rng);
+            let single: Single = rng.r#gen();
+            assert!(single.validate_all().unwrap());
         }
-
     }
+
+
 }
