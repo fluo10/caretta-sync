@@ -7,14 +7,17 @@ mod double;
 mod triple;
 
 pub use generated::*;
+
+use crate::TripodId;
 const PACKAGE_NAME: &'static str = "fireturtle.tripod_id";
 pub type SingleMessage = Single;
 pub type DoubleMessage = Double;
 pub type TripleMessage = Triple;
 
-pub trait TrypodIdMessage: From<Self::TrypodId> {
-    type TrypodId: crate::TripodId + TryFrom<Self>;
+pub trait TripodIdMessage: From<Self::TripodId> {
+    type TripodId: TripodId + TryFrom<Self>;
 
-    #[cfg(test)]
-    fn is_valid(&self) -> bool;
+    fn is_valid(self) -> bool {
+        Self::TripodId::try_from(self).is_ok()
+    }
 }

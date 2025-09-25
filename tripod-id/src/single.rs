@@ -2,6 +2,8 @@ use std::{fmt::Display, str::FromStr};
 
 use rand::{distributions::Standard, prelude::Distribution, Rng};
 
+#[cfg(feature="prost")]
+use crate::SingleMessage;
 use crate::{error::Error, TripodId};
 
 const CHARACTERS: &[u8;33] = b"0123456789abcdefghjkmnpqrstuvwxyz";
@@ -101,41 +103,41 @@ fn u16_to_string(int: u16) -> Result<String, Error> {
     Ok(format!("{}{}{}", first_char, second_char, third_char))
 }
 
-#[derive(Copy, Clone, Debug, PartialEq)]
-pub struct Single{
-    inner: u16
-}
+/// Single size tripod id.
+/// 
+/// # Examples
+/// 
+/// ```
+/// use std::str::FromStr;
+/// use tripod_id::{TripodId,Single};
+/// 
+/// assert_eq!(Single::from_str("012").unwrap(), Single::try_from(35).unwrap());
+/// ```
+#[derive(Copy, Clone, Debug, Hash, PartialEq)]
+pub struct Single(u16);
 
 
 impl TripodId for Single {
     type Integer = u16;
+    type Tuple = (Single,);
+    #[cfg(feature="prost")]
+    type Message = SingleMessage;
+
     const CAPACITY: Self::Integer = CUBED_BASE;
 
+    const NIL: Single = Single(0);
 
-    const NIL: Single = Single{
-        inner: 0
-    };
-
-    /// ```
-    /// use tripod_id::{TripodId, Single};
-    /// use std::str::FromStr;
-    /// 
-    /// assert_eq!(Single::MAX, Single::from_str("zzz").unwrap());
-    /// assert_eq!(Single::MAX, Single::try_from(35936).unwrap());
-    /// ```
-    const MAX: Single = Single{
-        inner: Self::CAPACITY-1
-    };
+    const MAX: Single = Single(Self::CAPACITY-1);
 
     #[cfg(test)]
     fn validate_inner(self) -> bool {
-        self.inner < Self::CAPACITY
+        self.0 < Self::CAPACITY
     }
 }
 
 impl Display for Single {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", u16_to_string(self.inner).unwrap())
+        write!(f, "{}", u16_to_string(self.0).unwrap())
     }
 }
 
@@ -143,17 +145,13 @@ impl FromStr for Single {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Self{
-            inner: str_to_u16(s)?
-        })
+        Ok(Self(str_to_u16(s)?))
     }
 }
 
 impl Distribution<Single> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Single {
-        Single {
-            inner: rng.gen_range(0..Single::CAPACITY)
-        }
+        Single(rng.gen_range(0..Single::CAPACITY))
     }
 }
 
@@ -162,7 +160,7 @@ impl TryFrom<u16> for Single {
 
     fn try_from(value: u16) -> Result<Self, Self::Error> {
         if value < Self::CAPACITY {
-            Ok(Self{inner: value})
+            Ok(Self(value))
         } else {
             Err(Error::OutsideOfRange{
                 expected: Self::CAPACITY as u64,
@@ -174,7 +172,18 @@ impl TryFrom<u16> for Single {
 
 impl From<Single> for u16 {
     fn from(value: Single) -> Self {
-        value.inner
+        value.0
+    }
+}
+
+impl From<(Single,)> for Single {
+    fn from(value: (Single,)) -> Self {
+        value.0
+    }
+}
+impl From<Single> for (Single,) {
+    fn from(value: Single) -> Self {
+        (value,)
     }
 }
 
@@ -197,22 +206,23 @@ impl PartialEq<String> for Single {
 
 #[cfg(test)]
 mod tests {
-    use crate::tests::{assert_id_eq_int, assert_id_eq_str};
-
     use super::*;
     #[test]
     fn nil() {
         assert!(Single::NIL.validate_all().unwrap());
         assert_eq!(Single::NIL, 0);
-        assert_eq!(Single::NIL, "000".to_string());
+        assert!(Single::NIL.validate_parse_strings(&["000"]).unwrap());
+        assert!(Single::NIL.is_nil());
+        assert!(!Single::NIL.is_max())
     }
 
     #[test]
     fn max() {
         assert!(Single::MAX.validate_all().unwrap());
-        assert_eq!(Single::MAX, Single::CAPACITY-1);
-        assert_eq!(Single::MAX, "zzz".to_string());
-        assert_eq!(Single::MAX, "ZZZ".to_string());
+        assert_eq!(Single::MAX, Single::CAPACITY - 1);
+        assert!(Single::MAX.validate_parse_strings(&["zzz", "ZZZ"]).unwrap());
+        assert!(Single::MAX.is_max());
+        assert!(!Single::MAX.is_nil());
     }
 
     #[test]

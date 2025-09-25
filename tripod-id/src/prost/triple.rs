@@ -1,19 +1,14 @@
 use prost::Name;
 
-use crate::{prost::Triple, Error, TripodId};
+use crate::{prost::{Triple, TripodIdMessage}, Error, TripodId};
 
 impl Name for Triple {
     const NAME: &'static str = "Triple";
     const PACKAGE: &'static str = super::PACKAGE_NAME;
 }
 
-impl Triple {
-    #[cfg(test)]
-    pub fn is_valid(&self) -> bool {
-        use crate::TripodId;
-
-        self.id < crate::Triple::CAPACITY
-    }
+impl TripodIdMessage for Triple{
+    type TripodId = crate::Triple;
 }
 
 impl From<crate::Triple> for Triple {
