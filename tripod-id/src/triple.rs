@@ -15,7 +15,7 @@ use crate::TripodId;
 /// # use tripod_id::{TripodId, Triple};
 /// # use std::str::FromStr;
 /// 
-/// let _ = tripod_id::from_str("123-abc");
+/// let _ = Triple::from_str("012-abc-def");
 /// ``` 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Triple(u64);

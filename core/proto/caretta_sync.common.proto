@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package caretta_sync.common;
+
+import "tripod_id.proto";
+
+message PublicKey {
+    bytes key = 1;
+}
+
+message UuidMessage {
+    uint64 first_half = 1;
+    uint64 second_half = 2;
+}
+
+message PeerIdentifierMessage {
+    oneof peer_identifier {
+        tripod_id.Double id = 1;
+        PublicKey public_key = 2;
+    }
+}
+
+message PeerIdentifierErrorMessage {
+    oneof error {
+        string peer_id_not_found = 1;
+        string public_key_not_found = 2;
+    }
+}

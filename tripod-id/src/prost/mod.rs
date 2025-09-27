@@ -1,4 +1,4 @@
-mod generated {
+pub mod generated {
     include!(concat!(env!("OUT_DIR"), "/fireturtle.tripod_id.rs"));
 }
 
