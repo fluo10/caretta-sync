@@ -1,5 +1,5 @@
 pub mod generated {
-    include!(concat!(env!("OUT_DIR"), "/fireturtle.tripod_id.rs"));
+    include!(concat!(env!("OUT_DIR"), "/tripod_id.rs"));
 }
 
 mod single;
@@ -9,7 +9,7 @@ mod triple;
 pub use generated::*;
 
 use crate::TripodId;
-const PACKAGE_NAME: &'static str = "fireturtle.tripod_id";
+const PACKAGE_NAME: &'static str = "tripod_id";
 pub type SingleMessage = Single;
 pub type DoubleMessage = Double;
 pub type TripleMessage = Triple;
