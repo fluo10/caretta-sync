@@ -1,0 +1,8 @@
+{
+    "protoc": {
+        "options": [
+            "--proto_path=${workspaceRoot}/tripod-id/proto",
+            "--proto_path=${workspaceRoot}/core/proto"
+        ]
+    }
+}
