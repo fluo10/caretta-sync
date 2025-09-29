@@ -1,6 +1,7 @@
-mod convert;
+pub mod authorization_request;
+mod authorized_node;
+mod remote_node;
+mod common;
 mod error;
-mod server;
-
-tonic::include_proto!("caretta_sync");
-tonic::include_proto!("caretta_sync.common");
+//mod server;
+mod generated;

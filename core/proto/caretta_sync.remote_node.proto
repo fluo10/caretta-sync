@@ -1,0 +1,70 @@
+syntax = "proto3";
+package caretta_sync.remote_node;
+
+import "caretta_sync.common.proto";
+import "tripod_id.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/empty.proto";
+
+service RemoteNode {
+    rpc Info(RemoteNodeInfoRequest) returns (RemoteNodeInfoResponse);
+    rpc InfoStream(stream RemoteNodeInfoStreamRequest) returns (stream RemoteNodeInfoStreamResponse);
+}
+
+message RemoteNodeIdentifier {
+    oneof remote_node_identifier {
+        tripod_id.Double id = 1;
+        caretta_sync.common.PublicKey public_key = 2;
+    }
+}
+
+message RemoteNodeInfoRequest {
+    RemoteNodeIdentifier remote_node = 1;
+}
+
+message RemoteNodeInfoStreamRequest {}
+
+message RemoteNodeInfoResponse {
+    RemoteNodeInfo remote_node_info = 1;
+}
+
+message RemoteNodeInfoStreamResponse {
+    RemoteNodeInfo remote_node_info = 1;
+}
+
+message RemoteNodeInfo {
+    tripod_id.Double id = 1;
+    bool authorized = 2;
+    caretta_sync.common.PublicKey public_key = 3;
+    string relay_url = 4;
+    repeated RemoteNodeDirectAddrInfo addrs = 5;
+    string conn_type = 6;
+    google.protobuf.Duration latency = 7;
+    google.protobuf.Duration last_used = 8;
+}
+
+message RemoteNodeRelayUrlInfo {
+    caretta_sync.common.Url relay_url = 1;
+    google.protobuf.Duration last_alive = 2;
+    google.protobuf.Duration latency = 3;
+}
+
+message RemoteNodeDirectAddrInfo {
+    string addr = 1;
+    google.protobuf.Duration latency = 2;
+    RemoteNodeLastControl last_control = 3;
+    google.protobuf.Duration last_payload = 4;
+    google.protobuf.Duration last_alive = 5;
+    repeated RemoteNodeSource sources = 6;
+}
+
+message RemoteNodeLastControl {
+    google.protobuf.Duration duration = 1;
+    string control_msg = 2;
+}
+
+message RemoteNodeSource {
+    string source = 1;
+    google.protobuf.Duration duration = 2;
+}

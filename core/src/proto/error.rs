@@ -12,4 +12,6 @@ pub enum ProtoDeserializeError {
     Signature(#[from] ed25519_dalek::SignatureError),
     #[error("slice parse error: {0}")]
     SliceTryFrom(#[from] std::array::TryFromSliceError),
+    #[error("Int parse error: {0}")]
+    IntTryFrom(#[from] std::num::TryFromIntError),
 }

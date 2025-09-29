@@ -4,7 +4,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .compile_protos(
             &[
                 "proto/caretta_sync.authorization_request.proto",
-                "proto/caretta_sync.peer_info.proto",
+                "proto/caretta_sync.authorized_node.proto",
+                "proto/caretta_sync.remote_node.proto",
                 "proto/caretta_sync.common.proto"
             ],
             &["proto", "../tripod-id/proto"]

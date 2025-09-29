@@ -1,5 +1,5 @@
 // mod authorization_request;
-mod peer;
+mod remote_node;
 pub mod migration;
 
 use std::{cell::OnceCell, convert::Infallible, iter::Map, path::Path, sync::{LazyLock, OnceLock}};
