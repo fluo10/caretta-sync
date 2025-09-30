@@ -1,4 +1,7 @@
 use std::{array::TryFromSliceError, ffi::OsString};
+use tonic::Status;
+
+use crate::proto::ProtoDeserializeError;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
@@ -31,10 +34,30 @@ pub enum Error {
     TomlDe(#[from] toml::de::Error),
     #[error("toml serialization error: {0}")]
     TomlSer(#[from] toml::ser::Error),
+    #[error("protobuf serialization error: {0}")]
+    ProtoSerialize(#[from] crate::proto::ProtoSerializeError),
+    #[error("protobuf deserialization error: {0}")]
+    ProtoDeserialize(#[from] crate::proto::ProtoDeserializeError),
+    #[error("Local record error: {0}")]
+    LocalRecord(#[from] crate::data::local::LocalRecordError),
+    #[error("Tripod id error: {0}")]
+    TripodId(#[from] tripod_id::Error),
 }
 
 impl From<std::ffi::OsString> for Error {
     fn from(s: OsString) -> Error {
         Self::OsStringConvert(s)
+    }
+}
+
+impl From<Error> for Status {
+    fn from(value: Error) -> Self {
+        match value {
+            Error::ProtoDeserialize(x) => { match x {
+                ProtoDeserializeError::MissingField(x) => Self::invalid_argument(format!("{} is required", x)),
+                _ => Status::unimplemented("Unimplemented protobuf deserialize error status")
+            }},
+            _ => Status::unimplemented("Unimplemented error status")
+        }
     }
 }

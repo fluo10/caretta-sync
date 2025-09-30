@@ -1,4 +1,4 @@
-pub use crate::proto::generated::common;
+pub use crate::proto::generated::common::{self, PublicKey as PublicKeyMessage, Uuid as UuidMessage, Url as UrlMessage};
 
 use crate::proto::{error::{ProtoDeserializeError, ProtoSerializeError}};
 

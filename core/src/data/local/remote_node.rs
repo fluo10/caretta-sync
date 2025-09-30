@@ -33,23 +33,24 @@ pub struct RemoteNodeRecord<T> {
 
 impl RemoteNodeRecord<LocalRecordId> {
     pub fn get_or_insert_by_public_key(public_key: &PublicKey) -> Result<Self, rusqlite::Error> {
-        match Self::get_by_public_key(public_key)? {
-            Some(x) => Ok(x),
-            None => {
+        match Self::get_by_public_key(public_key) {
+            Ok(x) => Ok(x),
+            Err(rusqlite::Error::QueryReturnedNoRows) => {
                 let new = RemoteNodeRecord{
                     id: NoLocalRecordId{},
                     public_id: rand::random(),
                     public_key: public_key.clone()                    
                 };
                 Ok(new.insert()?)
-            }
+            },
+            Err(e) => Err(e)
         }
 
     }
-    pub fn get_by_public_id(public_id: &Double) -> Result<Option<Self>, rusqlite::Error> {
+    pub fn get_by_public_id(public_id: &Double) -> Result<Self, rusqlite::Error> {
         Self::get_one_where("WHERE public_id = ?1", (public_id,))
     }
-    pub fn get_by_public_key(public_key: &PublicKey) -> Result<Option<Self>, rusqlite::Error> {
+    pub fn get_by_public_key(public_key: &PublicKey) -> Result<Self, rusqlite::Error> {
         Self::get_one_where("WHERE public_Key = ?1", (public_key.as_bytes(),))
     }
 }
@@ -113,7 +114,7 @@ mod tests {
         let key = SecretKey::generate(&mut rand::rngs::OsRng);
         let pubkey = key.public();
         let record = RemoteNodeRecord::get_or_insert_by_public_key(&pubkey).unwrap();
-        assert_eq!(record, RemoteNodeRecord::get_by_public_id(&record.public_id).unwrap().unwrap());
-        assert_eq!(record, RemoteNodeRecord::get_by_public_key(&record.public_key).unwrap().unwrap());
+        assert_eq!(record, RemoteNodeRecord::get_by_public_id(&record.public_id).unwrap());
+        assert_eq!(record, RemoteNodeRecord::get_by_public_key(&record.public_key).unwrap());
     }
 }

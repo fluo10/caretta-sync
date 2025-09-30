@@ -1,5 +1,6 @@
 // mod authorization_request;
 mod remote_node;
+pub use remote_node::RemoteNodeRecord;
 pub mod migration;
 
 use std::{cell::OnceCell, convert::Infallible, iter::Map, path::Path, sync::{LazyLock, OnceLock}};
@@ -10,7 +11,7 @@ use rusqlite::{ffi::Error, params, types::FromSql, Connection, MappedRows, Optio
 use crate::{config::StorageConfig, global::{CONFIG, LOCAL_DATABASE_CONNECTION}};
 
 // pub use authorization_request::*;
-type LocalRecordError = rusqlite::Error;
+pub type LocalRecordError = rusqlite::Error;
 
 
 /// a struct of id for local database record.
@@ -48,7 +49,7 @@ pub trait SelectableLocalRecord: LocalRecord<RowValues: TryInto<Self>> {
 
 
     
-    fn get_one_where<P>(where_statement: &str, params: P) -> Result<Option<Self>, rusqlite::Error> 
+    fn get_one_where<P>(where_statement: &str, params: P) -> Result<Self, rusqlite::Error> 
     where P: Params
     {
         let connection = LOCAL_DATABASE_CONNECTION.get_unchecked();
@@ -56,21 +57,21 @@ pub trait SelectableLocalRecord: LocalRecord<RowValues: TryInto<Self>> {
             &(String::new() + &Self::SELECT_STATEMENT + " " + where_statement),
             params,
             Self::from_row
-        ).optional()?)
+        )?)
     }
 
-    fn get_one_by_field<T>(field_name: &str, field_value: T) -> Result<Option<Self>, rusqlite::Error> 
+    fn get_one_by_field<T>(field_name: &str, field_value: T) -> Result<Self, rusqlite::Error> 
     where 
         T: ToSql
     {
         let connection = LOCAL_DATABASE_CONNECTION.get_unchecked();
-        Ok(Some(connection.query_row(
-            &("SELECT ".to_string() + &Self::COLUMNS.join(", ") + " FROM " + Self::TABLE_NAME + " WHERE " + field_name + "= ?1"),
+        Ok(connection.query_row(
+            &([&Self::SELECT_STATEMENT, "FROM", Self::TABLE_NAME, "WHERE", field_name,"= ?1"].join(" ")),
             params![field_value],
             Self::from_row
-        )?))
+        )?)
     }
-    fn get_one_by_id(id: u32) -> Result<Option<Self>, rusqlite::Error> {
+    fn get_one_by_id(id: u32) -> Result<Self, rusqlite::Error> {
         Self::get_one_by_field("id", id )
     }
     fn from_row(row: &Row<'_>) -> Result<Self, rusqlite::Error>;
