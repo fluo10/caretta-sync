@@ -5,8 +5,8 @@ syntax = "proto3";
 package caretta_sync;
 
 import "tripod_id.proto";
-import "caretta_sync.remote_node.proto";
-import "caretta_sync.common.proto";
+import "caretta_sync/remote_node.proto";
+import "caretta_sync/common.proto";
 
 service AuthorizadNode {
     rpc Info(AuthorizedNodeInfoRequest) returns (AuthorizedNodeInfoResponse);

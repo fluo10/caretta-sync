@@ -1,7 +1,7 @@
 syntax = "proto3";
 package caretta_sync;
 
-import "caretta_sync.common.proto";
+import "caretta_sync/common.proto";
 import "tripod_id.proto";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/duration.proto";
