@@ -1,5 +1,5 @@
 syntax = "proto3";
-package caretta_sync.authorization_request;
+package caretta_sync;
 
 import "caretta_sync.common.proto";
 import "caretta_sync.authorized_node.proto";
@@ -22,17 +22,17 @@ enum AuthorizationRequestKind {
 }
 
 message AuthorizationRequestSendRequest {
-    caretta_sync.remote_node.RemoteNodeIdentifier remote_node = 1;
+    caretta_sync.RemoteNodeIdentifier remote_node = 1;
 }
 
 message AuthorizationRequestSendResponse {
-    caretta_sync.remote_node.RemoteNodeInfo remote_node_info = 1;
+    caretta_sync.RemoteNodeInfo remote_node_info = 1;
     string passcode = 2;
 }
 
 message AuthorizationRequestInfo {
     tripod_id.Double id = 1;
-    caretta_sync.common.PublicKey public_key = 2;
+    caretta_sync.PublicKey public_key = 2;
     google.protobuf.Timestamp created_at = 3;
     AuthorizationRequestKind kind = 4;
     string node_info = 5;
@@ -41,7 +41,7 @@ message AuthorizationRequestInfo {
 
 message AuthorizationRequestIdentifier {
     oneof identifier {
-        caretta_sync.common.Uuid uuid = 1;
+        caretta_sync.Uuid uuid = 1;
         tripod_id.Double id = 2;
     }
 }
@@ -52,7 +52,7 @@ message AuthorizationRequestAcceptRequest {
 }
 
 message AuthorizationRequestAcceptResponse {
-    caretta_sync.authorized_node.AuthorizedNodeInfo authorized_node_info = 1;
+    caretta_sync.AuthorizedNodeInfo authorized_node_info = 1;
 }
 
 message AuthorizationRequestRejectRequest {

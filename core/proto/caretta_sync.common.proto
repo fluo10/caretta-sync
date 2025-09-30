@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package caretta_sync.common;
+package caretta_sync;
 
 message PublicKey {
     bytes key = 1;

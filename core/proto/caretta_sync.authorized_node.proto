@@ -2,7 +2,7 @@ syntax = "proto3";
 
 // The package contain service and messages about node already authorized.
 // The authorized node includes not only remote authorized peers but also local node itself.
-package caretta_sync.authorized_node;
+package caretta_sync;
 
 import "tripod_id.proto";
 import "caretta_sync.remote_node.proto";
@@ -16,13 +16,13 @@ service AuthorizadNode {
 message AuthorizedNodeIdentifier {
     oneof identifier {
         tripod_id.Single id = 1;
-        caretta_sync.common.PublicKey public_key = 2;
+        caretta_sync.PublicKey public_key = 2;
     }
 }
 
 message AuthorizedNodeInfo {
     tripod_id.Single id = 1;
-    caretta_sync.common.PublicKey public_key = 2;
+    caretta_sync.PublicKey public_key = 2;
     string note = 3;
 }
 
