@@ -1,17 +1,20 @@
-pub mod generated {
-    include!(concat!(env!("OUT_DIR"), "/tripod_id.rs"));
-}
-
 mod single;
 mod double;
 mod triple;
 
-pub use generated::*;
-
 use crate::TripodId;
+
 const PACKAGE_NAME: &'static str = "tripod_id";
+
+include!(concat!(env!("OUT_DIR"), "/tripod_id.rs"));
+
+/// Alias of single tripod-id message
 pub type SingleMessage = Single;
+
+/// Alias of double tripod-id message
 pub type DoubleMessage = Double;
+
+/// Alias of triple tripod-id message
 pub type TripleMessage = Triple;
 
 pub trait TripodIdMessage: From<Self::TripodId> {

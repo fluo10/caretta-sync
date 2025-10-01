@@ -1,0 +1,7 @@
+syntax = "proto3";
+package tripod_id;
+
+// Single size tripod id message
+message Single {
+    uint32 id = 1;
+}

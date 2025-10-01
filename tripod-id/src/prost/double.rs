@@ -1,6 +1,6 @@
 use prost::Name;
 
-use crate::{prost::{Double, TripodIdMessage}, Error, TripodId};
+use crate::{prost::{Double, TripodIdMessage}, Error};
 
 impl Name for Double {
     const NAME: &'static str = "Double";
@@ -25,5 +25,29 @@ impl TryFrom<Double> for crate::Double {
         Self::try_from(
             value.id
         )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{Double, DoubleMessage, TripodId};
+
+    #[test]
+    fn nil() {
+        let nil = DoubleMessage{id: 0};
+        assert_eq!(Double::NIL, Double::try_from(nil).unwrap());
+    }
+
+    #[test]
+    fn max() {
+        let max = DoubleMessage{id: u32::from(Double::CAPACITY)-1};
+        assert_eq!(Double::MAX, Double::try_from(max).unwrap());
+    }
+
+    #[test]
+    #[should_panic]
+    fn oversized () {
+        let oversized = DoubleMessage{id: u32::from(Double::CAPACITY)};
+        let _ = Double::try_from(oversized).unwrap();
     }
 }
