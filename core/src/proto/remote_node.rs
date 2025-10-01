@@ -1,3 +1,4 @@
+use super::*;
 use std::{pin::Pin, time::Duration};
 
 
@@ -6,10 +7,10 @@ use iroh::{endpoint::{DirectAddrInfo, RemoteInfo}, PublicKey};
 use tonic::{Request, Response, Status, Streaming};
 use tripod_id::Double;
 
-use crate::{data::local::{LocalRecordId, RemoteNodeRecord}, global::IROH_ENDPOINT, error::Error, proto::{error::{ProtoDeserializeError, ProtoSerializeError}, generated::remote_node::*}};
+use crate::{data::local::{LocalRecordId, RemoteNodeRecord}, error::Error, global::IROH_ENDPOINT, proto::{error::{ProtoDeserializeError, ProtoSerializeError}}};
 
 
-impl TryFrom<(iroh::endpoint::Source, Duration)> for RemoteNodeSource {
+impl TryFrom<(iroh::endpoint::Source, Duration)> for remote_node_info::remote_info::direct_addr_info::Source {
     type Error = ProtoSerializeError;
     fn try_from(src: (iroh::endpoint::Source, Duration)) -> Result<Self, Self::Error> {
         let (source, duration )= src;

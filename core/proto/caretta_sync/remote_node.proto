@@ -60,7 +60,7 @@ message RemoteNodeInfo {
                 google.protobuf.Duration duration = 1;
                 ControlMsg control_msg = 2;
             }
-            message Source {
+            message SourceDuration {
                 oneof source {
                     google.protobuf.Empty saved = 1;
                     google.protobuf.Empty udp = 2;
@@ -76,7 +76,7 @@ message RemoteNodeInfo {
             LastControl last_control = 3;
             google.protobuf.Duration last_payload = 4;
             google.protobuf.Duration last_alive = 5;
-            repeated Source sources = 6;
+            repeated SourceDuration sources = 6;
         }
 
         message RelayUrlInfo {
