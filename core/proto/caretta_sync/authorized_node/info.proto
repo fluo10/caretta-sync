@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package caretta_sync.authorized_node;
+
+import "tripod_id/single.proto";
+import "caretta_sync/iroh/public_key.proto";
+
+message Info {
+    tripod_id.Single id = 1;
+    caretta_sync.iroh.PublicKey public_key = 2;
+    string note = 3;
+}

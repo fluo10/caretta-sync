@@ -1,0 +1,12 @@
+syntax = "proto3";
+package caretta_sync.authorization_request;
+
+import "caretta_sync/common/uuid.proto";
+import "tripod_id/double.proto";
+
+message Identifier {
+    oneof identifier_value {
+        caretta_sync.common.Uuid uuid = 1;
+        tripod_id.Double id = 2;
+    }
+}

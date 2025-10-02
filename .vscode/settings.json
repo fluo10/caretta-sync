@@ -1,8 +1,10 @@
 {
     "protoc": {
+        "compile_on_save": true,
         "options": [
             "--proto_path=${workspaceRoot}/tripod-id/proto",
-            "--proto_path=${workspaceRoot}/core/proto"
+            "--proto_path=${workspaceRoot}/core/proto",
+            "--java_out=${workspaceRoot}/.tmp"
         ]
     }
 }

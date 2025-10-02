@@ -1,0 +1,9 @@
+syntax = "proto3";
+package caretta_sync.net;
+
+import "caretta_sync/net/ipv6_addr.proto";
+
+message SocketAddrV6 {
+    Ipv6Addr ip = 1;
+    uint32 port = 2;
+}

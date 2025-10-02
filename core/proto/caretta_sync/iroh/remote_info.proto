@@ -1,0 +1,18 @@
+syntax = "proto3";
+package caretta_sync.iroh;
+
+import "caretta_sync/iroh/public_key.proto";
+import "caretta_sync/iroh/relay_url_info.proto";
+import "caretta_sync/iroh/direct_addr_info.proto";
+import "caretta_sync/iroh/connection_type.proto";
+import "google/protobuf/duration.proto";
+
+// A messege of iroh::RemoteInfo.
+message RemoteInfo {
+    PublicKey node_id = 3;
+    RelayUrlInfo relay_url = 4;
+    repeated DirectAddrInfo addrs = 5;
+    ConnectionType conn_type = 6;
+    google.protobuf.Duration latency = 7;
+    google.protobuf.Duration last_used = 8;
+}

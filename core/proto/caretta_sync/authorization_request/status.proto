@@ -1,0 +1,10 @@
+syntax = "proto3";
+package caretta_sync.authorization_request;
+
+enum Status {
+    UNSPECIFIED = 0;
+    SENT = 1;
+    RECEIVED = 2;
+    ACCEPTED = 3;
+    REJECTED = 4;
+}

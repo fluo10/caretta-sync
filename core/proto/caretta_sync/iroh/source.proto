@@ -1,0 +1,23 @@
+syntax = "proto3";
+package caretta_sync.iroh;
+
+message Source {
+    message Saved{}
+    message Udp{}
+    message Relay{}
+    message App{}
+    message Discovery{
+        string value = 1;
+    }
+    message NamedApp {
+        string value = 1;
+    }
+    oneof source_value {
+            Saved saved = 1;
+            Udp udp = 2;
+            Relay relay = 3;
+            App app = 4;
+            Discovery discovery = 5;
+            NamedApp named_app = 6;
+    };
+}

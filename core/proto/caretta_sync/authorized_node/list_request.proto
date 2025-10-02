@@ -1,0 +1,5 @@
+syntax = "proto3";
+
+package caretta_sync.authorized_node;
+
+message ListRequest{}

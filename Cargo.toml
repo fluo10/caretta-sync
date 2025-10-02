@@ -53,7 +53,7 @@ tokio-stream = "0.1.17"
 tonic = "0.14.0"
 url = { version = "2.5.7", features = ["serde"] }
 uuid = { version = "1.17.0", features = ["v7"] }
-iroh = { version = "0.91.2", features = ["discovery-local-network", "discovery-pkarr-dht"] }
+iroh = { version = "0.92.0", features = ["discovery-local-network", "discovery-pkarr-dht"] }
 prost = "0.14.1"
 prost-types = "0.14.1"
 tonic-prost-build = "0.14.0"

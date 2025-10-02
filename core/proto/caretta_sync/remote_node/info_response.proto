@@ -1,0 +1,8 @@
+syntax = "proto3";
+package caretta_sync.remote_node;
+
+import "caretta_sync/remote_node/info.proto";
+
+message InfoResponse {
+    Info remote_node_info = 1;
+}

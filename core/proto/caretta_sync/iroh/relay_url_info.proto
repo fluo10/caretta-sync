@@ -1,0 +1,12 @@
+syntax = "proto3";
+package caretta_sync.iroh;
+
+import "google/protobuf/duration.proto";
+import "caretta_sync/common/url.proto";
+
+// A protobuf message of iroh::RelayUrlInfo
+message RelayUrlInfo {
+    caretta_sync.common.Url relay_url = 1;
+    google.protobuf.Duration last_alive = 2;
+    google.protobuf.Duration latency = 3;
+}

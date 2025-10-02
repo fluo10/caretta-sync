@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package caretta_sync.net;
+
+import "caretta_sync/net/socket_addr_v4.proto";
+import "caretta_sync/net/socket_addr_v6.proto";
+
+// Protobuf message of std::net::SocketAddr.
+message SocketAddr {
+    oneof socket_addr_value {
+        SocketAddrV4 v4 = 1;
+        SocketAddrV6 v6 = 2;
+    }
+}
+
+
+
+
+

@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package caretta_sync.authorized_node;
+import "caretta_sync/authorized_node/info.proto";
+
+message InfoResponse {
+    Info node_info = 1;
+}

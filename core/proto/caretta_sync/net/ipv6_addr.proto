@@ -1,0 +1,7 @@
+syntax = "proto3";
+package caretta_sync.net;
+
+message Ipv6Addr {
+    uint64 high_bits = 1;
+    uint64 low_bits = 2;
+}

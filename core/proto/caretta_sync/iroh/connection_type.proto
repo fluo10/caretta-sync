@@ -1,0 +1,26 @@
+syntax = "proto3";
+package caretta_sync.iroh;
+
+import "caretta_sync/common/url.proto";
+import "caretta_sync/net/socket_addr.proto";
+
+// A protobuf message of iroh::ConnectionType
+message ConnectionType {
+    message Direct {
+        caretta_sync.net.SocketAddr direct_value = 1;
+    }
+    message Relay {
+        caretta_sync.common.Url relay_value = 1;
+    }
+    message Mixed {
+        caretta_sync.net.SocketAddr socket_addr = 1;
+        caretta_sync.common.Url relay_url = 2; 
+    }
+    message None{}
+    oneof connection_type_value {
+        Direct direct = 1;
+        Relay relay = 2;
+        Mixed mixed = 3;
+        None none = 4;
+    }
+}

@@ -1,0 +1,12 @@
+syntax = "proto3";
+package caretta_sync.remote_node;
+
+import "caretta_sync/remote_node/info_request.proto";
+import "caretta_sync/remote_node/info_response.proto";
+import "caretta_sync/remote_node/list_request.proto";
+import "caretta_sync/remote_node/list_response.proto";
+
+service RemoteNode {
+    rpc Info(InfoRequest) returns (InfoResponse);
+    rpc List(stream ListRequest) returns (stream ListResponse);
+}

@@ -1,0 +1,18 @@
+syntax = "proto3";
+package caretta_sync.iroh;
+
+// The message of iroh::endpoint::ControlMsg.
+// To ensure compatiility with irof::endpoint::ControlMsg, 
+// it's implemented as a message rather than an enum to accommodate the posibility 
+// that values may be added to the enum in rust in the future.
+message ControlMsg {
+    message Ping {}
+    message Pong {}
+    message CallMeMayBe {}
+
+    oneof control_msg_vaue {
+        Ping ping = 1;
+        Pong pong = 2;
+        CallMeMayBe call_me_maybe = 3;
+    }
+}

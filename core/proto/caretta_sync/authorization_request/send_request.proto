@@ -1,0 +1,8 @@
+syntax = "proto3";
+package caretta_sync.authorization_request;
+
+import "caretta_sync/remote_node/identifier.proto";
+
+message SendRequest {
+    caretta_sync.remote_node.Identifier remote_node = 1;
+}

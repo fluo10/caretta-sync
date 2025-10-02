@@ -1,0 +1,8 @@
+syntax = "proto3";
+package caretta_sync.authorization_request;
+
+import "caretta_sync/authorization_request/identifier.proto";
+
+message InfoRequest {
+    Identifier request = 1;   
+}

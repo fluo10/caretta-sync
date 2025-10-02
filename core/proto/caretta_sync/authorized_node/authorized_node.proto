@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package caretta_sync.authorized_node;
+
+import "caretta_sync/authorized_node/info_request.proto";
+import "caretta_sync/authorized_node/info_response.proto";
+import "caretta_sync/authorized_node/list_request.proto";
+import "caretta_sync/authorized_node/list_response.proto";
+
+
+service AuthorizedNode {
+    rpc Info(InfoRequest) returns (InfoResponse);
+    rpc List(stream ListRequest) returns (stream ListResponse);
+}

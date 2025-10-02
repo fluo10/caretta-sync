@@ -1,0 +1,9 @@
+syntax = "proto3";
+package caretta_sync.authorization_request;
+
+import "caretta_sync/authorization_request/info.proto";
+
+
+message InfoResponse{
+    Info info = 1;
+}
