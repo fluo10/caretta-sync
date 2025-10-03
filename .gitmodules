@@ -1,0 +1,3 @@
+[submodule "tripod-id"]
+	path = tripod-id
+	url = https://github.com/fluo10/tripod-id.git
