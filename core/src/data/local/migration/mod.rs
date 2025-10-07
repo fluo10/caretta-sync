@@ -1,17 +1,14 @@
-mod v1;
+use sea_orm_migration::*;
 
-use rusqlite::{Error, Connection};
-use tracing::{event, Level};
+mod m20220101_000001_create_table;
 
-pub fn migrate(con: &mut Connection) -> Result<(), Error>{
-    let version: u32 = con.pragma_query_value(None,"user_version", |row| row.get(0)).expect("Failed to get user_version");
-    if version < 1 {
-        let tx = con.transaction()?;
-        event!(Level::INFO, "Migrate local db to version 1");
-        v1::migrate(&tx)?;
-        tx.pragma_update(None,  "user_version", 1)?;
-        tx.commit()?;
-        event!(Level::INFO, "Migration done.");
-    } 
-    Ok(())
-}
+pub struct Migrator;
+
+#[async_trait::async_trait]
+impl MigratorTrait for Migrator {
+    fn migrations() -> Vec<Box<dyn MigrationTrait>> {
+        vec![
+            Box::new(m20220101_000001_create_table::Migration),
+        ]
+    }
+} 

@@ -1,3 +1,5 @@
+//! A module contains global variables.
+
 use std::{any::type_name, collections::HashMap, net::{IpAddr, Ipv4Addr}, path::{Path, PathBuf}, sync::LazyLock};
 
 use crate::{config::{StorageConfig}, error::Error }; 

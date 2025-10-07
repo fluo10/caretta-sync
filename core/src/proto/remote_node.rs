@@ -6,7 +6,7 @@ use iroh::{endpoint::{DirectAddrInfo, RemoteInfo}, PublicKey};
 use tonic::{Request, Response, Status, Streaming};
 use tripod_id::Double;
 
-use crate::{data::local::{LocalRecordId, RemoteNodeRecord}, error::Error, global::IROH_ENDPOINT, proto::{error::{ProtoDeserializeError, ProtoSerializeError}}};
+use crate::{error::Error, global::IROH_ENDPOINT, proto::{error::{ProtoDeserializeError, ProtoSerializeError}}};
 
 
 tonic::include_proto!("caretta_sync.remote_node");

@@ -3,7 +3,6 @@ use std::path::PathBuf;
 #[cfg(feature="cli")]
 use clap::Args;
 
-use rusqlite::Connection;
 #[cfg(any(test, feature="test"))]
 use tempfile::tempdir;
 use crate::{config::{ConfigError, PartialConfig}, utils::{emptiable::Emptiable, get_binary_name, mergeable::Mergeable}};

@@ -1,49 +1,46 @@
-use std::{fs::create_dir_all, path::{Path, PathBuf}, sync::OnceLock};
+use std::{fs::create_dir_all, path::{Path, PathBuf}};
 
-use rusqlite::Connection;
+use sea_orm::{Database, DatabaseConnection};
+use sea_orm_migration::MigratorTrait;
+use tokio::sync::OnceCell;
+use tracing_subscriber::registry::Data;
 
-use crate::{data::local::migration::migrate, error::Error};
+use crate::{ error::Error};
 
-pub static LOCAL_DATABASE_CONNECTION: GlobalLocalDatabaseConnection = GlobalLocalDatabaseConnection::const_new();
+pub static LOCAL_DATABASE_CONNECTION: GlobalDatabaseConnection = GlobalDatabaseConnection::const_new();
 
-pub struct GlobalLocalDatabaseConnection {
-    path: OnceLock<PathBuf>
+
+pub struct GlobalDatabaseConnection {
+    inner: OnceCell<DatabaseConnection>
 }
 
-fn path_to_connection_or_panic<P>(path: &P) -> Connection 
-where  
-    P: AsRef<Path>
-{
-    Connection::open(path.as_ref()).expect("Failed to open database connection for local data")
-}
-
-impl GlobalLocalDatabaseConnection {
+impl GlobalDatabaseConnection {
     const fn const_new() ->  Self {
         Self {
-            path: OnceLock::new()
+            inner: OnceCell::const_new()
         }
     }
 
-    pub fn get_or_init<P>(&self, path: &P) -> Connection
+    pub async fn get_or_try_init<P,M>(&self, path: &P, _: M) -> Result<&DatabaseConnection, Error>
     where 
         P: AsRef<Path>,
+        M: MigratorTrait
     {
-        path_to_connection_or_panic(self.path.get_or_init(|| {
+        self.inner.get_or_try_init(|| async move {
             let path = path.as_ref();
             let parent = path.parent().expect("Database path should have parent directory");
             create_dir_all(parent).expect("Failed to create parent directory of database");
-            let mut conn = path_to_connection_or_panic(&path);
-            migrate(&mut conn).expect("Local database migration should be done correctly");
-            path.to_path_buf()
-        }))
+            let url = "sqlite:/".to_owned() + path.to_str().expect("Invalid path string") + "?mode=rwc";
+            let db = Database::connect(url).await?;
+            M::up(&db, None).await?;
+            Ok(db)
+        }).await
     }
         
-    pub fn get(&self) -> Option<Connection> {
-        self.path.get().map(|path| {
-            path_to_connection_or_panic(path)
-        })
+    pub fn get(&self) -> Option<&DatabaseConnection> {
+        self.inner.get()
     }
-    pub fn get_unchecked(&self) -> Connection {
-        self.get().expect("Global database for local data mulst be initialized before use")
+    pub fn get_unchecked(&self) -> &DatabaseConnection {
+        self.get().expect("Global database mulst be initialized before use")
     }
 }

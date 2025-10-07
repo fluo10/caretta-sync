@@ -39,7 +39,7 @@ pub enum Error {
     #[error("protobuf deserialization error: {0}")]
     ProtoDeserialize(#[from] crate::proto::ProtoDeserializeError),
     #[error("Local record error: {0}")]
-    LocalRecord(#[from] crate::data::local::LocalRecordError),
+    LocalDb(#[from] sea_orm::DbErr),
     #[error("Tripod id error: {0}")]
     TripodId(#[from] tripod_id::Error),
 }
