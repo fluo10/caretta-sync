@@ -1,7 +1,0 @@
-syntax = "proto3";
-package tripod_id;
-
-// Triple size tripod id message
-message Triple {
-    uint64 id = 1;
-}
