@@ -4,7 +4,7 @@ use std::{pin::Pin, time::Duration};
 use futures::{future::Remote, Stream};
 use iroh::{endpoint::{DirectAddrInfo, RemoteInfo}, PublicKey};
 use tonic::{Request, Response, Status, Streaming};
-use tripod_id::Double;
+use mtid::Dtid;
 
 use crate::{error::Error, global::IROH_ENDPOINT, proto::{error::{ProtoDeserializeError, ProtoSerializeError}}};
 

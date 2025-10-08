@@ -7,7 +7,7 @@ use crate::{ config::{Config, PartialConfig, PartialIrohConfig, PartialRpcConfig
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 pub static TEST_CONFIG: LazyLock<Config> = LazyLock::new(|| {
-    let test_dir = TempDir::new().unwrap().keep();
+    let test_dir = tempfile::Builder::new().prefix("caretta-sync").tempdir().unwrap().keep();
     let data_dir = test_dir.join("data");
     let cache_dir = test_dir.join("cache");
 

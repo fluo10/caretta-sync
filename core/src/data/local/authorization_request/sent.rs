@@ -1,4 +1,4 @@
-use caretta_id::SingleId;
+use caretta_id::StidId;
 use chrono::{DateTime, Local, NaiveDateTime};
 use iroh::{NodeId, PublicKey};
 use rusqlite::types::FromSqlError;

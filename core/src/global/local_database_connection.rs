@@ -30,7 +30,7 @@ impl GlobalDatabaseConnection {
             let path = path.as_ref();
             let parent = path.parent().expect("Database path should have parent directory");
             create_dir_all(parent).expect("Failed to create parent directory of database");
-            let url = "sqlite:/".to_owned() + path.to_str().expect("Invalid path string") + "?mode=rwc";
+            let url = "sqlite://".to_owned() + path.to_str().expect("Invalid path string") + "?mode=rwc";
             let db = Database::connect(url).await?;
             M::up(&db, None).await?;
             Ok(db)

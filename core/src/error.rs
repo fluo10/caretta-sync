@@ -41,7 +41,7 @@ pub enum Error {
     #[error("Local record error: {0}")]
     LocalDb(#[from] sea_orm::DbErr),
     #[error("Tripod id error: {0}")]
-    TripodId(#[from] tripod_id::Error),
+    TripodId(#[from] mtid::Error),
 }
 
 impl From<std::ffi::OsString> for Error {

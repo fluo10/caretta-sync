@@ -2,10 +2,10 @@ syntax = "proto3";
 package caretta_sync.remote_node;
 
 import "caretta_sync/iroh/remote_info.proto";
-import "tripod_id/double.proto";
+import "mtid/dtid.proto";
 
 message Info {
-    tripod_id.Double public_id = 1;
+    mtid.Dtid public_id = 1;
     caretta_sync.iroh.RemoteInfo remote_info = 2;
 }
 

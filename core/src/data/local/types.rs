@@ -8,6 +8,7 @@ use iroh::PublicKey;
 /// # Examples
 /// ```
 /// # use sea_orm::entity::prelude::*;
+/// use caretta_sync_core::data::local::types::PublicKeyBlob;
 /// #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
 /// #[sea_orm(table_name = "public_key_example")]
 /// pub struct Model {

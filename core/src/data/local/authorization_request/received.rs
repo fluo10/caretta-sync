@@ -1,4 +1,4 @@
-use caretta_id::{DoubleId, SingleId};
+use caretta_id::{DtidId, StidId};
 use chrono::{DateTime, Local, NaiveDateTime};
 use iroh::{NodeId, PublicKey};
 

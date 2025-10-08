@@ -3,11 +3,11 @@ package caretta_sync.authorization_request;
 
 import "caretta_sync/iroh/public_key.proto";
 import "caretta_sync/authorization_request/status.proto";
-import "tripod_id/double.proto";
+import "mtid/dtid.proto";
 import "google/protobuf/timestamp.proto";
 
 message Info {
-    tripod_id.Double id = 1;
+    mtid.Dtid id = 1;
     caretta_sync.iroh.PublicKey public_key = 2;
     google.protobuf.Timestamp created_at = 3;
     google.protobuf.Timestamp closed_at = 6;

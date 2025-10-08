@@ -1,7 +1,8 @@
 //! Structs about cached remote_node.
 
-use sea_orm::entity::prelude::*;
-use tripod_id::Double;
+use rand::Rng;
+use sea_orm::{entity::prelude::*, ActiveValue::Set};
+use mtid::Dtid;
 use chrono::{DateTime, Local, NaiveDateTime};
 use iroh::{NodeId, PublicKey};
 
@@ -26,13 +27,64 @@ pub struct Model {
 
     /// public tripod id of remote_node.
     /// this id is use only the node itself and not synced so another node has different local_remote_node_id even if its public_key is same.
-    pub public_id: Double,
+    pub public_id: Dtid,
 
     /// Iroh public key
     pub public_key: PublicKeyBlob,
 }
 
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {}
+#[derive(Copy, Clone, Debug, EnumIter)]
+pub enum Relation {
+    AuthorizationRequest,
+}
+
+impl RelationTrait for Relation {
+    fn def(&self) -> RelationDef {
+        match self {
+            Self::AuthorizationRequest => Entity::has_many(super::authorization_request::Entity).into(),
+        }
+    }
+}
+
+impl Related<super::authorization_request::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::AuthorizationRequest.def()
+    }
+}
+
+impl From<PublicKey> for ActiveModel {
+    fn from(value: PublicKey) -> Self {
+        let mut rng = rand::thread_rng();
+        let dtid: Dtid = rng.r#gen(); 
+        Self {
+            public_key: Set(value.into()),
+            public_id: Set(dtid),
+            ..Default::default()
+        }
+    }
+}
 
 impl ActiveModelBehavior for ActiveModel {}
+
+#[cfg(test)]
+mod tests {
+    use iroh::SecretKey;
+    use rand::Rng;
+    use sea_orm::ActiveValue::Set;
+    use crate::{data::local::migration::TestMigrator, tests::TEST_CONFIG};
+
+    use super::*;
+    #[tokio::test]
+    async fn insert_new() {
+        let db = crate::global::LOCAL_DATABASE_CONNECTION.get_or_try_init(&TEST_CONFIG.storage.get_local_database_path(), TestMigrator).await.unwrap();
+        let mut rng = rand::thread_rng();
+
+        let public_key = SecretKey::generate(rng).public();
+        let active_model = ActiveModel::from(public_key);
+        let model = active_model.clone().insert(db).await.unwrap();
+        assert_eq!(model.public_id, active_model.public_id.unwrap());
+        assert_eq!(model.public_key, active_model.public_key.unwrap());
+        
+    }
+
+}

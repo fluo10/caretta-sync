@@ -13,7 +13,6 @@ test = ["dep:tempfile", ]
 
 [dependencies]
 base64 = "0.22.1"
-tripod-id.workspace = true
 chrono.workspace = true
 chrono-tz = "0.10.3"
 ciborium.workspace = true
@@ -21,6 +20,7 @@ clap = {workspace = true, optional = true}
 dirs = "6.0.0"
 futures.workspace = true
 iroh.workspace = true
+mtid.workspace = true
 prost.workspace = true
 prost-types.workspace = true
 sea-orm.workspace = true
