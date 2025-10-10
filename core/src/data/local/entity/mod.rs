@@ -1,4 +1,6 @@
 mod authorization_request;
+mod sent_authorization_request;
+mod received_authorization_request;
 mod remote_node;
 
 pub use remote_node::{

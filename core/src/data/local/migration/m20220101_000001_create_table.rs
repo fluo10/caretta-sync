@@ -32,7 +32,7 @@ impl MigrationTrait for Migration {
                     "CREATE TABLE received_authorization_request (
                         id                       INTEGER PRIMARY KEY,
                         authorization_request_id INTEGER NOT NULL UNIQUE,
-                        node_note         TEXT,
+                        sender_note         TEXT,
                         FOREIGN KEY(authorization_request_id) REFERENCES authorization_request(id)
                     )"
                 ).await?;
@@ -40,7 +40,7 @@ impl MigrationTrait for Migration {
                     "CREATE TABLE sent_authorization_request (
                         id                       INTEGER PRIMARY KEY,
                         authorization_request_id INTEGER NOT NULL UNIQUE,
-                        passcode                 TEXT NOT NULL,
+                        passcode                 INTEGER NOT NULL,
                         FOREIGN KEY(authorization_request_id) REFERENCES authorization_request(id)
                     )"
                 ).await?;

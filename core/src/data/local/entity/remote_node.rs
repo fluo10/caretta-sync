@@ -25,7 +25,7 @@ pub struct Model {
     #[sea_orm(primary_key)]
     pub id: u32,
 
-    /// public tripod id of remote_node.
+    /// public DITD of remote_node.
     /// this id is use only the node itself and not synced so another node has different local_remote_node_id even if its public_key is same.
     pub public_id: Dtid,
 
@@ -66,6 +66,17 @@ impl From<PublicKey> for ActiveModel {
 
 impl ActiveModelBehavior for ActiveModel {}
 
+impl ActiveModel {
+    #[cfg(test)]
+    pub fn new_test() -> Self {
+        use iroh::SecretKey;
+
+        let mut rng = rand::thread_rng();
+        let public_key = SecretKey::generate(rng).public();
+        ActiveModel::from(public_key)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use iroh::SecretKey;
@@ -75,12 +86,10 @@ mod tests {
 
     use super::*;
     #[tokio::test]
-    async fn insert_new() {
+    async fn insert() {
         let db = crate::global::LOCAL_DATABASE_CONNECTION.get_or_try_init(&TEST_CONFIG.storage.get_local_database_path(), TestMigrator).await.unwrap();
-        let mut rng = rand::thread_rng();
 
-        let public_key = SecretKey::generate(rng).public();
-        let active_model = ActiveModel::from(public_key);
+        let active_model = ActiveModel::new_test();
         let model = active_model.clone().insert(db).await.unwrap();
         assert_eq!(model.public_id, active_model.public_id.unwrap());
         assert_eq!(model.public_key, active_model.public_key.unwrap());
