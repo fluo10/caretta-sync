@@ -1,6 +1,8 @@
-use sea_orm::{sea_query::{Nullable, ValueType, ValueTypeErr}, DbErr, TryGetable, Value};
 use iroh::PublicKey;
-
+use sea_orm::{
+    DbErr, TryGetable, Value,
+    sea_query::{Nullable, ValueType, ValueTypeErr},
+};
 
 /// A wrapper of iroh::PublicKey to read/write with sea-orm
 /// Saved as blob.
@@ -18,10 +20,10 @@ use iroh::PublicKey;
 /// }
 /// # #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 /// # pub enum Relation {}
-/// # 
+/// #
 /// # impl ActiveModelBehavior for ActiveModel{}
-/// ``` 
-#[derive(Clone, Debug, PartialEq, Eq, )]
+/// ```
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct PublicKeyBlob(PublicKey);
 
 impl From<PublicKey> for PublicKeyBlob {
@@ -45,20 +47,18 @@ impl From<PublicKeyBlob> for Vec<u8> {
 impl TryFrom<Vec<u8>> for PublicKeyBlob {
     type Error = DbErr;
     fn try_from(value: Vec<u8>) -> Result<Self, Self::Error> {
-        let arr: [u8;32] = value[0..32].try_into().map_err(|e| {
-            DbErr::TryIntoErr {
-                from: stringify!(Vec<u8>),
-                into: stringify!(PublicKeyBlob),
-                source: Box::new(e)
-            }
+        let arr: [u8; 32] = value[0..32].try_into().map_err(|e| DbErr::TryIntoErr {
+            from: stringify!(Vec<u8>),
+            into: stringify!(PublicKeyBlob),
+            source: Box::new(e),
         })?;
         match PublicKey::from_bytes(&arr) {
             Ok(x) => Ok(Self(x)),
             Err(e) => Err(DbErr::TryIntoErr {
                 from: stringify!(Vec<u8>),
                 into: stringify!(PublicKeyBlob),
-                source: Box::new(e) 
-            })
+                source: Box::new(e),
+            }),
         }
     }
 }
@@ -70,10 +70,12 @@ impl From<PublicKeyBlob> for sea_orm::Value {
 }
 
 impl TryGetable for PublicKeyBlob {
-    fn try_get_by<I: sea_orm::ColIdx>(res: &sea_orm::QueryResult, index: I) -> Result<Self, sea_orm::TryGetError> {
+    fn try_get_by<I: sea_orm::ColIdx>(
+        res: &sea_orm::QueryResult,
+        index: I,
+    ) -> Result<Self, sea_orm::TryGetError> {
         let vec = <Vec<u8> as sea_orm::TryGetable>::try_get_by(res, index)?;
         <Self as TryFrom<Vec<u8>>>::try_from(vec).map_err(|e| e.into())
-
     }
 }
 

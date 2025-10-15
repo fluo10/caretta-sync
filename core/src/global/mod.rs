@@ -1,8 +1,14 @@
 //! A module contains global variables.
 
-use std::{any::type_name, collections::HashMap, net::{IpAddr, Ipv4Addr}, path::{Path, PathBuf}, sync::LazyLock};
+use std::{
+    any::type_name,
+    collections::HashMap,
+    net::{IpAddr, Ipv4Addr},
+    path::{Path, PathBuf},
+    sync::LazyLock,
+};
 
-use crate::{config::{StorageConfig}, error::Error }; 
+use crate::{config::StorageConfig, error::Error};
 use tokio::sync::{OnceCell, RwLock, RwLockReadGuard, RwLockWriteGuard};
 
 mod config;
@@ -21,4 +27,3 @@ pub fn generate_uuid() -> Uuid {
 fn uninitialized_message<T>(var: T) -> String {
     format!("{} is uninitialized!", &stringify!(var))
 }
-

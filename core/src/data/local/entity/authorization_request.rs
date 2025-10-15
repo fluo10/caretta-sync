@@ -1,14 +1,14 @@
 use std::os::unix::raw::time_t;
 
-use mtid::Dtid;
 use chrono::{DateTime, Local, NaiveDateTime};
 use iroh::{NodeId, PublicKey};
+use mtid::Dtid;
 use sea_orm::entity::prelude::*;
 use uuid::Uuid;
 
 /// Request of node authorization.
 #[derive(Debug, Clone, PartialEq, Eq, DeriveEntityModel)]
-#[sea_orm(table_name="authorization_request")]
+#[sea_orm(table_name = "authorization_request")]
 pub struct Model {
     #[sea_orm(primary_key)]
     pub id: u32,
@@ -23,7 +23,7 @@ pub struct Model {
 pub enum Relation {
     RemoteNode,
     ReceivedAuthorizationRequest,
-    SentAuthorizationRequest
+    SentAuthorizationRequest,
 }
 
 impl RelationTrait for Relation {
@@ -33,8 +33,12 @@ impl RelationTrait for Relation {
                 .from(Column::RemoteNodeId)
                 .to(super::remote_node::Column::Id)
                 .into(),
-            Self::ReceivedAuthorizationRequest => Entity::has_one(super::received_authorization_request::Entity).into(),
-            Self::SentAuthorizationRequest => Entity::has_one(super::sent_authorization_request::Entity).into(),
+            Self::ReceivedAuthorizationRequest => {
+                Entity::has_one(super::received_authorization_request::Entity).into()
+            }
+            Self::SentAuthorizationRequest => {
+                Entity::has_one(super::sent_authorization_request::Entity).into()
+            }
         }
     }
 }
@@ -63,8 +67,8 @@ impl ActiveModel {
     #[cfg(test)]
     pub fn new_test(remote_node: &super::remote_node::Model) -> Self {
         let mut rng = rand::thread_rng();
-        use sea_orm::ActiveValue::Set;
         use rand::Rng;
+        use sea_orm::ActiveValue::Set;
 
         Self {
             uuid: Set(uuid::Uuid::now_v7()),
@@ -78,15 +82,23 @@ impl ActiveModel {
 
 #[cfg(test)]
 mod tests {
+    use crate::{
+        data::local::{
+            RemoteNodeActiveModel, entity::authorization_request, migration::TestMigrator,
+        },
+        tests::TEST_CONFIG,
+    };
     use iroh::SecretKey;
     use rand::Rng;
     use sea_orm::ActiveValue::Set;
-    use crate::{data::local::{entity::authorization_request, migration::TestMigrator, RemoteNodeActiveModel}, tests::TEST_CONFIG};
 
     use super::*;
     #[tokio::test]
     async fn insert() {
-        let db = crate::global::LOCAL_DATABASE_CONNECTION.get_or_try_init(&TEST_CONFIG.storage.get_local_database_path(), TestMigrator).await.unwrap();
+        let db = crate::global::LOCAL_DATABASE_CONNECTION
+            .get_or_try_init(&TEST_CONFIG.storage.get_local_database_path(), TestMigrator)
+            .await
+            .unwrap();
         let mut rng = rand::thread_rng();
 
         let remote_node_public_key = SecretKey::generate(&mut rng).public();
@@ -100,9 +112,14 @@ mod tests {
             created_at: Set(chrono::Local::now()),
             ..Default::default()
         };
-        let authorization_request_model = authorization_request_active_model.clone().insert(db).await.unwrap();
-        assert_eq!(authorization_request_active_model.uuid.unwrap(), authorization_request_model.uuid);
-
+        let authorization_request_model = authorization_request_active_model
+            .clone()
+            .insert(db)
+            .await
+            .unwrap();
+        assert_eq!(
+            authorization_request_active_model.uuid.unwrap(),
+            authorization_request_model.uuid
+        );
     }
-
 }

@@ -1,19 +1,24 @@
 pub mod error;
-mod storage;
 mod iroh;
 mod rpc;
+mod storage;
 
-use std::{default::Default, fs::File, io::{Read, Write}, path::Path};
-use crate::{utils::{emptiable::Emptiable, mergeable::Mergeable}};
+use crate::utils::{emptiable::Emptiable, mergeable::Mergeable};
 pub use error::ConfigError;
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
+use std::{
+    default::Default,
+    fs::File,
+    io::{Read, Write},
+    path::Path,
+};
 
-use tokio::{io::{AsyncReadExt, AsyncWriteExt}};
-pub use storage::{StorageConfig, PartialStorageConfig};
 pub use iroh::{IrohConfig, PartialIrohConfig};
 pub use rpc::*;
+pub use storage::{PartialStorageConfig, StorageConfig};
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
-#[cfg(feature="cli")]
+#[cfg(feature = "cli")]
 use clap::Args;
 
 #[derive(Clone, Debug)]
@@ -44,29 +49,38 @@ impl AsRef<RpcConfig> for Config {
 impl TryFrom<PartialConfig> for Config {
     type Error = crate::error::Error;
     fn try_from(value: PartialConfig) -> Result<Self, Self::Error> {
-        Ok(Self{
-            rpc: value.rpc.ok_or(crate::error::Error::MissingConfig("rpc"))?.try_into()?,
-            iroh: value.iroh.ok_or(crate::error::Error::MissingConfig("p2p"))?.try_into()?,
-            storage: value.storage.ok_or(crate::error::Error::MissingConfig("storage"))?.try_into()?
+        Ok(Self {
+            rpc: value
+                .rpc
+                .ok_or(crate::error::Error::MissingConfig("rpc"))?
+                .try_into()?,
+            iroh: value
+                .iroh
+                .ok_or(crate::error::Error::MissingConfig("p2p"))?
+                .try_into()?,
+            storage: value
+                .storage
+                .ok_or(crate::error::Error::MissingConfig("storage"))?
+                .try_into()?,
         })
     }
 }
 
-#[cfg_attr(feature="cli", derive(Args))]
+#[cfg_attr(feature = "cli", derive(Args))]
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct PartialConfig {
-    #[cfg_attr(feature="cli", command(flatten))]
+    #[cfg_attr(feature = "cli", command(flatten))]
     pub iroh: Option<PartialIrohConfig>,
-    #[cfg_attr(feature="cli", command(flatten))]
+    #[cfg_attr(feature = "cli", command(flatten))]
     pub storage: Option<PartialStorageConfig>,
-    #[cfg_attr(feature="cli", command(flatten))]
+    #[cfg_attr(feature = "cli", command(flatten))]
     pub rpc: Option<PartialRpcConfig>,
 }
 
 impl PartialConfig {
     pub fn new() -> Self {
         Self {
-            iroh : Some(PartialIrohConfig::empty().with_new_secret_key()),
+            iroh: Some(PartialIrohConfig::empty().with_new_secret_key()),
             storage: Some(PartialStorageConfig::empty()),
             rpc: Some(PartialRpcConfig::empty()),
         }
@@ -77,18 +91,18 @@ impl PartialConfig {
     pub fn into_toml(&self) -> Result<String, toml::ser::Error> {
         toml::to_string(self)
     }
-    pub fn read_or_create<T>(path: T) -> Result<Self, ConfigError> 
+    pub fn read_or_create<T>(path: T) -> Result<Self, ConfigError>
     where
-    T: AsRef<Path>
+        T: AsRef<Path>,
     {
         if !path.as_ref().exists() {
             Self::new().write_to(&path)?;
         }
         Self::read_from(&path)
     }
-    pub fn read_from<T>(path:T) -> Result<Self, ConfigError> 
-    where 
-    T: AsRef<Path>
+    pub fn read_from<T>(path: T) -> Result<Self, ConfigError>
+    where
+        T: AsRef<Path>,
     {
         if !path.as_ref().exists() {
             if let Some(x) = path.as_ref().parent() {
@@ -102,9 +116,9 @@ impl PartialConfig {
         let config: Self = toml::from_str(&content)?;
         Ok(config)
     }
-    pub fn write_to<T>(&self, path:T) -> Result<(), ConfigError> 
-    where 
-    T: AsRef<Path>
+    pub fn write_to<T>(&self, path: T) -> Result<(), ConfigError>
+    where
+        T: AsRef<Path>,
     {
         if !path.as_ref().exists() {
             if let Some(x) = path.as_ref().parent() {
@@ -130,7 +144,7 @@ impl From<Config> for PartialConfig {
         Self {
             iroh: Some(value.iroh.into()),
             storage: Some(value.storage.into()),
-            rpc: Some(value.rpc.into())
+            rpc: Some(value.rpc.into()),
         }
     }
 }
@@ -138,7 +152,7 @@ impl From<Config> for PartialConfig {
 impl Emptiable for PartialConfig {
     fn empty() -> Self {
         Self {
-            iroh: None, 
+            iroh: None,
             storage: None,
             rpc: None,
         }

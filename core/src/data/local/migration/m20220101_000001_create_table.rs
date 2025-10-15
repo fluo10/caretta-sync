@@ -1,5 +1,5 @@
-use sea_orm_migration::prelude::*;
 use sea_orm::DbBackend;
+use sea_orm_migration::prelude::*;
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
@@ -15,8 +15,9 @@ impl MigrationTrait for Migration {
                         id         INTEGER PRIMARY KEY,
                         public_id  INTEGER NOT NULL UNIQUE,
                         public_key BLOB UNIQUE NOT NULL
-                    )"
-                ).await?;
+                    )",
+                )
+                .await?;
                 db.execute_unprepared(
                     "CREATE TABLE authorization_request (
                         id             INTEGER PRIMARY KEY,
@@ -26,24 +27,27 @@ impl MigrationTrait for Migration {
                         created_at     TEXT NOT NULL,
                         closed_at      TEXT,
                         FOREIGN KEY(remote_node_id) REFERENCES remote_node(id)
-                    )"
-                ).await?;
+                    )",
+                )
+                .await?;
                 db.execute_unprepared(
                     "CREATE TABLE received_authorization_request (
                         id                       INTEGER PRIMARY KEY,
                         authorization_request_id INTEGER NOT NULL UNIQUE,
                         sender_note         TEXT,
                         FOREIGN KEY(authorization_request_id) REFERENCES authorization_request(id)
-                    )"
-                ).await?;
+                    )",
+                )
+                .await?;
                 db.execute_unprepared(
                     "CREATE TABLE sent_authorization_request (
                         id                       INTEGER PRIMARY KEY,
                         authorization_request_id INTEGER NOT NULL UNIQUE,
                         passcode                 INTEGER NOT NULL,
                         FOREIGN KEY(authorization_request_id) REFERENCES authorization_request(id)
-                    )"
-                ).await?;
+                    )",
+                )
+                .await?;
                 db.execute_unprepared(
                     "CREATE TABLE authorized_remote_node (
                         id                       INTEGER PRIMARY KEY,
@@ -55,12 +59,13 @@ impl MigrationTrait for Migration {
                         last_sent_version_vector BLOB,
                         created_at               TEXT NOT NULL,
                         updated_at               TEXT NOT NULL
-                    )"
-                ).await?;
+                    )",
+                )
+                .await?;
                 Ok(())
-            },
-            _ => Err(DbErr::Migration("Unsupported backend db".to_string()))
-        }        
+            }
+            _ => Err(DbErr::Migration("Unsupported backend db".to_string())),
+        }
     }
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         todo!()

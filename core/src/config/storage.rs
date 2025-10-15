@@ -1,12 +1,15 @@
 use std::path::PathBuf;
 
-#[cfg(feature="cli")]
+#[cfg(feature = "cli")]
 use clap::Args;
 
-#[cfg(any(test, feature="test"))]
-use tempfile::tempdir;
-use crate::{config::{ConfigError, PartialConfig}, utils::{emptiable::Emptiable, get_binary_name, mergeable::Mergeable}};
+use crate::{
+    config::{ConfigError, PartialConfig},
+    utils::{emptiable::Emptiable, get_binary_name, mergeable::Mergeable},
+};
 use serde::{Deserialize, Serialize};
+#[cfg(any(test, feature = "test"))]
+use tempfile::tempdir;
 
 #[derive(Clone, Debug)]
 pub struct StorageConfig {
@@ -34,25 +37,28 @@ impl TryFrom<PartialStorageConfig> for StorageConfig {
 
     fn try_from(value: PartialStorageConfig) -> Result<Self, Self::Error> {
         Ok(Self {
-            data_directory: value.data_directory.ok_or(ConfigError::MissingConfig("data_directory".to_string()))?,
-            cache_directory: value.cache_directory.ok_or(ConfigError::MissingConfig("cache_directory".to_string()))?,
+            data_directory: value
+                .data_directory
+                .ok_or(ConfigError::MissingConfig("data_directory".to_string()))?,
+            cache_directory: value
+                .cache_directory
+                .ok_or(ConfigError::MissingConfig("cache_directory".to_string()))?,
         })
     }
 }
 
-#[cfg_attr(feature="cli", derive(Args))]
+#[cfg_attr(feature = "cli", derive(Args))]
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct PartialStorageConfig {
-    #[cfg_attr(feature="cli", arg(long))]
+    #[cfg_attr(feature = "cli", arg(long))]
     pub data_directory: Option<PathBuf>,
-    #[cfg_attr(feature="cli", arg(long))]
+    #[cfg_attr(feature = "cli", arg(long))]
     pub cache_directory: Option<PathBuf>,
 }
 
 impl PartialStorageConfig {
-    #[cfg(not(any(target_os="android", target_os="ios")))]
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
     pub fn default(app_name: &'static str) -> Self {
-    
         let mut data_dir = dirs::data_local_dir().unwrap();
         data_dir.push(app_name);
         let mut cache_dir = dirs::cache_dir().unwrap();
@@ -60,45 +66,40 @@ impl PartialStorageConfig {
 
         Self {
             data_directory: Some(data_dir),
-            cache_directory: Some(cache_dir)
+            cache_directory: Some(cache_dir),
         }
     }
-    #[cfg(target_os="android")]
-    pub fn default_android() -> Self{
-            let ctx = ndk_context::android_context();
-            let vm = unsafe { jni::JavaVM::from_raw(ctx.vm().cast()) }?;
-            let mut env = vm.attach_current_thread()?;
-            let ctx = unsafe { jni::objects::JObject::from_raw(ctx.context().cast()) };
-            let cache_dir = env
-                .call_method(ctx, "getFilesDir", "()Ljava/io/File;", &[])?
-                .l()?;
-            let cache_dir: jni::objects::JString = env
-                .call_method(&cache_dir, "toString", "()Ljava/lang/String;", &[])?
-                .l()?
-                .try_into()?;
-            let cache_dir = env.get_string(&cache_dir)?;
-            let cache_dir = cache_dir.to_str()?;
-            Ok(cache_dir.to_string())
-
+    #[cfg(target_os = "android")]
+    pub fn default_android() -> Self {
+        let ctx = ndk_context::android_context();
+        let vm = unsafe { jni::JavaVM::from_raw(ctx.vm().cast()) }?;
+        let mut env = vm.attach_current_thread()?;
+        let ctx = unsafe { jni::objects::JObject::from_raw(ctx.context().cast()) };
+        let cache_dir = env
+            .call_method(ctx, "getFilesDir", "()Ljava/io/File;", &[])?
+            .l()?;
+        let cache_dir: jni::objects::JString = env
+            .call_method(&cache_dir, "toString", "()Ljava/lang/String;", &[])?
+            .l()?
+            .try_into()?;
+        let cache_dir = env.get_string(&cache_dir)?;
+        let cache_dir = cache_dir.to_str()?;
+        Ok(cache_dir.to_string())
     }
-    #[cfg(target_os="ios")]
-    pub fn default(_: &'static str) -> Self{
-        
-        use objc2::rc::Retained;
+    #[cfg(target_os = "ios")]
+    pub fn default(_: &'static str) -> Self {
         use objc2::msg_send;
+        use objc2::rc::Retained;
         use objc2_foundation::*;
 
-        let home_dir: Retained<NSString> = unsafe {NSHomeDirectory()};
-        
+        let home_dir: Retained<NSString> = unsafe { NSHomeDirectory() };
+
         let path = PathBuf::from(home_dir.to_string());
         Self {
             data_directory: Some(path.join("Library")),
             cache_directory: Some(path.join("Library").join("Cache")),
         }
-
-    
     }
-
 }
 
 impl From<StorageConfig> for PartialStorageConfig {
@@ -114,7 +115,7 @@ impl Emptiable for PartialStorageConfig {
     fn empty() -> Self {
         Self {
             data_directory: None,
-            cache_directory: None
+            cache_directory: None,
         }
     }
 
@@ -142,7 +143,7 @@ impl Mergeable for Option<PartialStorageConfig> {
                 } else {
                     let _ = self.insert(x);
                 }
-            },
+            }
             None => {}
         };
     }

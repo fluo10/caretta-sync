@@ -1,5 +1,5 @@
 mod entity;
-pub mod types;
 pub mod migration;
+pub mod types;
 
 pub use entity::*;

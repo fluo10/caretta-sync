@@ -1,13 +1,18 @@
-use std::{net::{IpAddr, Ipv4Addr, SocketAddr, TcpListener}, path::PathBuf, str::FromStr};
-#[cfg(feature="cli")]
+use crate::{
+    config::PartialConfig,
+    utils::{emptiable::Emptiable, mergeable::Mergeable},
+};
+#[cfg(feature = "cli")]
 use clap::Args;
-use url::Url;
-use crate::{config::PartialConfig, utils::{emptiable::Emptiable, mergeable::Mergeable}};
 use serde::{Deserialize, Serialize};
+use std::{
+    net::{IpAddr, Ipv4Addr, SocketAddr, TcpListener},
+    path::PathBuf,
+    str::FromStr,
+};
+use url::Url;
 
 use crate::config::error::ConfigError;
-
-
 
 #[cfg(unix)]
 static DEFAULT_PORT: u16 = 54321;
@@ -20,29 +25,41 @@ pub struct RpcConfig {
 impl TryFrom<PartialRpcConfig> for RpcConfig {
     type Error = ConfigError;
     fn try_from(config: PartialRpcConfig) -> Result<Self, Self::Error> {
-        Ok(Self{
-            endpoint_url: config.endpoint_url.ok_or(ConfigError::MissingConfig("endpoint".to_string()))?,
+        Ok(Self {
+            endpoint_url: config
+                .endpoint_url
+                .ok_or(ConfigError::MissingConfig("endpoint".to_string()))?,
         })
     }
 }
 
-#[cfg_attr(feature="cli", derive(Args))]
+#[cfg_attr(feature = "cli", derive(Args))]
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct PartialRpcConfig {
     pub endpoint_url: Option<Url>,
 }
 
 impl PartialRpcConfig {
-    #[cfg(not(any(all(target_os="ios", target_abi="sim"), target_os="windows")))]
+    #[cfg(not(any(all(target_os = "ios", target_abi = "sim"), target_os = "windows")))]
     pub fn default(app_name: &'static str) -> Self {
         let username = whoami::username();
-        Self{
-            endpoint_url: Some(Url::parse(&(String::from("unix://") + std::env::temp_dir().join(username).join(String::from(app_name) + ".sock").to_str().unwrap())).unwrap()),
+        Self {
+            endpoint_url: Some(
+                Url::parse(
+                    &(String::from("unix://")
+                        + std::env::temp_dir()
+                            .join(username)
+                            .join(String::from(app_name) + ".sock")
+                            .to_str()
+                            .unwrap()),
+                )
+                .unwrap(),
+            ),
         }
     }
-    #[cfg(any(all(target_os="ios", target_abi="sim"), target_os="windows"))]
+    #[cfg(any(all(target_os = "ios", target_abi = "sim"), target_os = "windows"))]
     pub fn default(app_name: &'static str) -> Self {
-        Self{
+        Self {
             endpoint_url: Some(Url::parse("http://127.0.0.1:54321").unwrap()),
         }
     }
@@ -50,9 +67,7 @@ impl PartialRpcConfig {
 
 impl Emptiable for PartialRpcConfig {
     fn empty() -> Self {
-        Self {
-            endpoint_url: None,
-        }
+        Self { endpoint_url: None }
     }
     fn is_empty(&self) -> bool {
         self.endpoint_url.is_none()
@@ -84,7 +99,7 @@ impl Mergeable for Option<PartialRpcConfig> {
                 } else {
                     let _ = self.insert(x);
                 }
-            },
+            }
             None => {}
         };
     }

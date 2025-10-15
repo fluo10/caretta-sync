@@ -16,14 +16,14 @@ pub enum Error {
     #[error("Infallible: {0}")]
     Infallible(#[from] std::convert::Infallible),
     #[error("IO Error: {0}")]
-    Io(#[from]std::io::Error),
+    Io(#[from] std::io::Error),
     #[error("Iroh bind error: {0}")]
     IrohBind(#[from] iroh::endpoint::BindError),
     #[error("mandatory config `{0}` is missing")]
     MissingConfig(&'static str),
     #[error("Parse OsString error: {0:?}")]
     OsStringConvert(std::ffi::OsString),
-    #[cfg(feature="cli")]
+    #[cfg(feature = "cli")]
     #[error("Parse args error: {0}")]
     ParseCommand(#[from] clap::Error),
     #[error("Signature error: {0}")]
@@ -53,11 +53,13 @@ impl From<std::ffi::OsString> for Error {
 impl From<Error> for Status {
     fn from(value: Error) -> Self {
         match value {
-            Error::ProtoDeserialize(x) => { match x {
-                ProtoDeserializeError::MissingField(x) => Self::invalid_argument(format!("{} is required", x)),
-                _ => Status::unimplemented("Unimplemented protobuf deserialize error status")
-            }},
-            _ => Status::unimplemented("Unimplemented error status")
+            Error::ProtoDeserialize(x) => match x {
+                ProtoDeserializeError::MissingField(x) => {
+                    Self::invalid_argument(format!("{} is required", x))
+                }
+                _ => Status::unimplemented("Unimplemented protobuf deserialize error status"),
+            },
+            _ => Status::unimplemented("Unimplemented error status"),
         }
     }
 }

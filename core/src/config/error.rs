@@ -11,5 +11,5 @@ pub enum ConfigError {
     #[error("Toml Serialization Error")]
     TomlSerialization(#[from] toml::ser::Error),
     #[error("Invalid url: {0}")]
-    InvalidUrl(Url)
+    InvalidUrl(Url),
 }

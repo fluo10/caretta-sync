@@ -1,18 +1,25 @@
-use std::{net::{IpAddr, Ipv4Addr}, ops, path::{Path, PathBuf}};
+use std::{
+    net::{IpAddr, Ipv4Addr},
+    ops,
+    path::{Path, PathBuf},
+};
 
-use base64::{prelude::BASE64_STANDARD, Engine};
-#[cfg(feature="cli")]
+use base64::{Engine, prelude::BASE64_STANDARD};
+#[cfg(feature = "cli")]
 use clap::Args;
 use futures::StreamExt;
 use iroh::{Endpoint, SecretKey};
 use serde::{Deserialize, Serialize};
-use tokio::{fs::File, io::{AsyncReadExt, AsyncWriteExt}};
+use tokio::{
+    fs::File,
+    io::{AsyncReadExt, AsyncWriteExt},
+};
 use tracing_subscriber::EnvFilter;
-
 
 use crate::{
     config::PartialConfig,
-    error::Error, utils::{emptiable::Emptiable, mergeable::Mergeable}
+    error::Error,
+    utils::{emptiable::Emptiable, mergeable::Mergeable},
 };
 
 #[derive(Clone, Debug)]
@@ -44,22 +51,24 @@ impl TryFrom<PartialIrohConfig> for IrohConfig {
     fn try_from(raw: PartialIrohConfig) -> Result<IrohConfig, Self::Error> {
         Ok(IrohConfig {
             enable: raw.enable.ok_or(Error::MissingConfig("iroh.enable"))?,
-            secret_key: raw.secret_key.ok_or(Error::MissingConfig("iroh.secret_key"))?,
-            use_n0_discovery_service: raw.use_n0_discovery_service.ok_or(Error::MissingConfig("iroh.use_n0_discovery_service"))?
+            secret_key: raw
+                .secret_key
+                .ok_or(Error::MissingConfig("iroh.secret_key"))?,
+            use_n0_discovery_service: raw
+                .use_n0_discovery_service
+                .ok_or(Error::MissingConfig("iroh.use_n0_discovery_service"))?,
         })
     }
 }
 
-
-
-#[cfg_attr(feature="cli",derive(Args))]
+#[cfg_attr(feature = "cli", derive(Args))]
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct PartialIrohConfig {
-    #[cfg_attr(feature="cli",arg(long="p2p_enable"))]
+    #[cfg_attr(feature = "cli", arg(long = "p2p_enable"))]
     pub enable: Option<bool>,
-    #[cfg_attr(feature="cli",arg(long))]
+    #[cfg_attr(feature = "cli", arg(long))]
     pub secret_key: Option<SecretKey>,
-    #[cfg_attr(feature="cli",arg(long))]
+    #[cfg_attr(feature = "cli", arg(long))]
     pub use_n0_discovery_service: Option<bool>,
 }
 
@@ -76,7 +85,7 @@ impl From<IrohConfig> for PartialIrohConfig {
         Self {
             enable: Some(config.enable),
             secret_key: Some(config.secret_key),
-            use_n0_discovery_service: Some(config.use_n0_discovery_service)
+            use_n0_discovery_service: Some(config.use_n0_discovery_service),
         }
     }
 }
@@ -86,22 +95,24 @@ impl Default for PartialIrohConfig {
         Self {
             enable: Some(true),
             secret_key: None,
-            use_n0_discovery_service: Some(true)
+            use_n0_discovery_service: Some(true),
         }
     }
 }
 
 impl Emptiable for PartialIrohConfig {
     fn empty() -> Self {
-        Self{
+        Self {
             enable: None,
             secret_key: None,
-            use_n0_discovery_service: None
+            use_n0_discovery_service: None,
         }
     }
 
     fn is_empty(&self) -> bool {
-        self.enable.is_none() && self.secret_key.is_none() && self.use_n0_discovery_service.is_none()
+        self.enable.is_none()
+            && self.secret_key.is_none()
+            && self.use_n0_discovery_service.is_none()
     }
 }
 
@@ -127,7 +138,7 @@ impl Mergeable for Option<PartialIrohConfig> {
                 } else {
                     let _ = self.insert(x);
                 }
-            },
+            }
             None => {}
         };
     }

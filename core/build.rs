@@ -7,7 +7,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 "proto/caretta_sync/authorized_node/authorized_node.proto",
                 "proto/caretta_sync/remote_node/remote_node.proto",
             ],
-            &["proto", "../mtid/proto"]
+            &["proto", "../mtid/proto"],
         )?;
     Ok(())
 }
