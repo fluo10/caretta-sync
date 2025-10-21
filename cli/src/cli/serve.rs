@@ -27,7 +27,6 @@ where
     #[tokio::main]
     async fn run(self, app_name: &'static str) {
         let config = CONFIG.get_or_init::<Config>(self.config.into_config(app_name).await).await;
-        let _ = LOCAL_DATABASE_CONNECTION.get_or_try_init::<_, M>(&config.storage.get_local_database_path()).await.unwrap();
-        S::serve_all(config).await.unwrap();
+        S::serve::<_, M>(config).await.unwrap();
     }
 }
