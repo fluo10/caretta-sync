@@ -1,10 +1,6 @@
-use chrono::{DateTime, Local, NaiveDateTime};
-use iroh::{NodeId, PublicKey};
 use mtid::Dtid;
-use rand::Rng;
 use sea_orm::{ActiveValue::Set, entity::prelude::*};
 
-use crate::data::local::entity::authorization_request;
 
 /// Sent request of node authentication.
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
@@ -68,7 +64,7 @@ mod tests {
     #[tokio::test]
     async fn insert() {
         let db = crate::global::LOCAL_DATABASE_CONNECTION
-            .get_or_try_init::<_, TestMigrator>(&TEST_CONFIG.storage.get_local_database_path(), )
+            .get_or_try_init::<_, TestMigrator>(&TEST_CONFIG.storage.get_local_database_path())
             .await
             .unwrap();
         let mut rng = rand::thread_rng();

@@ -1,23 +1,12 @@
-use std::{
-    net::{IpAddr, Ipv4Addr},
-    ops,
-    path::{Path, PathBuf},
-};
 
-use base64::{Engine, prelude::BASE64_STANDARD};
 #[cfg(feature = "cli")]
 use clap::Args;
 use futures::StreamExt;
 use iroh::{Endpoint, SecretKey};
 use serde::{Deserialize, Serialize};
-use tokio::{
-    fs::File,
-    io::{AsyncReadExt, AsyncWriteExt},
-};
-use tracing_subscriber::EnvFilter;
+use tokio::io::AsyncReadExt;
 
 use crate::{
-    config::PartialConfig,
     error::Error,
     utils::{emptiable::Emptiable, mergeable::Mergeable},
 };
@@ -131,15 +120,12 @@ impl Mergeable for PartialIrohConfig {
 }
 impl Mergeable for Option<PartialIrohConfig> {
     fn merge(&mut self, mut other: Self) {
-        match other.take() {
-            Some(x) => {
-                if let Some(y) = self.as_mut() {
-                    y.merge(x);
-                } else {
-                    let _ = self.insert(x);
-                }
+        if let Some(x) = other.take() {
+            if let Some(y) = self.as_mut() {
+                y.merge(x);
+            } else {
+                let _ = self.insert(x);
             }
-            None => {}
         };
     }
 }

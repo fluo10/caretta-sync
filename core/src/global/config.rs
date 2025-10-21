@@ -2,13 +2,7 @@
 use tempfile::TempDir;
 use tokio::sync::OnceCell;
 
-use crate::{
-    config::{
-        Config, ConfigError, PartialIrohConfig, PartialRpcConfig, PartialStorageConfig,
-        StorageConfig,
-    },
-    error::Error,
-};
+use crate::config::Config;
 
 pub static CONFIG: GlobalConfig = GlobalConfig::const_new();
 pub struct GlobalConfig {
@@ -25,7 +19,7 @@ impl GlobalConfig {
     where
         T: Into<Config>,
     {
-        self.inner.get_or_init(|| async { config.into() }).await
+        self.inner.get_or_init(|| async { config }).await
     }
     pub async fn get_or_try_init<T, E>(
         &'static self,

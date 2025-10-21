@@ -1,15 +1,6 @@
 //! A module contains global variables.
 
-use std::{
-    any::type_name,
-    collections::HashMap,
-    net::{IpAddr, Ipv4Addr},
-    path::{Path, PathBuf},
-    sync::LazyLock,
-};
 
-use crate::{config::StorageConfig, error::Error};
-use tokio::sync::{OnceCell, RwLock, RwLockReadGuard, RwLockWriteGuard};
 
 mod config;
 mod iroh_endpoint;

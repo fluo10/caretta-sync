@@ -18,7 +18,7 @@ impl GlobalIrohEndpoint {
         self.inner.get_or_init(|| endpoint.clone()).clone()
     }
     pub fn get(&self) -> Option<Endpoint> {
-        self.inner.get().map(|x| x.clone())
+        self.inner.get().cloned()
     }
     pub fn get_unchecked(&self) -> Endpoint {
         self.get()

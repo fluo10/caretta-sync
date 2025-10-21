@@ -1,7 +1,6 @@
-use super::*;
 tonic::include_proto!("caretta_sync.common");
 
-use crate::proto::error::{ProtoDeserializeError, ProtoSerializeError};
+use crate::proto::error::ProtoDeserializeError;
 
 impl From<uuid::Uuid> for Uuid {
     fn from(value: uuid::Uuid) -> Self {

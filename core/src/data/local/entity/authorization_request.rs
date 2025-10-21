@@ -1,7 +1,5 @@
-use std::os::unix::raw::time_t;
 
-use chrono::{DateTime, Local, NaiveDateTime};
-use iroh::{NodeId, PublicKey};
+use chrono::{DateTime, Local};
 use mtid::Dtid;
 use sea_orm::entity::prelude::*;
 use uuid::Uuid;
@@ -66,7 +64,6 @@ impl ActiveModelBehavior for ActiveModel {}
 impl ActiveModel {
     #[cfg(test)]
     pub fn new_test(remote_node: &super::remote_node::Model) -> Self {
-
         use sea_orm::ActiveValue::Set;
 
         Self {

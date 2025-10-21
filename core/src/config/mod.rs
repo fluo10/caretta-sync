@@ -5,7 +5,7 @@ mod storage;
 
 use crate::utils::{emptiable::Emptiable, mergeable::Mergeable};
 pub use error::ConfigError;
-use serde::{Deserialize, Serialize, de::DeserializeOwned};
+use serde::{Deserialize, Serialize};
 use std::{
     default::Default,
     fs::File,
@@ -75,6 +75,12 @@ pub struct PartialConfig {
     pub storage: Option<PartialStorageConfig>,
     #[cfg_attr(feature = "cli", command(flatten))]
     pub rpc: Option<PartialRpcConfig>,
+}
+
+impl Default for PartialConfig {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl PartialConfig {
