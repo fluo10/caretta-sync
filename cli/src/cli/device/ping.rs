@@ -1,13 +1,13 @@
-use clap::Args;
+use crate::cli::{ConfigArgs, DeviceIdentifierArgs};
 use caretta_sync_core::utils::runnable::Runnable;
-use crate::cli::{ConfigArgs, PeerArgs};
+use clap::Args;
 
 #[derive(Debug, Args)]
-pub struct DevicePingCommandArgs{
+pub struct DevicePingCommandArgs {
     #[command(flatten)]
-    peer: PeerArgs,
+    peer: DeviceIdentifierArgs,
     #[command(flatten)]
-    config: ConfigArgs
+    config: ConfigArgs,
 }
 
 impl Runnable for DevicePingCommandArgs {
