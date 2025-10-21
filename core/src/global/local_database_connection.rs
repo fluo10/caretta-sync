@@ -1,12 +1,11 @@
 use std::{
     fs::create_dir_all,
-    path::{Path, PathBuf},
+    path::Path,
 };
 
 use sea_orm::{Database, DatabaseConnection};
 use sea_orm_migration::MigratorTrait;
 use tokio::sync::OnceCell;
-use tracing_subscriber::registry::Data;
 
 use crate::error::Error;
 
@@ -24,7 +23,7 @@ impl GlobalDatabaseConnection {
         }
     }
 
-    pub async fn get_or_try_init<P, M>(&self, path: &P, _: M) -> Result<&DatabaseConnection, Error>
+    pub async fn get_or_try_init<P, M>(&self, path: &P) -> Result<&DatabaseConnection, Error>
     where
         P: AsRef<Path>,
         M: MigratorTrait,

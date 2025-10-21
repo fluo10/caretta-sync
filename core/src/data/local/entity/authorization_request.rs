@@ -1,7 +1,5 @@
-use std::os::unix::raw::time_t;
 
-use chrono::{DateTime, Local, NaiveDateTime};
-use iroh::{NodeId, PublicKey};
+use chrono::{DateTime, Local};
 use mtid::Dtid;
 use sea_orm::entity::prelude::*;
 use uuid::Uuid;
@@ -66,13 +64,11 @@ impl ActiveModelBehavior for ActiveModel {}
 impl ActiveModel {
     #[cfg(test)]
     pub fn new_test(remote_node: &super::remote_node::Model) -> Self {
-        let mut rng = rand::thread_rng();
-        use rand::Rng;
         use sea_orm::ActiveValue::Set;
 
         Self {
             uuid: Set(uuid::Uuid::now_v7()),
-            public_id: Set(rng.r#gen()),
+            public_id: Set(Dtid::random()),
             remote_node_id: Set(remote_node.id),
             created_at: Set(chrono::Local::now()),
             ..Default::default()
@@ -96,7 +92,7 @@ mod tests {
     #[tokio::test]
     async fn insert() {
         let db = crate::global::LOCAL_DATABASE_CONNECTION
-            .get_or_try_init(&TEST_CONFIG.storage.get_local_database_path(), TestMigrator)
+            .get_or_try_init::<_, TestMigrator>(&TEST_CONFIG.storage.get_local_database_path())
             .await
             .unwrap();
         let mut rng = rand::thread_rng();
@@ -107,7 +103,7 @@ mod tests {
 
         let authorization_request_active_model = ActiveModel {
             uuid: Set(uuid::Uuid::now_v7()),
-            public_id: Set(rng.r#gen()),
+            public_id: Set(Dtid::random()),
             remote_node_id: Set(remote_node_model.id),
             created_at: Set(chrono::Local::now()),
             ..Default::default()

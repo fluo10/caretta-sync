@@ -1,6 +1,6 @@
 tonic::include_proto!("caretta_sync.net");
 
-use crate::proto::error::{ProtoDeserializeError, ProtoSerializeError};
+use crate::proto::error::ProtoDeserializeError;
 
 type Ipv4AddrMessage = Ipv4Addr;
 type Ipv6AddrMessage = Ipv6Addr;
@@ -41,7 +41,7 @@ impl TryFrom<SocketAddrMessage> for std::net::SocketAddr {
 impl From<std::net::SocketAddrV4> for SocketAddrV4Message {
     fn from(value: std::net::SocketAddrV4) -> Self {
         Self {
-            ip: Some(value.ip().clone().into()),
+            ip: Some((*value.ip()).into()),
             port: value.port().into(),
         }
     }
@@ -76,7 +76,7 @@ impl From<Ipv4AddrMessage> for std::net::Ipv4Addr {
 impl From<std::net::SocketAddrV6> for SocketAddrV6Message {
     fn from(value: std::net::SocketAddrV6) -> Self {
         Self {
-            ip: Some(value.ip().clone().into()),
+            ip: Some((*value.ip()).into()),
             port: value.port().into(),
         }
     }

@@ -1,7 +1,7 @@
 mod config;
 mod device;
-mod peer;
+mod peer_identifier;
 
 pub use config::ConfigArgs;
 pub use device::DeviceArgs;
-pub use peer::PeerArgs;
+pub use peer_identifier::PeerArgs;

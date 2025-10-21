@@ -1,9 +1,0 @@
-syntax = "proto3";
-
-package caretta_sync.authorized_node;
-
-import "caretta_sync/authorized_node/identifier.proto";
-
-message InfoRequest {
-    Identifier node = 1;
-}

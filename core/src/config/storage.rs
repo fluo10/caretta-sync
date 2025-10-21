@@ -4,8 +4,8 @@ use std::path::PathBuf;
 use clap::Args;
 
 use crate::{
-    config::{ConfigError, PartialConfig},
-    utils::{emptiable::Emptiable, get_binary_name, mergeable::Mergeable},
+    config::ConfigError,
+    utils::{emptiable::Emptiable, mergeable::Mergeable},
 };
 use serde::{Deserialize, Serialize};
 #[cfg(any(test, feature = "test"))]
@@ -136,15 +136,12 @@ impl Mergeable for PartialStorageConfig {
 
 impl Mergeable for Option<PartialStorageConfig> {
     fn merge(&mut self, mut other: Self) {
-        match other.take() {
-            Some(x) => {
-                if let Some(y) = self.as_mut() {
-                    y.merge(x);
-                } else {
-                    let _ = self.insert(x);
-                }
+        if let Some(x) = other.take() {
+            if let Some(y) = self.as_mut() {
+                y.merge(x);
+            } else {
+                let _ = self.insert(x);
             }
-            None => {}
         };
     }
 }

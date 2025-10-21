@@ -1,10 +1,7 @@
-use std::pin::Pin;
 
-use futures::Stream;
-use tonic::{Request, Response, Status, async_trait};
 
 use crate::proto::{
-    ProtoDeserializeError, ProtoSerializeError, net::SocketAddr, remote_node_server,
+    ProtoDeserializeError, ProtoSerializeError, net::SocketAddr,
 };
 
 tonic::include_proto!("caretta_sync.iroh");
@@ -67,7 +64,7 @@ impl TryFrom<iroh::endpoint::DirectAddrInfo> for DirectAddrInfo {
         Ok(Self {
             addr: Some(value.addr.into()),
             latency: value.latency.map(|x| x.try_into()).transpose()?,
-            last_control: last_control,
+            last_control,
             last_payload: value.last_payload.map(|x| x.try_into()).transpose()?,
             last_alive: value.last_alive.map(|x| x.try_into()).transpose()?,
             sources: value

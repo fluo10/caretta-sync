@@ -6,7 +6,6 @@ use caretta_sync_core::{
     utils::{emptiable::Emptiable, mergeable::Mergeable}
 };
 
-use libp2p::identity::Keypair;
 use serde::{Deserialize, Serialize};
 use tokio::sync::OnceCell;
 

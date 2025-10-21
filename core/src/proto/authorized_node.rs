@@ -1,7 +1,7 @@
 use std::pin::Pin;
 
 use futures::Stream;
-use tonic::{Request, Response, Status, Streaming};
+use tonic::{Request, Response, Streaming};
 
 tonic::include_proto!("caretta_sync.authorized_node");
 pub struct AuthorizedNodeService {}

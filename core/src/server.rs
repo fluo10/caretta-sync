@@ -1,5 +1,5 @@
 use crate::{
-    config::{Config, IrohConfig, RpcConfig},
+    config::{IrohConfig, RpcConfig},
     error::Error,
 };
 

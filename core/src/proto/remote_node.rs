@@ -1,18 +1,9 @@
-use std::{pin::Pin, time::Duration};
+use std::pin::Pin;
 
-use futures::{Stream, future::Remote};
-use iroh::{
-    PublicKey,
-    endpoint::{DirectAddrInfo, RemoteInfo},
-};
-use mtid::Dtid;
+use futures::Stream;
 use tonic::{Request, Response, Status, Streaming};
 
-use crate::{
-    error::Error,
-    global::IROH_ENDPOINT,
-    proto::error::{ProtoDeserializeError, ProtoSerializeError},
-};
+use crate::global::IROH_ENDPOINT;
 
 tonic::include_proto!("caretta_sync.remote_node");
 

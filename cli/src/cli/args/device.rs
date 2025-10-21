@@ -1,5 +1,4 @@
 use clap::Args;
-use libp2p::{Multiaddr, PeerId};
 use uuid::Uuid;
 
 #[derive(Args, Clone, Debug)]

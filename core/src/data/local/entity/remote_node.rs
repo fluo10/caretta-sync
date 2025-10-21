@@ -1,12 +1,9 @@
 //! Structs about cached remote_node.
 
-use chrono::{DateTime, Local, NaiveDateTime};
-use iroh::{NodeId, PublicKey};
+use iroh::PublicKey;
 use mtid::Dtid;
-use rand::Rng;
 use sea_orm::{ActiveValue::Set, entity::prelude::*};
 
-use uuid::Uuid;
 
 use crate::data::local::types::PublicKeyBlob;
 
@@ -55,8 +52,8 @@ impl Related<super::authorization_request::Entity> for Entity {
 
 impl From<PublicKey> for ActiveModel {
     fn from(value: PublicKey) -> Self {
-        let mut rng = rand::thread_rng();
-        let dtid: Dtid = rng.r#gen();
+        let rng = rand::thread_rng();
+        let dtid = Dtid::random();
         Self {
             public_key: Set(value.into()),
             public_id: Set(dtid),
@@ -89,7 +86,7 @@ mod tests {
     #[tokio::test]
     async fn insert() {
         let db = crate::global::LOCAL_DATABASE_CONNECTION
-            .get_or_try_init(&TEST_CONFIG.storage.get_local_database_path(), TestMigrator)
+            .get_or_try_init::<_, TestMigrator>(&TEST_CONFIG.storage.get_local_database_path())
             .await
             .unwrap();
 

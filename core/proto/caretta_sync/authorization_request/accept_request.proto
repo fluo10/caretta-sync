@@ -1,9 +1,0 @@
-syntax = "proto3";
-package caretta_sync.authorization_request;
-
-import "caretta_sync/authorization_request/identifier.proto";
-
-message AcceptRequest {
-    Identifier authorization_request = 1;
-    string passcode = 2;
-}

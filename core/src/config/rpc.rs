@@ -1,15 +1,7 @@
-use crate::{
-    config::PartialConfig,
-    utils::{emptiable::Emptiable, mergeable::Mergeable},
-};
+use crate::utils::{emptiable::Emptiable, mergeable::Mergeable};
 #[cfg(feature = "cli")]
 use clap::Args;
 use serde::{Deserialize, Serialize};
-use std::{
-    net::{IpAddr, Ipv4Addr, SocketAddr, TcpListener},
-    path::PathBuf,
-    str::FromStr,
-};
 use url::Url;
 
 use crate::config::error::ConfigError;
@@ -92,15 +84,12 @@ impl Mergeable for PartialRpcConfig {
 
 impl Mergeable for Option<PartialRpcConfig> {
     fn merge(&mut self, mut other: Self) {
-        match other.take() {
-            Some(x) => {
-                if let Some(y) = self.as_mut() {
-                    y.merge(x);
-                } else {
-                    let _ = self.insert(x);
-                }
+        if let Some(x) = other.take() {
+            if let Some(y) = self.as_mut() {
+                y.merge(x);
+            } else {
+                let _ = self.insert(x);
             }
-            None => {}
         };
     }
 }
