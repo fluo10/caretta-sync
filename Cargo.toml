@@ -39,7 +39,7 @@ repository = "https://github.com/caretta-sync"
 
 [workspace.dependencies]
 bevy = { git = "https://github.com/bevyengine/bevy.git", rev="16ffdaea0daec11e4347d965f56c9c8e1122a488"  }
-mtid = { git = "https://github.com/fluo10/mtid.git", default-features= false, features=["prost", "sea-orm", "serde",]}
+mtid = { version = "0.6.0", features=["prost", "sea-orm", "serde",]}
 chrono = "0.4.41"
 ciborium = "0.2.2"
 clap = { version = "4.5.38", features = ["derive"] }

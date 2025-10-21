@@ -44,7 +44,7 @@ impl ActiveModel {
     fn new(authorization_request: &super::authorization_request::Model) -> Self {
         Self {
             authorization_request_id: Set(authorization_request.id),
-            passcode: Set(rand::thread_rng().r#gen()),
+            passcode: Set(Dtid::random()),
             ..Default::default()
         }
     }

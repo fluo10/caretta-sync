@@ -56,7 +56,7 @@ impl Related<super::authorization_request::Entity> for Entity {
 impl From<PublicKey> for ActiveModel {
     fn from(value: PublicKey) -> Self {
         let mut rng = rand::thread_rng();
-        let dtid: Dtid = rng.r#gen();
+        let dtid = Dtid::random();
         Self {
             public_key: Set(value.into()),
             public_id: Set(dtid),

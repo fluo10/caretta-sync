@@ -1,9 +1,0 @@
-syntax = "proto3";
-package caretta_sync.authorization_request;
-
-import "caretta_sync/remote_node/info.proto";
-
-message SendResponse {
-    caretta_sync.remote_node.Info remote_node_info = 1;
-    string passcode = 2;
-}

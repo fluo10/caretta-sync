@@ -66,13 +66,12 @@ impl ActiveModelBehavior for ActiveModel {}
 impl ActiveModel {
     #[cfg(test)]
     pub fn new_test(remote_node: &super::remote_node::Model) -> Self {
-        let mut rng = rand::thread_rng();
-        use rand::Rng;
+
         use sea_orm::ActiveValue::Set;
 
         Self {
             uuid: Set(uuid::Uuid::now_v7()),
-            public_id: Set(rng.r#gen()),
+            public_id: Set(Dtid::random()),
             remote_node_id: Set(remote_node.id),
             created_at: Set(chrono::Local::now()),
             ..Default::default()
@@ -107,7 +106,7 @@ mod tests {
 
         let authorization_request_active_model = ActiveModel {
             uuid: Set(uuid::Uuid::now_v7()),
-            public_id: Set(rng.r#gen()),
+            public_id: Set(Dtid::random()),
             remote_node_id: Set(remote_node_model.id),
             created_at: Set(chrono::Local::now()),
             ..Default::default()
