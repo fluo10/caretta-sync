@@ -1,6 +1,3 @@
-[submodule "mtid-proto"]
-	path = mtid-proto
-	url = https://github.com/fluo10/mtid-proto
 [submodule "core/mtid-proto"]
 	path = core/mtid-proto
 	url = https://github.com/fluo10/mtid-proto
