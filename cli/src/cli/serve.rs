@@ -2,27 +2,32 @@ use std::marker::PhantomData;
 
 use clap::Args;
 use caretta_sync_core::{config::Config, global::{CONFIG, LOCAL_DATABASE_CONNECTION}, server::ServerTrait, utils::runnable::Runnable};
+use sea_orm_migration::MigratorTrait;
 
 use super::ConfigArgs;
 
 #[derive(Args, Debug)]
-pub struct ServeCommandArgs<T> 
+pub struct ServeCommandArgs<M,S> 
 where
-    T: ServerTrait
+    M: MigratorTrait,
+    S: ServerTrait,
 {
     #[arg(skip)]
-    server: PhantomData<T>,
+    migrator: PhantomData<M>,
+    #[arg(skip)]
+    server: PhantomData<S>,
     #[command(flatten)]
     config: ConfigArgs,
 }
-impl<T> Runnable for ServeCommandArgs<T>
-where 
-    T: ServerTrait
+impl<M,S> Runnable for ServeCommandArgs<M,S>
+where
+    M: MigratorTrait,
+    S: ServerTrait
 {
     #[tokio::main]
     async fn run(self, app_name: &'static str) {
         let config = CONFIG.get_or_init::<Config>(self.config.into_config(app_name).await).await;
-        let _ = LOCAL_DATABASE_CONNECTION.get_or_init(&config.storage.get_local_database_path() );
-        T::serve_all(config).await.unwrap();
+        let _ = LOCAL_DATABASE_CONNECTION.get_or_try_init::<_, M>(&config.storage.get_local_database_path()).await.unwrap();
+        S::serve_all(config).await.unwrap();
     }
 }

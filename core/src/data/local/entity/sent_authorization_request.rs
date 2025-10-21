@@ -68,7 +68,7 @@ mod tests {
     #[tokio::test]
     async fn insert() {
         let db = crate::global::LOCAL_DATABASE_CONNECTION
-            .get_or_try_init(&TEST_CONFIG.storage.get_local_database_path(), TestMigrator)
+            .get_or_try_init::<_, TestMigrator>(&TEST_CONFIG.storage.get_local_database_path(), )
             .await
             .unwrap();
         let mut rng = rand::thread_rng();

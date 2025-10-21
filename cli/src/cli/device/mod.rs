@@ -1,4 +1,4 @@
-mod add;
+mod auth;
 mod list;
 mod ping;
 mod remove;
