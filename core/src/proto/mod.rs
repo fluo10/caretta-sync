@@ -1,11 +1,9 @@
-mod authorization_request;
-mod authorized_node;
-mod common;
+pub mod authorization_request;
+pub mod authorized_node;
+pub mod common;
 mod error;
-mod iroh;
-mod net;
-mod remote_node;
+pub mod iroh;
+pub mod net;
+pub mod remote_node;
 
-pub use common::*;
 pub use error::*;
-pub use remote_node::*;

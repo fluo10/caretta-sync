@@ -7,11 +7,10 @@ pub use list::*;
 use caretta_sync_core::utils::runnable::Runnable;
 use clap::{Args, Subcommand};
 
-
 #[derive(Debug, Args)]
 pub struct ConfigCommandArgs {
     #[command(subcommand)]
-    pub command: ConfigSubcommand
+    pub command: ConfigSubcommand,
 }
 
 impl Runnable for ConfigCommandArgs {
@@ -34,5 +33,3 @@ impl Runnable for ConfigSubcommand {
         }
     }
 }
-
-

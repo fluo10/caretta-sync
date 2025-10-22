@@ -1,11 +1,11 @@
-use clap::Args;
-use caretta_sync_core::utils::runnable::Runnable;
 use crate::cli::ConfigArgs;
+use caretta_sync_core::utils::runnable::Runnable;
+use clap::Args;
 
 #[derive(Debug, Args)]
-pub struct ConfigCheckCommandArgs{
+pub struct ConfigCheckCommandArgs {
     #[command(flatten)]
-    config: ConfigArgs
+    config: ConfigArgs,
 }
 
 impl Runnable for ConfigCheckCommandArgs {

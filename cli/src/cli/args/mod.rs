@@ -1,7 +1,7 @@
 mod config;
-mod device;
-mod peer_identifier;
+mod device_identifier;
+mod verification_identifier;
 
 pub use config::ConfigArgs;
-pub use device::DeviceArgs;
-pub use peer_identifier::PeerArgs;
+pub use device_identifier::DeviceIdentifierArgs;
+pub use verification_identifier::VerificationIdentifierArgs;
