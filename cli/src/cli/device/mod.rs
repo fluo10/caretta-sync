@@ -1,9 +1,9 @@
-mod authorize;
 mod info;
 mod list;
 mod ping;
 mod remove;
 mod scan;
+mod verification;
 
 use caretta_sync_core::utils::runnable::Runnable;
 pub use info::DeviceInfoCommandArgs;
