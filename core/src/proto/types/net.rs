@@ -1,4 +1,4 @@
-tonic::include_proto!("caretta_sync.net");
+tonic::include_proto!("caretta_sync.types.net");
 
 use crate::proto::error::ProtoDeserializeError;
 
@@ -11,12 +11,12 @@ type SocketAddrV6Message = SocketAddrV6;
 impl From<std::net::SocketAddr> for SocketAddrMessage {
     fn from(value: std::net::SocketAddr) -> Self {
         Self {
-            socket_addr_value: Some(match value {
+            value: Some(match value {
                 std::net::SocketAddr::V4(x) => {
-                    socket_addr::SocketAddrValue::V4(SocketAddrV4Message::from(x))
+                    socket_addr::Value::V4(SocketAddrV4Message::from(x))
                 }
                 std::net::SocketAddr::V6(x) => {
-                    socket_addr::SocketAddrValue::V6(SocketAddrV6Message::from(x))
+                    socket_addr::Value::V6(SocketAddrV6Message::from(x))
                 }
             }),
         }
@@ -28,11 +28,11 @@ impl TryFrom<SocketAddrMessage> for std::net::SocketAddr {
     fn try_from(value: SocketAddrMessage) -> Result<Self, Self::Error> {
         Ok(
             match value
-                .socket_addr_value
+                .value
                 .ok_or(Self::Error::MissingField("SocketAddr.socket_addr"))?
             {
-                socket_addr::SocketAddrValue::V4(x) => std::net::SocketAddr::V4(x.try_into()?),
-                socket_addr::SocketAddrValue::V6(x) => std::net::SocketAddr::V6(x.try_into()?),
+                socket_addr::Value::V4(x) => std::net::SocketAddr::V4(x.try_into()?),
+                socket_addr::Value::V6(x) => std::net::SocketAddr::V6(x.try_into()?),
             },
         )
     }

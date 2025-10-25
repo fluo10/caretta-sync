@@ -1,33 +1,33 @@
 
 
 use crate::proto::{
-    ProtoDeserializeError, ProtoSerializeError, net::SocketAddr,
+    ProtoDeserializeError, ProtoSerializeError, types::net::SocketAddr,
 };
 
-tonic::include_proto!("caretta_sync.iroh");
+tonic::include_proto!("caretta_sync.types.iroh");
 
 impl From<iroh::endpoint::ConnectionType> for ConnectionType {
     fn from(value: iroh::endpoint::ConnectionType) -> Self {
         use connection_type::*;
         Self {
-            connection_type_value: Some(match value {
+            value: Some(match value {
                 iroh::endpoint::ConnectionType::Direct(socket_addr) => {
-                    connection_type::ConnectionTypeValue::Direct(connection_type::Direct {
-                        direct_value: Some(SocketAddr::from(socket_addr)),
+                    connection_type::Value::Direct(connection_type::Direct {
+                        addr: Some(SocketAddr::from(socket_addr)),
                     })
                 }
                 iroh::endpoint::ConnectionType::Relay(relay_url) => {
-                    connection_type::ConnectionTypeValue::Relay(connection_type::Relay {
-                        relay_value: Some(super::common::Url::from((*relay_url).clone())),
+                    connection_type::Value::Relay(connection_type::Relay {
+                        url: Some(super::url::Url::from((*relay_url).clone())),
                     })
                 }
                 iroh::endpoint::ConnectionType::Mixed(socket_addr, relay_url) => {
-                    connection_type::ConnectionTypeValue::Mixed(connection_type::Mixed {
-                        socket_addr: Some(SocketAddr::from(socket_addr)),
-                        relay_url: Some(super::common::Url::from((*relay_url).clone())),
+                    connection_type::Value::Mixed(connection_type::Mixed {
+                        addr: Some(SocketAddr::from(socket_addr)),
+                        url: Some(super::url::Url::from((*relay_url).clone())),
                     })
                 }
-                iroh::endpoint::ConnectionType::None => ConnectionTypeValue::None(None {}),
+                iroh::endpoint::ConnectionType::None => Value::None(None {}),
             }),
         }
     }
@@ -37,11 +37,11 @@ impl From<iroh::endpoint::ControlMsg> for ControlMsg {
     fn from(value: iroh::endpoint::ControlMsg) -> Self {
         use control_msg::*;
         Self {
-            control_msg_vaue: Some(match value {
-                iroh::endpoint::ControlMsg::Ping => ControlMsgVaue::Ping(Ping {}),
-                iroh::endpoint::ControlMsg::Pong => ControlMsgVaue::Pong(Pong {}),
+            value: Some(match value {
+                iroh::endpoint::ControlMsg::Ping => Value::Ping(Ping {}),
+                iroh::endpoint::ControlMsg::Pong => Value::Pong(Pong {}),
                 iroh::endpoint::ControlMsg::CallMeMaybe => {
-                    ControlMsgVaue::CallMeMaybe(CallMeMayBe {})
+                    Value::CallMeMaybe(CallMeMayBe {})
                 }
             }),
         }
@@ -84,7 +84,7 @@ impl TryFrom<iroh::endpoint::DirectAddrInfo> for DirectAddrInfo {
 impl From<iroh::PublicKey> for PublicKey {
     fn from(value: iroh::PublicKey) -> Self {
         Self {
-            key: Vec::from(value.as_bytes()),
+            value: Vec::from(value.as_bytes()),
         }
     }
 }
@@ -92,7 +92,7 @@ impl From<iroh::PublicKey> for PublicKey {
 impl TryFrom<PublicKey> for iroh::PublicKey {
     type Error = ProtoDeserializeError;
     fn try_from(value: PublicKey) -> Result<Self, Self::Error> {
-        let slice: [u8; 32] = value.key[0..32].try_into()?;
+        let slice: [u8; 32] = value.value[0..32].try_into()?;
         Ok(iroh::PublicKey::from_bytes(&slice)?)
     }
 }
@@ -128,16 +128,16 @@ impl From<iroh::endpoint::Source> for Source {
     fn from(value: iroh::endpoint::Source) -> Self {
         use source::*;
         Self {
-            source_value: Some(match value {
-                iroh::endpoint::Source::Saved => SourceValue::Saved(Saved {}),
-                iroh::endpoint::Source::Udp => SourceValue::Udp(Udp {}),
-                iroh::endpoint::Source::Relay => SourceValue::Relay(Relay {}),
-                iroh::endpoint::Source::App => SourceValue::App(App {}),
+            value: Some(match value {
+                iroh::endpoint::Source::Saved => Value::Saved(Saved {}),
+                iroh::endpoint::Source::Udp => Value::Udp(Udp {}),
+                iroh::endpoint::Source::Relay => Value::Relay(Relay {}),
+                iroh::endpoint::Source::App => Value::App(App {}),
                 iroh::endpoint::Source::Discovery { name } => {
-                    SourceValue::Discovery(Discovery { value: name })
+                    Value::Discovery(Discovery { value: name })
                 }
                 iroh::endpoint::Source::NamedApp { name } => {
-                    SourceValue::NamedApp(NamedApp { value: name })
+                    Value::NamedApp(NamedApp { value: name })
                 }
             }),
         }

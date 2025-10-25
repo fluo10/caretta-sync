@@ -1,9 +1,6 @@
-pub mod authorization_request;
-pub mod authorized_node;
-pub mod common;
+pub mod api;
+pub mod doc;
 mod error;
-pub mod iroh;
-pub mod net;
-pub mod remote_node;
+pub mod types;
 
 pub use error::*;
