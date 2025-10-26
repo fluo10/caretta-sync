@@ -3,9 +3,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .extern_path(".mtid", "::mtid::proto")
         .compile_protos(
             &[
-                "caretta-sync-proto/caretta_sync/authorization_request/authorization_request.proto",
-                "caretta-sync-proto/caretta_sync/authorized_node/authorized_node.proto",
-                "caretta-sync-proto/caretta_sync/remote_node/remote_node.proto",
+                "caretta-sync-proto/caretta_sync/api/device_verification/device_verification_service.proto",
+                "caretta-sync-proto/caretta_sync/api/device/device_service.proto",
+                "caretta-sync-proto/caretta_sync/doc/verified_node.proto",
             ],
             &["caretta-sync-proto", "mtid-proto"],
         )?;
