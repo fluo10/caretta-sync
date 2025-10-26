@@ -63,9 +63,11 @@ pub struct PartialIrohConfig {
 
 impl PartialIrohConfig {
     pub fn with_new_secret_key(mut self) -> Self {
-        let mut rng = rand::rngs::OsRng;
-        self.secret_key = Some(SecretKey::generate(&mut rng));
+        self.secret_key = Some(SecretKey::generate(rand::thread_rng()));
         self
+    }
+    pub fn renew_secret_key(&mut self) {
+        self.secret_key = Some(SecretKey::generate(rand::thread_rng()))
     }
 }
 
