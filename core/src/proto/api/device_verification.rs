@@ -3,11 +3,11 @@ use std::pin::Pin;
 use futures::Stream;
 use tonic::{Request, Response, Streaming};
 
-tonic::include_proto!("caretta_sync.api.device.verification");
-pub struct VerificationServier;
+tonic::include_proto!("caretta_sync.api.device_verification");
+pub struct DeviceVerificationServier;
 
 #[tonic::async_trait]
-impl verification_service_server::VerificationService for VerificationServier {
+impl device_verification_service_server::DeviceVerificationService for DeviceVerificationServier {
     async fn request(
         &self,
         request: Request<RequestRequest>,

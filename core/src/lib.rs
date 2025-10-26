@@ -1,7 +1,7 @@
 pub mod config;
-pub mod data;
 pub mod error;
 pub mod global;
+pub mod models;
 pub mod proto;
 pub mod server;
 #[cfg(any(test, feature = "test"))]

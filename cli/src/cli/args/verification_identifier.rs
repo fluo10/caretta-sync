@@ -14,14 +14,14 @@ pub struct VerificationIdentifierArgs {
     public_key: Option<PublicKey>,
 }
 
-impl From<VerificationIdentifierArgs> for caretta_sync_core::proto::authorization_request::Identifier {
+impl From<VerificationIdentifierArgs> for caretta_sync_core::proto::api::device::verification::Identifier {
     fn from(value: VerificationIdentifierArgs) -> Self {
-        use caretta_sync_core::proto::authorization_request::identifier::Value;
+        use caretta_sync_core::proto::api::device::verification::identifier::Value;
         Self{
             value: Some( match (value.request_id, value.device_id, value.public_key) {
-                (Some(x), None, None) => Value::AuthorizationRequestId(x),
-                (None, Some(x), None) => Value::DeviceId(x),
-                (None, None, Some(x)) => Value::PublicKey(x),
+                (Some(x), None, None) => Value::VerificationId(x.into()),
+                (None, Some(x), None) => Value::DeviceId(x.into()),
+                (None, None, Some(x)) => Value::PublicKey(x.into()),
                 (_, _, _) => unreachable!("The parsed argument must be one.")
             })
         }

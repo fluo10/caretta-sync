@@ -14,4 +14,6 @@ pub enum ProtoDeserializeError {
     SliceTryFrom(#[from] std::array::TryFromSliceError),
     #[error("Int parse error: {0}")]
     IntTryFrom(#[from] std::num::TryFromIntError),
+    #[error("Unspecified enum: {0}")]
+    EnumUnspecified(&'static str)
 }

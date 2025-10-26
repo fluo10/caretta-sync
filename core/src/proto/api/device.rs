@@ -1,5 +1,3 @@
-pub mod verification;
-
 use std::pin::Pin;
 
 use futures::Stream;

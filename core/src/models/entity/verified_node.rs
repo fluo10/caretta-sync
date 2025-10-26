@@ -5,7 +5,7 @@ use mtid::Dtid;
 use sea_orm::{ActiveValue::Set, entity::prelude::*};
 
 
-use crate::data::local::types::PublicKeyBlob;
+use crate::models::types::PublicKeyBlob;
 
 /// RemoteNode information cached in local database.
 ///
@@ -15,69 +15,36 @@ use crate::data::local::types::PublicKeyBlob;
 /// - Once a remote_node is authorized, it is assigned a global (=synced) ID as authorized_remote_node so essentially this local id targets unauthorized remote_nodes.
 ///
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
-#[sea_orm(table_name = "remote_node")]
+#[sea_orm(table_name = "verified_node")]
 pub struct Model {
     /// serial primary key.
     #[sea_orm(primary_key)]
     pub id: u32,
 
-    /// public DITD of remote_node.
-    /// this id is use only the node itself and not synced so another node has different local_remote_node_id even if its public_key is same.
+    pub uuid: Uuid,
+
+    /// public [`Dtid`] of the node.
     pub public_id: Dtid,
 
     /// Iroh public key
     pub public_key: PublicKeyBlob,
+
+    /// Name of the node.
+    pub name: String,
+
+    pub created_at: DateTimeLocal,
+    pub updated_at: DateTimeLocal,
 }
 
-#[derive(Copy, Clone, Debug, EnumIter)]
-pub enum Relation {
-    AuthorizationRequest,
-}
-
-impl RelationTrait for Relation {
-    fn def(&self) -> RelationDef {
-        match self {
-            Self::AuthorizationRequest => {
-                Entity::has_many(super::authorization_request::Entity).into()
-            }
-        }
-    }
-}
-
-impl Related<super::authorization_request::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::AuthorizationRequest.def()
-    }
-}
-
-impl From<PublicKey> for ActiveModel {
-    fn from(value: PublicKey) -> Self {
-        let rng = rand::thread_rng();
-        let dtid = Dtid::random();
-        Self {
-            public_key: Set(value.into()),
-            public_id: Set(dtid),
-            ..Default::default()
-        }
-    }
-}
+#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
+pub enum Relation {}
 
 impl ActiveModelBehavior for ActiveModel {}
 
-impl ActiveModel {
-    #[cfg(test)]
-    pub fn new_test() -> Self {
-        use iroh::SecretKey;
-
-        let mut rng = rand::thread_rng();
-        let public_key = SecretKey::generate(rng).public();
-        ActiveModel::from(public_key)
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use crate::{data::local::migration::TestMigrator, tests::TEST_CONFIG};
+    use crate::{models::migration::TestMigrator, tests::TEST_CONFIG};
+    use chrono::Local;
     use iroh::SecretKey;
     use rand::Rng;
     use sea_orm::ActiveValue::Set;
@@ -90,7 +57,15 @@ mod tests {
             .await
             .unwrap();
 
-        let active_model = ActiveModel::new_test();
+        let active_model = ActiveModel{
+            uuid: Set(Uuid::now_v7()),
+            public_id: Set(Dtid::random()),
+            public_key: Set(PublicKeyBlob::from(iroh::SecretKey::generate(rand::thread_rng()).public())),
+            name: Set(String::from("test")),
+            created_at: Set(Local::now()),
+            updated_at: Set(Local::now()),
+            ..Default::default()
+        };
         let model = active_model.clone().insert(db).await.unwrap();
         assert_eq!(model.public_id, active_model.public_id.unwrap());
         assert_eq!(model.public_key, active_model.public_key.unwrap());
