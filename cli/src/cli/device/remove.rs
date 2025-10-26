@@ -1,13 +1,13 @@
-use clap::Args;
+use crate::cli::{args::DeviceIdentifierArgs, ConfigArgs };
 use caretta_sync_core::utils::runnable::Runnable;
-use crate::cli::{ConfigArgs, DeviceArgs};
+use clap::Args;
 
 #[derive(Debug, Args)]
-pub struct DeviceRemoveCommandArgs{
+pub struct DeviceRemoveCommandArgs {
     #[command(flatten)]
-    device: DeviceArgs,
+    device: DeviceIdentifierArgs,
     #[command(flatten)]
-    config: ConfigArgs
+    config: ConfigArgs,
 }
 
 impl Runnable for DeviceRemoveCommandArgs {

@@ -1,8 +1,7 @@
 {
-    "protoc": {
-        "options": [
-            "--proto_path=${workspaceRoot}/mtid/proto",
-            "--proto_path=${workspaceRoot}/core/proto"
+    "protobuf-support.protols": {
+        "args": [
+            "--include-paths=core/caretta-sync-proto,core/mtid-proto"
         ]
     }
 }
