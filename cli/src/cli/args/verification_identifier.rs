@@ -14,9 +14,9 @@ pub struct VerificationIdentifierArgs {
     public_key: Option<PublicKey>,
 }
 
-impl From<VerificationIdentifierArgs> for caretta_sync_core::proto::api::device::verification::Identifier {
+impl From<VerificationIdentifierArgs> for caretta_sync_core::proto::api::device_verification::Identifier {
     fn from(value: VerificationIdentifierArgs) -> Self {
-        use caretta_sync_core::proto::api::device::verification::identifier::Value;
+        use caretta_sync_core::proto::api::device_verification::identifier::Value;
         Self{
             value: Some( match (value.request_id, value.device_id, value.public_key) {
                 (Some(x), None, None) => Value::VerificationId(x.into()),

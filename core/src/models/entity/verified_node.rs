@@ -60,7 +60,7 @@ mod tests {
         let active_model = ActiveModel{
             uuid: Set(Uuid::now_v7()),
             public_id: Set(Dtid::random()),
-            public_key: Set(PublicKeyBlob::from(iroh::SecretKey::generate(rand::thread_rng()).public())),
+            public_key: Set(PublicKeyBlob::from(iroh::SecretKey::generate(&mut rand::rng()).public())),
             name: Set(String::from("test")),
             created_at: Set(Local::now()),
             updated_at: Set(Local::now()),

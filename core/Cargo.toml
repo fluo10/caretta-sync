@@ -15,7 +15,6 @@ test = ["dep:tempfile", ]
 base64 = "0.22.1"
 chrono.workspace = true
 chrono-tz = "0.10.3"
-ciborium.workspace = true
 clap = {workspace = true, optional = true}
 dirs = "6.0.0"
 futures.workspace = true
@@ -39,7 +38,6 @@ uuid.workspace = true
 url.workspace = true
 whoami = "1.6.1"
 rand.workspace = true
-ed25519-dalek = { version = "2.2.0", features = ["signature"] }
 tokio-stream.workspace = true
 async-trait = "0.1.89"
 

@@ -2,7 +2,7 @@
 #[cfg(feature = "cli")]
 use clap::Args;
 use futures::StreamExt;
-use iroh::{Endpoint, SecretKey};
+use iroh::{discovery::{dns::DnsDiscovery, mdns::MdnsDiscovery}, Endpoint, SecretKey};
 use serde::{Deserialize, Serialize};
 use tokio::io::AsyncReadExt;
 
@@ -23,10 +23,9 @@ impl IrohConfig {
         if config.enable {
             let mut endpoint = Endpoint::builder()
                 .secret_key(config.secret_key)
-                .discovery_dht()
-                .discovery_local_network();
+                .discovery(MdnsDiscovery::builder());
             if config.use_n0_discovery_service {
-                endpoint = endpoint.discovery_n0();
+                endpoint = endpoint.discovery(DnsDiscovery::n0_dns());
             }
             Ok(Some(endpoint.bind().await?))
         } else {
@@ -63,11 +62,11 @@ pub struct PartialIrohConfig {
 
 impl PartialIrohConfig {
     pub fn with_new_secret_key(mut self) -> Self {
-        self.secret_key = Some(SecretKey::generate(rand::thread_rng()));
+        self.secret_key = Some(SecretKey::generate(&mut rand::rng()));
         self
     }
     pub fn renew_secret_key(&mut self) {
-        self.secret_key = Some(SecretKey::generate(rand::thread_rng()))
+        self.secret_key = Some(SecretKey::generate(&mut rand::rng()))
     }
 }
 

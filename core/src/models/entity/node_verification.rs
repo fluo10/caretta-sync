@@ -48,7 +48,7 @@ mod tests {
         let active_model = ActiveModel {
             uuid: Set(uuid::Uuid::now_v7()),
             public_id: Set(Dtid::random()),
-            public_key: Set(iroh::SecretKey::generate(rand::thread_rng()).public().into()),
+            public_key: Set(iroh::SecretKey::generate(&mut rand::rng()).public().into()),
             status: Set(NodeVerificationStatus::Pending),
             node_info: Set(String::from("test_node")),
             created_at: Set(chrono::Local::now()),
