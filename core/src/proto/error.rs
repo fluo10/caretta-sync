@@ -8,8 +8,8 @@ pub enum ProtoSerializeError {
 pub enum ProtoDeserializeError {
     #[error("Missing field: {0}")]
     MissingField(&'static str),
-    #[error("Signature error: {0}")]
-    Signature(#[from] ed25519_dalek::SignatureError),
+    #[error("Public key parsing error: {0}")]
+    PublicKeyParsing(#[from] iroh::KeyParsingError),
     #[error("slice parse error: {0}")]
     SliceTryFrom(#[from] std::array::TryFromSliceError),
     #[error("Int parse error: {0}")]
