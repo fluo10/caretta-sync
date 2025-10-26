@@ -1,9 +1,10 @@
+use iroh::discovery::dns::DnsDiscovery;
 use sea_orm_migration::MigratorTrait;
 use async_trait::async_trait;
 
 use crate::{
     config::{IrohConfig, RpcConfig, StorageConfig},
-    error::Error, global::LOCAL_DATABASE_CONNECTION,
+    error::Error, global::{IROH_ENDPOINT, LOCAL_DATABASE_CONNECTION},
 };
 
 #[async_trait]
@@ -19,7 +20,13 @@ pub trait ServerTrait: Send + Sync {
 
     async fn serve_p2p<T>(config: &T) -> Result<(), Error>
     where
-        T: AsRef<IrohConfig> + Send + Sync;
+        T: AsRef<IrohConfig> + Send + Sync {
+        let endpoint = iroh::Endpoint::builder()
+            .discovery(DnsDiscovery::n0_dns())
+            .bind().await?;
+        let _ = IROH_ENDPOINT.get_or_init(&endpoint);
+        Ok(())
+    }
     async fn serve_rpc<T>(config: &T) -> Result<(), Error>
     where
         T: AsRef<RpcConfig> + Send + Sync;

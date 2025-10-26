@@ -46,6 +46,7 @@ clap = { version = "4.5.38", features = ["derive"] }
 caretta-sync-core.path = "core"
 futures = { version = "0.3.31", features = ["executor"] }
 iroh = { version = "0.94.0", features = ["discovery-local-network", "discovery-pkarr-dht"] }
+iroh-tickets = "0.1.0"
 prost = "0.14.1"
 prost-types = "0.14.1"
 rand = "0.9.2"

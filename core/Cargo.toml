@@ -19,6 +19,8 @@ clap = {workspace = true, optional = true}
 dirs = "6.0.0"
 futures.workspace = true
 iroh.workspace = true
+iroh-docs = "0.94.0"
+iroh-tickets.workspace = true
 mtid.workspace = true
 prost.workspace = true
 prost-types.workspace = true
