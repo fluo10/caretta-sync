@@ -10,15 +10,9 @@ struct MergeableStruct {
 
 #[cfg(test)]
 fn test() {
-    let zero = MergeableStruct{
-        opt: Some(0),
-    };
-    let one = MergeableStruct {
-        opt: Some(1),
-    };
-    let none = MergeableStruct{
-        opt: None,
-    };
+    let zero = MergeableStruct { opt: Some(0) };
+    let one = MergeableStruct { opt: Some(1) };
+    let none = MergeableStruct { opt: None };
     let mut zero_with_one = zero.clone();
     zero_with_one.merge(one.clone());
     let mut none_with_zero = none.clone();
@@ -28,5 +22,4 @@ fn test() {
     assert_eq!(zero_with_one.clone(), one.clone());
     assert_eq!(none_with_zero, zero.clone());
     assert_eq!(zero_with_none, zero.clone());
-    
 }

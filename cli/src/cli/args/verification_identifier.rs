@@ -15,15 +15,17 @@ pub struct VerificationIdentifierArgs {
     device: DeviceIdentifierArgs,
 }
 
-impl From<VerificationIdentifierArgs> for caretta_sync_core::proto::api::device_verification::Identifier {
+impl From<VerificationIdentifierArgs>
+    for caretta_sync_core::proto::api::device_verification::Identifier
+{
     fn from(value: VerificationIdentifierArgs) -> Self {
         use caretta_sync_core::proto::api::device_verification::identifier::Value;
-        Self{
-            value: Some( match (value.verificaton_id, value.device) {
+        Self {
+            value: Some(match (value.verificaton_id, value.device) {
                 (Some(x), _) => Value::VerificationId(x.into()),
                 (None, x) => Value::Device(x.into()),
-                (_, _) => unreachable!("The parsed argument must be one.")
-            })
+                (_, _) => unreachable!("The parsed argument must be one."),
+            }),
         }
     }
 }

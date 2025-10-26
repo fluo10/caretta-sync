@@ -1,7 +1,13 @@
-use bevy::{app::{App, Plugin, Startup, Update}, ecs::{component::Component, query::With, system::{Commands, Query}}, tasks::TaskPool};
-use caretta_sync_core::{
-    proto::*,
+use bevy::{
+    app::{App, Plugin, Startup, Update},
+    ecs::{
+        component::Component,
+        query::With,
+        system::{Commands, Query},
+    },
+    tasks::TaskPool,
 };
+use caretta_sync_core::proto::*;
 
 #[derive(Component)]
 pub struct Peer;

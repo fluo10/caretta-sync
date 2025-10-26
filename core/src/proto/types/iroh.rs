@@ -1,13 +1,11 @@
-use crate::proto::{
-    ProtoDeserializeError,
-};
+use crate::proto::ProtoDeserializeError;
 
 tonic::include_proto!("caretta_sync.types.iroh");
 
 impl From<iroh_docs::NamespaceSecret> for DocNamespaceSecret {
     fn from(value: iroh_docs::NamespaceSecret) -> Self {
-        Self{
-            value: Vec::from(value.to_bytes())
+        Self {
+            value: Vec::from(value.to_bytes()),
         }
     }
 }
@@ -15,11 +13,10 @@ impl From<iroh_docs::NamespaceSecret> for DocNamespaceSecret {
 impl TryFrom<DocNamespaceSecret> for iroh_docs::NamespaceSecret {
     type Error = ProtoDeserializeError;
     fn try_from(value: DocNamespaceSecret) -> Result<Self, Self::Error> {
-        let slice: [u8;32] = value.value[0..32].try_into()?;
+        let slice: [u8; 32] = value.value[0..32].try_into()?;
         Ok(Self::from_bytes(&slice))
     }
 }
-
 
 impl From<iroh::PublicKey> for EndpointId {
     fn from(value: iroh::PublicKey) -> Self {
@@ -40,7 +37,7 @@ impl TryFrom<EndpointId> for iroh::PublicKey {
 impl From<iroh_tickets::endpoint::EndpointTicket> for EndpointTicket {
     fn from(value: iroh_tickets::endpoint::EndpointTicket) -> Self {
         Self {
-            value: value.to_string()
+            value: value.to_string(),
         }
     }
 }

@@ -1,10 +1,9 @@
 use caretta_sync_example_core::{models::migration::Migrator, server::Server};
-#[cfg(feature="gui")]
+#[cfg(feature = "gui")]
 mod gui;
 
+use caretta_sync::{cli::*, config::Config, global::CONFIG, utils::Runnable};
 use clap::{Parser, Subcommand};
-use caretta_sync::{cli::*, config::Config,  global::{CONFIG, }, utils::Runnable};
-
 
 #[derive(Debug, Parser)]
 pub struct Cli {
@@ -19,9 +18,9 @@ impl Runnable for Cli {
         if let Some(x) = self.command {
             x.run(app_name)
         } else {
-            #[cfg(feature="gui")]
+            #[cfg(feature = "gui")]
             gui::main();
-            #[cfg(not(feature="gui"))]
+            #[cfg(not(feature = "gui"))]
             todo!()
         }
     }

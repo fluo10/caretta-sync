@@ -4,7 +4,6 @@ use iroh::PublicKey;
 use mtid::Dtid;
 use sea_orm::{ActiveValue::Set, entity::prelude::*};
 
-
 use crate::models::types::PublicKeyBlob;
 
 /// RemoteNode information cached in local database.
@@ -57,10 +56,12 @@ mod tests {
             .await
             .unwrap();
 
-        let active_model = ActiveModel{
+        let active_model = ActiveModel {
             uuid: Set(Uuid::now_v7()),
             public_id: Set(Dtid::random()),
-            public_key: Set(PublicKeyBlob::from(iroh::SecretKey::generate(&mut rand::rng()).public())),
+            public_key: Set(PublicKeyBlob::from(
+                iroh::SecretKey::generate(&mut rand::rng()).public(),
+            )),
             name: Set(String::from("test")),
             created_at: Set(Local::now()),
             updated_at: Set(Local::now()),

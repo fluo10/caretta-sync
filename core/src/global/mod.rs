@@ -1,7 +1,5 @@
 //! A module contains global variables.
 
-
-
 mod config;
 mod iroh_endpoint;
 mod local_database_connection;

@@ -1,8 +1,10 @@
-
 #[cfg(feature = "cli")]
 use clap::Args;
 use futures::StreamExt;
-use iroh::{discovery::{dns::DnsDiscovery, mdns::MdnsDiscovery}, Endpoint, SecretKey};
+use iroh::{
+    Endpoint, SecretKey,
+    discovery::{dns::DnsDiscovery, mdns::MdnsDiscovery},
+};
 use serde::{Deserialize, Serialize};
 use tokio::io::AsyncReadExt;
 
