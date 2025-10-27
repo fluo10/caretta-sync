@@ -6,7 +6,11 @@ use bevy::{
     window::{AppLifecycle, ScreenEdge, WindowMode},
     winit::WinitSettings,
 };
-use caretta_sync::{config::{Config, PartialConfig, PartialP2pConfig, PartialStorageConfig, StorageConfig}, server::ServerTrait, utils::{Emptiable, Mergeable}};
+use caretta_sync::{
+    config::{Config, PartialConfig, PartialP2pConfig, PartialStorageConfig, StorageConfig},
+    server::ServerTrait,
+    utils::{Emptiable, Mergeable},
+};
 use caretta_sync_example_core::{global::APP_NAME, server::Server};
 
 #[tokio::main]
@@ -20,7 +24,6 @@ pub async fn init_config() {
         } else {
             None
         }
-        
     } else {
         Some(PartialP2pConfig::empty().with_new_private_key())
     } {
@@ -29,44 +32,41 @@ pub async fn init_config() {
     }
     let mut default = PartialConfig::default(APP_NAME);
     default.merge(config);
-    let config2 : Config = default.try_into().unwrap();
+    let config2: Config = default.try_into().unwrap();
     Server::serve_all(&config2);
-    
 }
 
 #[bevy_main]
 pub fn main() {
-
     init_config();
-    
+
     let mut app = App::new();
     app.add_plugins(
-        DefaultPlugins.set(LogPlugin {
-            level: Level::DEBUG,
-            filter: "wgpu=error,bevy_render=info,bevy_ecs_trace".to_string(),
-            ..Default::default()
-        })
-        .set(WindowPlugin {
-            primary_window: Some(Window {
-                resizable: false,
-                mode: WindowMode::BorderlessFullscreen(MonitorSelection::Primary),
-                recognize_rotation_gesture: true,
-                prefers_home_indicator_hidden: true,
-                prefers_status_bar_hidden: true,
-                preferred_screen_edges_deferring_system_gestures: ScreenEdge::Bottom,
+        DefaultPlugins
+            .set(LogPlugin {
+                level: Level::DEBUG,
+                filter: "wgpu=error,bevy_render=info,bevy_ecs_trace".to_string(),
+                ..Default::default()
+            })
+            .set(WindowPlugin {
+                primary_window: Some(Window {
+                    resizable: false,
+                    mode: WindowMode::BorderlessFullscreen(MonitorSelection::Primary),
+                    recognize_rotation_gesture: true,
+                    prefers_home_indicator_hidden: true,
+                    prefers_status_bar_hidden: true,
+                    preferred_screen_edges_deferring_system_gestures: ScreenEdge::Bottom,
+                    ..default()
+                }),
                 ..default()
             }),
-            ..default()
-        }),
     )
     .insert_resource(WinitSettings::mobile())
     .add_systems(Startup, setup_scene)
     .run();
 }
 
-fn setup_scene(
-    mut commands: Commands,
-) {
+fn setup_scene(mut commands: Commands) {
     commands.spawn((
         Camera3d::default(),
         Transform::from_xyz(-2.0, 2.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
@@ -86,7 +86,7 @@ fn setup_scene(
                 right: Val::Px(50.0),
                 bottom: Val::Px(50.0),
                 ..default()
-            }
+            },
         ))
         .with_child((
             Text::new(format!("{:?}", PartialConfig::default(APP_NAME))),

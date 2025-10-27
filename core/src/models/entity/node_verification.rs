@@ -1,4 +1,3 @@
-
 use chrono::{DateTime, Local};
 use mtid::Dtid;
 use sea_orm::entity::prelude::*;
@@ -29,9 +28,7 @@ impl ActiveModelBehavior for ActiveModel {}
 mod tests {
     use super::*;
     use crate::{
-        models::{
-             entity::node_verification, migration::TestMigrator,
-        },
+        models::{entity::node_verification, migration::TestMigrator},
         tests::TEST_CONFIG,
     };
     use iroh::{PublicKey, SecretKey};
@@ -54,15 +51,8 @@ mod tests {
             created_at: Set(chrono::Local::now()),
             ..Default::default()
         };
-        let model = active_model
-            .clone()
-            .insert(db)
-            .await
-            .unwrap();
-        assert_eq!(
-            active_model.uuid.unwrap(),
-            model.uuid
-        );
+        let model = active_model.clone().insert(db).await.unwrap();
+        assert_eq!(active_model.uuid.unwrap(), model.uuid);
         assert_eq!(
             PublicKey::try_from(active_model.public_key.unwrap()).unwrap(),
             PublicKey::try_from(model.public_key).unwrap()

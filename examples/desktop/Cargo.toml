@@ -5,9 +5,16 @@ version.workspace = true
 description.workspace = true
 license.workspace = true
 repository.workspace = true
+publish = false
+
+[features]
+default = ["cli"]
+cli = ["caretta-sync/cli"]
+gui = ["caretta-sync/bevy", "caretta-sync-example-core/gui"]
 
 [dependencies]
 clap.workspace = true
-caretta-sync = { path = "../..", features = ["cli", "bevy", "test"] }
+caretta-sync = { path = "../..", features = ["test"] }
 caretta-sync-example-core.path = "../core"
+sea-orm-migration.workspace = true
 tokio.workspace = true

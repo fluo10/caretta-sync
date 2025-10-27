@@ -1,29 +1,31 @@
 use clap::Args;
 use iroh::PublicKey;
+use iroh_tickets::endpoint::EndpointTicket;
 use mtid::Dtid;
+
+use crate::cli::DeviceIdentifierArgs;
 
 /// Specify target authorization_request
 #[derive(Args, Clone, Debug)]
 #[group(multiple = false, required = true)]
 pub struct VerificationIdentifierArgs {
     #[arg(short, long)]
-    request_id: Option<Dtid>,
-    #[arg(short, long)]
-    device_id: Option<Dtid>,
-    #[arg(short, long)]
-    public_key: Option<PublicKey>,
+    verificaton_id: Option<Dtid>,
+    #[command(flatten)]
+    device: DeviceIdentifierArgs,
 }
 
-impl From<VerificationIdentifierArgs> for caretta_sync_core::proto::api::device_verification::Identifier {
+impl From<VerificationIdentifierArgs>
+    for caretta_sync_core::proto::api::device_verification::Identifier
+{
     fn from(value: VerificationIdentifierArgs) -> Self {
         use caretta_sync_core::proto::api::device_verification::identifier::Value;
-        Self{
-            value: Some( match (value.request_id, value.device_id, value.public_key) {
-                (Some(x), None, None) => Value::VerificationId(x.into()),
-                (None, Some(x), None) => Value::DeviceId(x.into()),
-                (None, None, Some(x)) => Value::PublicKey(x.into()),
-                (_, _, _) => unreachable!("The parsed argument must be one.")
-            })
+        Self {
+            value: Some(match (value.verificaton_id, value.device) {
+                (Some(x), _) => Value::VerificationId(x.into()),
+                (None, x) => Value::Device(x.into()),
+                (_, _) => unreachable!("The parsed argument must be one."),
+            }),
         }
     }
 }

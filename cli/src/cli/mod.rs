@@ -1,4 +1,3 @@
-
 mod args;
 mod config;
 mod device;

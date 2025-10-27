@@ -4,7 +4,7 @@ use caretta_sync_core::utils::emptiable::Emptiable;
 use caretta_sync_macros::Emptiable;
 
 #[derive(Debug, PartialEq, Emptiable)]
-struct EmptiableStruct{
+struct EmptiableStruct {
     vec: Vec<u8>,
     text: String,
     map: HashMap<u8, u8>,
@@ -16,11 +16,14 @@ struct EmptiableStruct{
 fn test() {
     use std::hash::Hash;
     let empty = EmptiableStruct::empty();
-    assert_eq!(&empty, &EmptiableStruct{
-        vec: Vec::new(),
-        text: String::new(),
-        map: HashMap::new(),
-        set: HashSet::new(),
-        opt: None,
-    })
+    assert_eq!(
+        &empty,
+        &EmptiableStruct {
+            vec: Vec::new(),
+            text: String::new(),
+            map: HashMap::new(),
+            set: HashSet::new(),
+            opt: None,
+        }
+    )
 }

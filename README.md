@@ -1,8 +1,8 @@
-# Caretta Framework
+# caretta-sync
 
-A local-first application framework.
+A device management and data synchronization library for local-first application.
 
 ## Features
 - Local first
-- Decentralized data synchronization with libp2p
+- Decentralized data synchronization with iroh-docs
 - Device management

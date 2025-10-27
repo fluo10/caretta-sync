@@ -22,11 +22,8 @@ struct RunnableStruct2 {
 
 #[tokio::test]
 async fn test() {
-    let runnable = RunnableStruct2{
-        runnable: RunnableEnum::Struct1(RunnableStruct1)
+    let runnable = RunnableStruct2 {
+        runnable: RunnableEnum::Struct1(RunnableStruct1),
     };
     runnable.run("runnable_app").await;
 }
-
-
-

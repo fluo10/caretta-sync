@@ -15,6 +15,7 @@ caretta-sync-core = { workspace = true, features = ["cli"] }
 clap.workspace = true
 dirs = "6.0.0"
 iroh.workspace = true
+iroh-tickets.workspace = true
 mtid.workspace = true
 sea-orm-migration.workspace = true
 serde.workspace = true

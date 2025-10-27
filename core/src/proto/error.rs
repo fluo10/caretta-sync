@@ -9,11 +9,13 @@ pub enum ProtoDeserializeError {
     #[error("Missing field: {0}")]
     MissingField(&'static str),
     #[error("Public key parsing error: {0}")]
-    PublicKeyParsing(#[from] iroh::KeyParsingError),
-    #[error("slice parse error: {0}")]
+    IrohPublicKeyParsing(#[from] iroh::KeyParsingError),
+    #[error("Ticket Parsing error: {0}")]
+    IrohTicketParsing(#[from] iroh_tickets::ParseError),
+    #[error("Invalid bytes length error: {0}")]
     SliceTryFrom(#[from] std::array::TryFromSliceError),
     #[error("Int parse error: {0}")]
     IntTryFrom(#[from] std::num::TryFromIntError),
     #[error("Unspecified enum: {0}")]
-    EnumUnspecified(&'static str)
+    EnumUnspecified(&'static str),
 }

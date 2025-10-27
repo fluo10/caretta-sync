@@ -1,7 +1,7 @@
 use caretta_sync_core::utils::runnable::Runnable;
 use clap::Args;
 
-use crate::cli::args::{ VerificationIdentifierArgs};
+use crate::cli::args::VerificationIdentifierArgs;
 
 /// Approve an authorization request
 #[derive(Args, Debug)]

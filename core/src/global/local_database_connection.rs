@@ -1,7 +1,4 @@
-use std::{
-    fs::create_dir_all,
-    path::Path,
-};
+use std::{fs::create_dir_all, path::Path};
 
 use sea_orm::{Database, DatabaseConnection};
 use sea_orm_migration::MigratorTrait;

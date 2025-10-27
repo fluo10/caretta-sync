@@ -5,6 +5,7 @@ version.workspace = true
 description.workspace = true
 license.workspace = true
 repository.workspace = true
+publish = false
 
 [[bin]]
 name = "caretta_sync_example"

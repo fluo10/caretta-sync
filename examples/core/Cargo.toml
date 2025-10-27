@@ -5,11 +5,18 @@ version.workspace = true
 description.workspace = true
 license.workspace = true
 repository.workspace = true
+publish = false
+
+[features]
+default=[]
+gui = ["caretta-sync/bevy"]
 
 [dependencies]
 bevy.workspace = true
 caretta-sync = { path = "../.." }
+iroh.workspace = true
 tokio.workspace = true
 tokio-stream = { version = "0.1.17", features = ["net"] }
 tonic.workspace = true
 url.workspace = true
+sea-orm-migration.workspace = true

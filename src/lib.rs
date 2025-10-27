@@ -10,13 +10,7 @@ pub use caretta_sync_mobile::*;
 #[cfg(feature = "macros")]
 pub mod utils {
     pub use caretta_sync_core::utils::{
-        runnable::Runnable,
-        emptiable::Emptiable,
-        mergeable::Mergeable,
+        emptiable::Emptiable, mergeable::Mergeable, runnable::Runnable,
     };
-    pub use caretta_sync_macros::{
-        Runnable,
-        Emptiable,
-        Mergeable,
-    };
+    pub use caretta_sync_macros::{Emptiable, Mergeable, Runnable};
 }

@@ -1,10 +1,7 @@
 use std::marker::PhantomData;
 
 use caretta_sync_core::{
-    config::Config,
-    global::CONFIG,
-    server::ServerTrait,
-    utils::runnable::Runnable,
+    config::Config, global::CONFIG, server::ServerTrait, utils::runnable::Runnable,
 };
 use clap::Args;
 use sea_orm_migration::MigratorTrait;
