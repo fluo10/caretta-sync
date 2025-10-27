@@ -1,2 +1,2 @@
-mod node_verification;
-mod verified_node;
+mod invitation_token;
+mod authorized_node;
