@@ -5,6 +5,7 @@ version.workspace = true
 description.workspace = true
 license.workspace = true
 repository.workspace = true
+exclude = ["/.github", "/.gitignore", "/.gitmodules", "/.vscode"]
 
 [features]
 default = ["macros"]
@@ -15,10 +16,10 @@ macros = ["dep:caretta-sync-macros"]
 test = ["caretta-sync-core/test"]
 
 [dependencies]
-caretta-sync-bevy = { path = "bevy", optional = true }
+caretta-sync-bevy = { path = "bevy", version = "0.0.2", optional = true }
 caretta-sync-core.workspace = true
-caretta-sync-cli = { path="cli", optional = true }
-caretta-sync-macros = { path="macros", optional = true}
+caretta-sync-cli = { path="cli", version = "0.0.2", optional = true }
+caretta-sync-macros = { path="macros", version = "0.0.2", optional = true}
 
 [dev-dependencies]
 caretta-sync-core = {workspace = true, features = ["test"]}
@@ -30,18 +31,18 @@ resolver = "3"
 
 [workspace.package]
 edition = "2024"
-version = "0.0.1"
+version = "0.0.2"
 description = "A local-first application framework for lazy person"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/caretta-sync" 
+repository = "https://github.com/fluo10/caretta-sync" 
 
 [workspace.dependencies]
-bevy = { git = "https://github.com/bevyengine/bevy.git", rev="16ffdaea0daec11e4347d965f56c9c8e1122a488"  }
+bevy = "0.17.2"
 mtid = { version = "0.6.0", features=["prost", "sea-orm", "serde",]}
 chrono = "0.4.41"
 ciborium = "0.2.2"
 clap = { version = "4.5.38", features = ["derive"] }
-caretta-sync-core.path = "core"
+caretta-sync-core = {version = "0.0.2", path = "core"}
 futures = { version = "0.3.31", features = ["executor"] }
 iroh = { version = "0.94.0", features = ["discovery-local-network", "discovery-pkarr-dht"] }
 iroh-tickets = "0.1.0"
