@@ -1,2 +1,2 @@
-mod invitation_token;
-mod authorized_node;
+pub mod invitation_token;
+pub mod authorized_device;

@@ -13,10 +13,11 @@ impl MigrationTrait for Migration {
                 db.execute_unprepared(
                     "CREATE TABLE invitation_token (
                         id             INTEGER PRIMARY KEY,
-                        uuid           BLOB NOT NULL UNIQUE,
+                        public_id      INTEGER NOT NULL,
                         created_at     TEXT NOT NULL,
                         expires_at     TEXT NOT NULL,
-                        used_at.       TEXT
+                        closed_at      TEXT,
+                        status         INTEGER NOT NULL
                     )",
                 )
                 .await?;

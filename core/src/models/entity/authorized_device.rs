@@ -14,7 +14,7 @@ use crate::models::types::PublicKeyBlob;
 /// - Once a remote_node is authorized, it is assigned a global (=synced) ID as authorized_remote_node so essentially this local id targets unauthorized remote_nodes.
 ///
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
-#[sea_orm(table_name = "authorized_node")]
+#[sea_orm(table_name = "authorized_device")]
 pub struct Model {
     /// serial primary key.
     #[sea_orm(primary_key)]
