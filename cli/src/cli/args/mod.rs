@@ -1,7 +1,7 @@
 mod config;
 mod device_identifier;
-mod verification_identifier;
+mod duration;
 
 pub use config::ConfigArgs;
 pub use device_identifier::DeviceIdentifierArgs;
-pub use verification_identifier::VerificationIdentifierArgs;
+pub use duration::DurationOptionArgs;
