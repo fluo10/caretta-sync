@@ -11,20 +11,18 @@ impl MigrationTrait for Migration {
             DbBackend::Sqlite => {
                 let db = manager.get_connection();
                 db.execute_unprepared(
-                    "CREATE TABLE node_verification (
+                    "CREATE TABLE invitation_token (
                         id             INTEGER PRIMARY KEY,
-                        uuid           BLOB NOT NULL UNIQUE,
-                        public_id      INTEGER NOT NULL UNIQUE,
-                        public_key     BLOB NOT NULL,
-                        status         INTEGER NOT NULL,
-                        node_info      TEXT NOT NULL,
+                        public_id      INTEGER NOT NULL,
                         created_at     TEXT NOT NULL,
-                        closed_at      TEXT
+                        expires_at     TEXT NOT NULL,
+                        closed_at      TEXT,
+                        status         INTEGER NOT NULL
                     )",
                 )
                 .await?;
                 db.execute_unprepared(
-                    "CREATE TABLE verified_node (
+                    "CREATE TABLE authorized_device (
                         id                       INTEGER PRIMARY KEY,
                         uuid                     BLOB UNIQUE NOT NULL,
                         public_id                INTEGER NOT NULL UNIQUE,

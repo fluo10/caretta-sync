@@ -8,6 +8,18 @@ pub struct DeviceServer;
 
 #[tonic::async_trait]
 impl device_service_server::DeviceService for DeviceServer {
+    async fn invite(
+        &self,
+        request: Request<InviteRequest>,
+    ) -> Result<Response<InviteResponse>, tonic::Status> {
+        todo!()
+    }
+    async fn join(
+        &self,
+        request: Request<JoinRequest>,
+    ) -> Result<Response<JoinResponse>, tonic::Status> {
+        todo!()
+    }
     async fn ping(
         &self,
         request: Request<PingRequest>,
