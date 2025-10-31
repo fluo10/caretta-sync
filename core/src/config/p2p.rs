@@ -14,13 +14,13 @@ use crate::{
 };
 
 #[derive(Clone, Debug)]
-pub struct IrohConfig {
+pub struct P2pConfig {
     pub enable: bool,
     pub secret_key: SecretKey,
     pub use_n0_discovery_service: bool,
 }
 
-impl IrohConfig {
+impl P2pConfig {
     async fn into_endpoint(config: Self) -> Result<Option<Endpoint>, crate::error::Error> {
         if config.enable {
             let mut endpoint = Endpoint::builder()
@@ -36,10 +36,10 @@ impl IrohConfig {
     }
 }
 
-impl TryFrom<PartialIrohConfig> for IrohConfig {
+impl TryFrom<PartialP2pConfig> for P2pConfig {
     type Error = crate::error::Error;
-    fn try_from(raw: PartialIrohConfig) -> Result<IrohConfig, Self::Error> {
-        Ok(IrohConfig {
+    fn try_from(raw: PartialP2pConfig) -> Result<P2pConfig, Self::Error> {
+        Ok(P2pConfig {
             enable: raw.enable.ok_or(Error::MissingConfig("iroh.enable"))?,
             secret_key: raw
                 .secret_key
@@ -53,7 +53,7 @@ impl TryFrom<PartialIrohConfig> for IrohConfig {
 
 #[cfg_attr(feature = "cli", derive(Args))]
 #[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct PartialIrohConfig {
+pub struct PartialP2pConfig {
     #[cfg_attr(feature = "cli", arg(long = "p2p_enable"))]
     pub enable: Option<bool>,
     #[cfg_attr(feature = "cli", arg(long))]
@@ -62,7 +62,7 @@ pub struct PartialIrohConfig {
     pub use_n0_discovery_service: Option<bool>,
 }
 
-impl PartialIrohConfig {
+impl PartialP2pConfig {
     pub fn with_new_secret_key(mut self) -> Self {
         self.secret_key = Some(SecretKey::generate(&mut rand::rng()));
         self
@@ -72,8 +72,8 @@ impl PartialIrohConfig {
     }
 }
 
-impl From<IrohConfig> for PartialIrohConfig {
-    fn from(config: IrohConfig) -> Self {
+impl From<P2pConfig> for PartialP2pConfig {
+    fn from(config: P2pConfig) -> Self {
         Self {
             enable: Some(config.enable),
             secret_key: Some(config.secret_key),
@@ -82,7 +82,7 @@ impl From<IrohConfig> for PartialIrohConfig {
     }
 }
 
-impl Default for PartialIrohConfig {
+impl Default for PartialP2pConfig {
     fn default() -> Self {
         Self {
             enable: Some(true),
@@ -92,7 +92,7 @@ impl Default for PartialIrohConfig {
     }
 }
 
-impl Emptiable for PartialIrohConfig {
+impl Emptiable for PartialP2pConfig {
     fn empty() -> Self {
         Self {
             enable: None,
@@ -108,7 +108,7 @@ impl Emptiable for PartialIrohConfig {
     }
 }
 
-impl Mergeable for PartialIrohConfig {
+impl Mergeable for PartialP2pConfig {
     fn merge(&mut self, mut other: Self) {
         if let Some(x) = other.enable.take() {
             let _ = self.enable.insert(x);
@@ -121,7 +121,7 @@ impl Mergeable for PartialIrohConfig {
         };
     }
 }
-impl Mergeable for Option<PartialIrohConfig> {
+impl Mergeable for Option<PartialP2pConfig> {
     fn merge(&mut self, mut other: Self) {
         if let Some(x) = other.take() {
             if let Some(y) = self.as_mut() {

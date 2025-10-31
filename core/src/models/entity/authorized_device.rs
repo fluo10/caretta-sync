@@ -42,7 +42,6 @@ impl ActiveModelBehavior for ActiveModel {}
 
 #[cfg(test)]
 mod tests {
-    use crate::{models::migration::TestMigrator, tests::TEST_CONFIG};
     use chrono::Local;
     use iroh::SecretKey;
     use rand::Rng;
@@ -51,10 +50,7 @@ mod tests {
     use super::*;
     #[tokio::test]
     async fn insert() {
-        let db = crate::global::LOCAL_DATABASE_CONNECTION
-            .get_or_try_init::<_, TestMigrator>(&TEST_CONFIG.storage.get_local_database_path())
-            .await
-            .unwrap();
+        let db = crate::tests::get_test_db().await;
 
         let active_model = ActiveModel {
             uuid: Set(Uuid::now_v7()),

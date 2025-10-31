@@ -1,5 +1,5 @@
 pub mod error;
-mod iroh;
+mod p2p;
 mod rpc;
 mod storage;
 
@@ -13,7 +13,7 @@ use std::{
     path::Path,
 };
 
-pub use iroh::{IrohConfig, PartialIrohConfig};
+pub use p2p::{P2pConfig, PartialP2pConfig};
 pub use rpc::*;
 pub use storage::{PartialStorageConfig, StorageConfig};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
@@ -23,7 +23,7 @@ use clap::Args;
 
 #[derive(Clone, Debug)]
 pub struct Config {
-    pub iroh: IrohConfig,
+    pub p2p: P2pConfig,
     pub storage: StorageConfig,
     pub rpc: RpcConfig,
 }
@@ -34,9 +34,9 @@ impl AsRef<StorageConfig> for Config {
     }
 }
 
-impl AsRef<IrohConfig> for Config {
-    fn as_ref(&self) -> &IrohConfig {
-        &self.iroh
+impl AsRef<P2pConfig> for Config {
+    fn as_ref(&self) -> &P2pConfig {
+        &self.p2p
     }
 }
 
@@ -54,8 +54,8 @@ impl TryFrom<PartialConfig> for Config {
                 .rpc
                 .ok_or(crate::error::Error::MissingConfig("rpc"))?
                 .try_into()?,
-            iroh: value
-                .iroh
+            p2p: value
+                .p2p
                 .ok_or(crate::error::Error::MissingConfig("p2p"))?
                 .try_into()?,
             storage: value
@@ -70,7 +70,7 @@ impl TryFrom<PartialConfig> for Config {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct PartialConfig {
     #[cfg_attr(feature = "cli", command(flatten))]
-    pub iroh: Option<PartialIrohConfig>,
+    pub p2p: Option<PartialP2pConfig>,
     #[cfg_attr(feature = "cli", command(flatten))]
     pub storage: Option<PartialStorageConfig>,
     #[cfg_attr(feature = "cli", command(flatten))]
@@ -86,7 +86,7 @@ impl Default for PartialConfig {
 impl PartialConfig {
     pub fn new() -> Self {
         Self {
-            iroh: Some(PartialIrohConfig::empty().with_new_secret_key()),
+            p2p: Some(PartialP2pConfig::empty().with_new_secret_key()),
             storage: Some(PartialStorageConfig::empty()),
             rpc: Some(PartialRpcConfig::empty()),
         }
@@ -138,7 +138,7 @@ impl PartialConfig {
     }
     pub fn default(app_name: &'static str) -> Self {
         Self {
-            iroh: Some(PartialIrohConfig::default()),
+            p2p: Some(PartialP2pConfig::default()),
             rpc: Some(PartialRpcConfig::default(app_name)),
             storage: Some(PartialStorageConfig::default(app_name)),
         }
@@ -148,7 +148,7 @@ impl PartialConfig {
 impl From<Config> for PartialConfig {
     fn from(value: Config) -> Self {
         Self {
-            iroh: Some(value.iroh.into()),
+            p2p: Some(value.p2p.into()),
             storage: Some(value.storage.into()),
             rpc: Some(value.rpc.into()),
         }
@@ -158,20 +158,20 @@ impl From<Config> for PartialConfig {
 impl Emptiable for PartialConfig {
     fn empty() -> Self {
         Self {
-            iroh: None,
+            p2p: None,
             storage: None,
             rpc: None,
         }
     }
 
     fn is_empty(&self) -> bool {
-        self.iroh.is_empty() && self.rpc.is_empty() && self.storage.is_empty()
+        self.p2p.is_empty() && self.rpc.is_empty() && self.storage.is_empty()
     }
 }
 
 impl Mergeable for PartialConfig {
     fn merge(&mut self, other: Self) {
-        self.iroh.merge(other.iroh);
+        self.p2p.merge(other.p2p);
         self.rpc.merge(other.rpc);
         self.storage.merge(other.storage);
     }
