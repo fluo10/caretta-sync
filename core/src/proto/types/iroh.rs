@@ -1,34 +1,25 @@
+use std::fmt::Display;
+
 use crate::proto::ProtoDeserializeError;
 
 tonic::include_proto!("caretta_sync.types.iroh");
 
-impl From<iroh::PublicKey> for EndpointId {
+impl From<iroh::PublicKey> for PublicKey {
     fn from(value: iroh::PublicKey) -> Self {
         Self {
             value: Vec::from(value.as_bytes()),
         }
     }
 }
-
-impl TryFrom<EndpointId> for iroh::PublicKey {
+impl Display for PublicKey {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        iroh::PublicKey::try_from(self).map_err(|_| std::fmt::Error)?.fmt(f)
+    }
+}
+impl TryFrom<&PublicKey> for iroh::PublicKey {
     type Error = ProtoDeserializeError;
-    fn try_from(value: EndpointId) -> Result<Self, Self::Error> {
+    fn try_from(value: &PublicKey) -> Result<Self, Self::Error> {
         let slice: [u8; 32] = value.value[0..32].try_into()?;
         Ok(iroh::PublicKey::from_bytes(&slice)?)
-    }
-}
-
-impl From<iroh_tickets::endpoint::EndpointTicket> for EndpointTicket {
-    fn from(value: iroh_tickets::endpoint::EndpointTicket) -> Self {
-        Self {
-            value: value.to_string(),
-        }
-    }
-}
-
-impl TryFrom<EndpointTicket> for iroh_tickets::endpoint::EndpointTicket {
-    type Error = ProtoDeserializeError;
-    fn try_from(value: EndpointTicket) -> Result<Self, Self::Error> {
-        Ok(value.value.parse()?)
     }
 }
