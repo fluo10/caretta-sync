@@ -78,7 +78,7 @@ impl ActiveModel {
 mod tests {
     use super::*;
     use crate::{
-        tests::TEST_CONFIG,
+        tests::CONFIG,
     };
     use iroh::{PublicKey, SecretKey};
     use rand::Rng;
@@ -86,7 +86,7 @@ mod tests {
 
     #[tokio::test]
     async fn insert() {
-        let db = crate::tests::get_test_db().await;
+        let db: &DatabaseConnection = crate::tests::get_server_context().await.as_ref();
 
 
         let active_model = ActiveModel {

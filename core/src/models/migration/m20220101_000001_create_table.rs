@@ -36,9 +36,10 @@ impl MigrationTrait for Migration {
                 db.execute_unprepared(
                     "CREATE TABLE p2p_config (
                         id INTEGER PRIMARY KEY CHECK (id = 0),
-                        enable                   BOOL NOT NULL,
-                        secret_key               BLOB NOT NULL,
-                        use_n0_discovery_service BOOL NOT NULL
+                        enabled     BOOL NOT NULL,
+                        secret_key  BLOB NOT NULL,
+                        enable_n0   BOOL NOT NULL,
+                        enable_mdns BOOL NOT NULL
                     )",
                 )
                 .await?;

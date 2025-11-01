@@ -16,3 +16,10 @@ pub use authorized_device::{
     Column as AuthorizedDeviceColumn,
     Entity as AuthorizedDeviceEntity,
 };
+
+pub use p2p_config::{
+    ActiveModel as P2pConfigActiveModel,
+    Model as P2pConfigModel,
+    Column as P2pConfigColumn,
+    Entity as P2pConfigEntity,
+};

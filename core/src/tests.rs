@@ -1,8 +1,10 @@
 use std::{fs::create_dir_all, path::PathBuf, sync::LazyLock};
+use crate::context::ServerContext;
+use crate::example::config::ExampleParsedConfig;
 use crate::example::migrator::ExampleMigrator;
 
 use crate::config::{
-    Config, PartialConfig, PartialP2pConfig, PartialRpcConfig, RpcConfig, StorageConfig,
+    ParsedConfig, PartialP2pConfig, PartialRpcConfig, PartialStorageConfig, RpcConfig, StorageConfig
 };
 use sea_orm::{Database, DatabaseConnection};
 use sea_orm_migration::MigratorTrait;
@@ -12,46 +14,32 @@ use url::Url;
 
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 
-pub static TEST_CONFIG: LazyLock<Config> = LazyLock::new(|| {
+const TEST_APP_NAME: &str = "caretta-sync-test";
+
+pub static CONFIG: LazyLock<ExampleParsedConfig> = LazyLock::new(|| {
     let test_dir = tempfile::Builder::new()
-        .prefix("caretta-sync")
+        .prefix(TEST_APP_NAME)
         .tempdir()
         .unwrap()
         .keep();
     let data_dir = test_dir.join("data");
     let cache_dir = test_dir.join("cache");
 
-    Config {
-        p2p: PartialP2pConfig::default()
-            .with_new_secret_key()
-            .try_into()
-            .unwrap(),
-        storage: StorageConfig {
-            data_directory: data_dir,
-            cache_directory: cache_dir,
-        },
-        rpc: RpcConfig {
-            endpoint_url: Url::parse(
-                &(String::from("unix://") + test_dir.join("socket.sock").to_str().unwrap()),
-            )
-            .unwrap(),
-        },
+    ExampleParsedConfig {
+        p2p: None,
+        storage: Some(
+            PartialStorageConfig {
+                data_dir: Some(data_dir),
+                cache_dir: Some(cache_dir),
+            }
+        ),
+        rpc: Some(PartialRpcConfig::default(TEST_APP_NAME)),
     }
 });
 
-static TEST_DB: tokio::sync::OnceCell<DatabaseConnection> = OnceCell::const_new();
-pub async fn get_test_db() -> &'static DatabaseConnection {
-    TEST_DB.get_or_init(|| async{
-        let path = TEST_CONFIG.storage.get_local_database_path();
-        let parent = path
-            .parent()
-            .expect("Database path should have parent directory");
-        create_dir_all(parent).expect("Failed to create parent directory of database");
-        let url = "sqlite://".to_owned()
-            + path.to_str().expect("Invalid path string")
-            + "?mode=rwc";
-        let db = Database::connect(url).await.unwrap();
-        ExampleMigrator::up(&db, None).await.unwrap();
-        db
+pub static SERVER_CONTEXT: OnceCell<ServerContext> = OnceCell::const_new();
+pub async fn get_server_context() -> &'static ServerContext {
+    SERVER_CONTEXT.get_or_init(|| async  {
+        ServerContext::from_parsed_config::<_,ExampleMigrator>((*CONFIG).clone()).await.unwrap()
     }).await
 }

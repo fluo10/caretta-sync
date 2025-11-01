@@ -46,11 +46,12 @@ mod tests {
     use iroh::SecretKey;
     use rand::Rng;
     use sea_orm::ActiveValue::Set;
+    use tracing_subscriber::registry::Data;
 
     use super::*;
     #[tokio::test]
     async fn insert() {
-        let db = crate::tests::get_test_db().await;
+        let db: &DatabaseConnection = crate::tests::get_server_context().await.as_ref();
 
         let active_model = ActiveModel {
             uuid: Set(Uuid::now_v7()),

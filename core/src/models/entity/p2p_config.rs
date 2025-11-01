@@ -12,9 +12,10 @@ pub struct Model {
     /// serial primary key.
     #[sea_orm(primary_key)]
     pub id: u32,
-    pub enable: bool,
+    pub enabled: bool,
     pub secret_key: SecretKeyBlob,
-    pub use_n0_discovery_service: bool,
+    pub enable_n0: bool,
+    pub enable_mdns: bool,
 }
 
 impl Model {
@@ -24,9 +25,10 @@ impl Model {
         } else {
             Ok(ActiveModel {
                 id: Set(ID),
-                enable: Set(true),
+                enabled: Set(true),
                 secret_key: Set(SecretKey::generate(&mut rand::rng()).into()),
-                use_n0_discovery_service: Set(true),
+                enable_n0: Set(true),
+                enable_mdns: Set(true)
             }.insert(db).await?)
         }
     }
@@ -47,7 +49,7 @@ mod tests {
     use super::*;
     #[tokio::test]
     async fn insert() {
-        let db = crate::tests::get_test_db().await;
+        let db: &DatabaseConnection = crate::tests::get_server_context().await.as_ref();
 
         let model = Model::get_or_try_init(db).await.unwrap();
         assert_eq!(model.id, ID);
