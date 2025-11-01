@@ -35,7 +35,11 @@ pub enum Error {
     #[error("Local record error: {0}")]
     LocalDb(#[from] sea_orm::DbErr),
     #[error("Tripod id error: {0}")]
-    TripodId(#[from] mtid::Error),
+    Mtid(#[from] mtid::Error),
+    #[error("Docs open error: {0}")]
+    DocsOpen(anyhow::Error),
+    #[error("Tonic transport error: {0}")]
+    TonicTransport(#[from] tonic::transport::Error)
 }
 
 impl From<std::ffi::OsString> for Error {

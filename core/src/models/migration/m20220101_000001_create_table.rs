@@ -33,6 +33,16 @@ impl MigrationTrait for Migration {
                     )",
                 )
                 .await?;
+                db.execute_unprepared(
+                    "CREATE TABLE p2p_config (
+                        id INTEGER PRIMARY KEY CHECK (id = 0),
+                        enabled     BOOL NOT NULL,
+                        secret_key  BLOB NOT NULL,
+                        enable_n0   BOOL NOT NULL,
+                        enable_mdns BOOL NOT NULL
+                    )",
+                )
+                .await?;
                 Ok(())
             }
             _ => Err(DbErr::Migration("Unsupported backend db".to_string())),

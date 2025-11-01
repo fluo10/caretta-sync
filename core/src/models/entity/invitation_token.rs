@@ -1,12 +1,12 @@
 use core::time;
 use std::convert::Infallible;
 
-use chrono::{DateTime, Duration, Local};
+use chrono::{DateTime, Duration, DurationRound, Local, SubsecRound};
 use mtid::Dtid;
 use sea_orm::{entity::prelude::*, ActiveValue::Set};
 use uuid::Uuid;
 
-use crate::{models::{types::TokenStatus, ModelsError}, token::InvitationToken};
+use crate::{models::{types::TokenStatus, ModelsError}, invitation_token::InvitationToken};
 
 /// Request of node authorization.
 #[derive(Debug, Clone, PartialEq, Eq, DeriveEntityModel)]
@@ -18,6 +18,10 @@ pub struct Model {
     /// Public [`Dtid`]
     pub public_id: Dtid,
     pub created_at: DateTime<Local>,
+
+    /// The timestamp when the token expires
+    /// 
+    /// Since the token does not contain subseconds, this timestamp is also rounded to the newarest second.
     pub expires_at: DateTime<Local>,
     pub closed_at: Option<DateTime<Local>>,
     pub status: TokenStatus
@@ -63,7 +67,7 @@ impl ActiveModel {
         let timestamp = Local::now();
         Self {
             created_at: Set(timestamp.clone()),
-            expires_at: Set(timestamp + duration),
+            expires_at: Set((timestamp + duration).round_subsecs(0)),
             status: Set(TokenStatus::default()),
             ..Default::default()
         }
@@ -74,8 +78,7 @@ impl ActiveModel {
 mod tests {
     use super::*;
     use crate::{
-        models::{entity::invitation_token, migration::TestMigrator},
-        tests::TEST_CONFIG,
+        tests::CONFIG,
     };
     use iroh::{PublicKey, SecretKey};
     use rand::Rng;
@@ -83,10 +86,8 @@ mod tests {
 
     #[tokio::test]
     async fn insert() {
-        let db = crate::global::LOCAL_DATABASE_CONNECTION
-            .get_or_try_init::<_, TestMigrator>(&TEST_CONFIG.storage.get_local_database_path())
-            .await
-            .unwrap();
+        let db: &DatabaseConnection = crate::tests::get_server_context().await.as_ref();
+
 
         let active_model = ActiveModel {
             created_at: Set(chrono::Local::now()),

@@ -4,6 +4,9 @@ pub use error::InvitationTokenDeserializeError;
 use chrono::{DateTime, Duration, SubsecRound, Utc};
 use iroh::{Endpoint, EndpointId};
 use mtid::Dtid;
+use sea_orm::DatabaseConnection;
+
+use crate::error::Error;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct InvitationToken{
@@ -24,7 +27,7 @@ impl InvitationToken {
     const EXPIRES_AT_LENGTH: usize = (i64::BITS / 8) as usize;
     const EXPIRES_AT_END: usize = Self::EXPIRES_AT_START + Self::EXPIRES_AT_LENGTH;
 
-    pub fn new(endpoint_id: EndpointId, model: crate::models::invitation_token::Model) -> Self {
+    pub fn new(endpoint_id: EndpointId, model: crate::models::InvitationTokenModel) -> Self {
         Self {
             endpoint_id: endpoint_id,
             token_id: model.public_id,
@@ -50,6 +53,13 @@ impl InvitationToken {
         
         Ok(Self { endpoint_id, token_id, expires_at })
     }
+    pub async fn validate(self, local_endpoint: &Endpoint, db: DatabaseConnection) -> Result<bool, Error> {
+        if self.endpoint_id != local_endpoint.id() {
+            return Ok(false);
+        }
+        todo!()
+    }
+
 }
 
 #[cfg(test)]

@@ -1,9 +1,10 @@
-use url::Url;
+use http::uri::InvalidUri;
+use sea_orm::DbErr;
 
 #[derive(thiserror::Error, Debug)]
 pub enum ConfigError {
     #[error("missing config: {0}")]
-    MissingConfig(String),
+    MissingConfig(&'static str),
     #[error("Io error: {0}")]
     Io(#[from] std::io::Error),
     #[error("Toml Deserialization Error")]
@@ -11,5 +12,7 @@ pub enum ConfigError {
     #[error("Toml Serialization Error")]
     TomlSerialization(#[from] toml::ser::Error),
     #[error("Invalid url: {0}")]
-    InvalidUrl(Url),
+    UriInvalid(#[from] InvalidUri),
+    #[error("Db Error: {0}")]
+    Db(#[from] DbErr),
 }

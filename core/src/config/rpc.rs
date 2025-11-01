@@ -20,7 +20,7 @@ impl TryFrom<PartialRpcConfig> for RpcConfig {
         Ok(Self {
             endpoint_url: config
                 .endpoint_url
-                .ok_or(ConfigError::MissingConfig("endpoint".to_string()))?,
+                .ok_or(ConfigError::MissingConfig("rpc.endpoint"))?,
         })
     }
 }
