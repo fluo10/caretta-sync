@@ -13,9 +13,9 @@ impl ClientContext {
 
     /// Convert context from [`ParsedConfig`]
     pub fn from_parsed_config<T>(config: T) -> Result<Self, ConfigError>
-    where T: ParsedConfig
+    where T: AsRef<ParsedConfig>
     {
-        let rpc_config = config.to_rpc_config()?;
+        let rpc_config = config.as_ref().to_rpc_config()?;
         Ok(Self{rpc_config})
 
     }
@@ -27,9 +27,9 @@ impl AsRef<ClientContext> for ClientContext {
     }
 }
 
-impl TryFrom<ClientContext> for Endpoint {
+impl TryFrom<&ClientContext> for Endpoint {
     type Error = Error;
-    fn try_from(value: ClientContext) -> Result<Self, Self::Error> {
+    fn try_from(value: &ClientContext) -> Result<Self, Self::Error> {
         Ok(value.rpc_config.endpoint_url.to_string().try_into()?)
     }
 }

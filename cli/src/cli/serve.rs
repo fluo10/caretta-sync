@@ -1,12 +1,11 @@
 use std::marker::PhantomData;
 
-use caretta_sync_core::{
-    config::Config, global::CONFIG, server::ServerTrait, utils::runnable::Runnable,
+use caretta_sync_core::{ server::ServerTrait, utils::runnable::Runnable,
 };
 use clap::Args;
 use sea_orm_migration::MigratorTrait;
 
-use super::ConfigArgs;
+use super::ConfigOptionArgs;
 
 #[derive(Args, Debug)]
 pub struct ServeCommandArgs<M, S>
@@ -19,7 +18,7 @@ where
     #[arg(skip)]
     server: PhantomData<S>,
     #[command(flatten)]
-    config: ConfigArgs,
+    config: ConfigOptionArgs,
 }
 impl<M, S> Runnable for ServeCommandArgs<M, S>
 where
@@ -28,9 +27,7 @@ where
 {
     #[tokio::main]
     async fn run(self, app_name: &'static str) {
-        let config = CONFIG
-            .get_or_init::<Config>(self.config.into_config(app_name).await)
-            .await;
-        S::serve::<_, M>(config).await.unwrap();
+        let context = self.config.into_server_context(app_name).await;
+        //S::serve::<_, M>(config).await.unwrap();
     }
 }

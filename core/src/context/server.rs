@@ -13,11 +13,12 @@ pub struct ServerContext {
     pub iroh_endpoint: Option<Endpoint>,
 }
 impl ServerContext {
-    pub async fn from_parsed_config<T,M>(config: T) -> Result<Self, Error> 
+    pub async fn from_parsed_config<T,M>(config: T, _: M) -> Result<Self, Error> 
     where
-        T: ParsedConfig,
+        T: AsRef<ParsedConfig>,
         M: MigratorTrait,
     {
+        let config = config.as_ref();
         let rpc_config = config.to_rpc_config()?;
         let p2p_config = config.to_p2p_config::<M>().await?;
         let storage_config = config.to_storage_config()?;

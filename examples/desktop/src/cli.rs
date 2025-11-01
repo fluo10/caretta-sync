@@ -10,7 +10,7 @@ pub struct Cli {
     #[command(subcommand)]
     command: Option<CliCommand>,
     #[command(flatten)]
-    config: ConfigArgs,
+    config: ConfigOptionArgs,
 }
 
 impl Runnable for Cli {

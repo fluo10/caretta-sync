@@ -1,11 +1,11 @@
-use crate::cli::ConfigArgs;
-use caretta_sync_core::{config::PartialConfig, utils::runnable::Runnable};
+use crate::cli::ConfigOptionArgs;
+use caretta_sync_core::{config::ParsedConfig, example::migrator::ExampleMigrator, utils::runnable::Runnable};
 use clap::Args;
 
 #[derive(Debug, Args)]
 pub struct ConfigListCommandArgs {
     #[command(flatten)]
-    config: ConfigArgs,
+    config: ConfigOptionArgs,
     #[arg(short, long)]
     all: bool,
 }
@@ -13,13 +13,14 @@ pub struct ConfigListCommandArgs {
 impl Runnable for ConfigListCommandArgs {
     #[tokio::main]
     async fn run(self, app_name: &'static str) {
-        let config: PartialConfig = if self.all {
-            self.config.into_config(app_name).await.into()
-        } else {
-            self.config
-                .to_partial_config_without_default(app_name)
-                .await
+        let mut config = self.config.into_parsed_config(app_name);
+         if self.all {            
+            config = ParsedConfig {
+                storage: Some(config.to_storage_config().unwrap().into()),
+                p2p: Some(config.to_p2p_config::<ExampleMigrator>().await.unwrap().into()),
+                rpc: Some(config.to_rpc_config().unwrap().into())
+            }
         };
-        println!("{}", config.into_toml().unwrap())
+        println!("{}", config)
     }
 }

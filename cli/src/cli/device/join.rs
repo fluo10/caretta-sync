@@ -1,11 +1,11 @@
-use crate::cli::{ConfigArgs, DeviceIdentifierArgs};
+use crate::cli::{ConfigOptionArgs, DeviceIdentifierArgs};
 use caretta_sync_core::utils::runnable::Runnable;
 use clap::Args;
 
 #[derive(Debug, Args)]
 pub struct DeviceJoinCommandArgs {
     #[command(flatten)]
-    config: ConfigArgs,
+    config: ConfigOptionArgs,
     #[command(flatten)]
     peer: DeviceIdentifierArgs,
 }

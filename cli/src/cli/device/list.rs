@@ -1,11 +1,11 @@
-use crate::cli::ConfigArgs;
+use crate::cli::ConfigOptionArgs;
 use caretta_sync_core::utils::runnable::Runnable;
 use clap::Args;
 
 #[derive(Debug, Args)]
 pub struct DeviceListCommandArgs {
     #[command(flatten)]
-    config: ConfigArgs,
+    config: ConfigOptionArgs,
 }
 
 impl Runnable for DeviceListCommandArgs {

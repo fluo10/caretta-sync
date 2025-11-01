@@ -15,4 +15,6 @@ pub enum ConfigError {
     UriInvalid(#[from] InvalidUri),
     #[error("Db Error: {0}")]
     Db(#[from] DbErr),
+    #[error("Failed to get config dir")]
+    ConfigDir,
 }

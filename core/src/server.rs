@@ -11,6 +11,6 @@ use crate::{
 pub trait ServerTrait: Send + Sync {
     async fn serve<C, M>(config: &C) -> Result<(), Error>
     where
-        C: ParsedConfig,
+        C: AsRef<ParsedConfig>,
         M: MigratorTrait;
 }
