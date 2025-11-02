@@ -1,10 +1,11 @@
-use std::path::PathBuf;
+use std::{marker::PhantomData, path::PathBuf};
 
 use caretta_sync_core::{
-    config::ParsedConfig, context::{ClientContext, ServerContext}, example::migrator::ExampleMigrator, utils::{emptiable::Emptiable, mergeable::Mergeable}
+    config::ParsedConfig, context::{ClientContext, ServerContext}, utils::{emptiable::Emptiable, mergeable::Mergeable}
 };
 use clap::Args;
 
+use sea_orm_migration::MigratorTrait;
 use tokio::sync::OnceCell;
 
 #[derive(Args, Clone, Debug)]
@@ -19,10 +20,11 @@ pub struct ConfigOptionArgs
 impl ConfigOptionArgs
 {
     pub fn into_parsed_config(self, app_name: &'static str) -> ParsedConfig {
-        let mut config = match self.file_path {
+        let mut config = ParsedConfig::default(app_name);
+        config.merge(match self.file_path {
             Some(x) => ParsedConfig::read_or_create_from_path(x).unwrap(),
             None => ParsedConfig::read_or_create(app_name).unwrap()
-        };
+        });
         config.merge(self.args);
         config
     }
@@ -30,7 +32,10 @@ impl ConfigOptionArgs
     pub fn into_client_context(self, app_name: &'static str) -> ClientContext {
         ClientContext::from_parsed_config(self.into_parsed_config(app_name)).unwrap()
     }
-    pub async fn into_server_context(self, app_name: &'static str) -> ServerContext {
-        ServerContext::from_parsed_config(self.into_parsed_config(app_name),ExampleMigrator).await.unwrap()
+    pub async fn into_server_context<M>(self, app_name: &'static str, migrator: PhantomData<M>) -> ServerContext
+    where 
+        M: MigratorTrait
+    {
+        ServerContext::from_parsed_config(self.into_parsed_config(app_name),migrator).await.unwrap()
     }
 }

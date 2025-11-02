@@ -12,6 +12,7 @@ default=[]
 gui = ["caretta-sync/bevy"]
 
 [dependencies]
+async-trait.workspace = true
 bevy.workspace = true
 caretta-sync = { path = "../.." }
 iroh.workspace = true

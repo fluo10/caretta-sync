@@ -1,8 +1,10 @@
+#[cfg(feature = "gui")]
+use caretta_sync_example_core::gui::Gui;
 use caretta_sync_example_core::{models::migration::Migrator, server::Server};
 #[cfg(feature = "gui")]
 mod gui;
 
-use caretta_sync::{cli::*, config::Config, global::CONFIG, utils::Runnable};
+use caretta_sync::{cli::{option::ConfigOptionArgs, *}, utils::Runnable};
 use clap::{Parser, Subcommand};
 
 #[derive(Debug, Parser)]
@@ -19,7 +21,7 @@ impl Runnable for Cli {
             x.run(app_name)
         } else {
             #[cfg(feature = "gui")]
-            gui::main();
+            Gui{}.run(app_name);
             #[cfg(not(feature = "gui"))]
             todo!()
         }
@@ -28,8 +30,7 @@ impl Runnable for Cli {
 
 #[derive(Debug, Subcommand, Runnable)]
 pub enum CliCommand {
-    Config(ConfigCommandArgs),
+    Config(ConfigCommandArgs<Migrator>),
     Device(DeviceCommandArgs),
-    Peer(DeviceCommandArgs),
     Serve(ServeCommandArgs<Migrator, Server>),
 }

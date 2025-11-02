@@ -3,7 +3,7 @@ use sea_orm_migration::MigratorTrait;
 use serde::{ser::Error, Deserialize, Serialize};
 
 use crate::{config::{ConfigError, P2pConfig, PartialP2pConfig, PartialRpcConfig, PartialStorageConfig, RpcConfig, StorageConfig}, context::{ClientContext, ServerContext}, models::P2pConfigModel, utils::{emptiable::Emptiable, mergeable::Mergeable}};
-use std::{fmt::{write, Display}, fs::File, io::Read, path::{Path, PathBuf}};
+use std::{fmt::{Display, write}, fs::File, io::Read, marker::PhantomData, path::{Path, PathBuf}};
 
 #[cfg_attr(feature="cli", derive(clap::Args))]
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -21,13 +21,21 @@ pub struct ParsedConfig {
 /// A partial config parsed from config file, cli args, etc.
 impl ParsedConfig {
 
+    pub fn default(app_name: &'static str) -> Self {
+        Self {
+            storage: Some(PartialStorageConfig::default(app_name)),
+            rpc: Some(PartialRpcConfig::default(app_name)),
+            p2p: None,
+        }
+    }
+
     /// Build [`StorageConfig`] from own [`PartialStorageConfig`]
     pub fn to_storage_config(&self) -> Result<StorageConfig, ConfigError> {
         self.storage.as_ref().ok_or(ConfigError::MissingConfig("[storage]"))?.clone().try_into()
     }
 
     /// Build [`P2pConfig`] from own [`PartialP2pConfig`]
-    pub async fn to_p2p_config<T>(&self) -> Result<P2pConfig, ConfigError>
+    pub async fn to_p2p_config<T>(&self, _: PhantomData<T>) -> Result<P2pConfig, ConfigError>
     where T: MigratorTrait
     {
         let p2p_config = self.p2p.clone().unwrap_or(PartialP2pConfig::empty());

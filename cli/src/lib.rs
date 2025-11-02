@@ -3,6 +3,6 @@ mod config;
 mod device;
 mod serve;
 
-pub use config::*;
-pub use device::*;
-pub use serve::*;
+pub use config::ConfigCommandArgs;
+pub use device::DeviceCommandArgs;
+pub use serve::ServeCommandArgs;

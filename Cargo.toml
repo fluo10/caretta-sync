@@ -37,6 +37,7 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/fluo10/caretta-sync" 
 
 [workspace.dependencies]
+async-trait = "0.1.89"
 bevy = "0.17.2"
 mtid = { version = "0.6.0", features=["prost", "sea-orm", "serde",]}
 chrono = "0.4.41"

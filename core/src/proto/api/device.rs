@@ -1,10 +1,20 @@
-use std::pin::Pin;
+use std::{pin::Pin, sync::Arc};
 
 use futures::Stream;
 use tonic::{Request, Response, Streaming};
 
+use crate::context::ServerContext;
+
 tonic::include_proto!("caretta_sync.api.device");
-pub struct DeviceServer;
+pub struct DeviceServer{
+    context: Arc<ServerContext>
+}
+
+impl DeviceServer {
+    pub fn new(context: Arc<ServerContext>) -> Self {
+        Self{context}
+    }
+}
 
 #[tonic::async_trait]
 impl device_service_server::DeviceService for DeviceServer {
