@@ -1,29 +1,29 @@
-use caretta_sync_core::utils::runnable::Runnable;
-use caretta_sync_macros::Runnable;
+use caretta_sync_cli::RunnableCommand;
+use caretta_sync_macros::RunnableCommand;
 
-struct RunnableStruct1;
+struct RunnableCommandStruct1;
 
-impl Runnable for RunnableStruct1 {
-    async fn run(self, app_name: &'static str) {
-        print!("Run {}", stringify!(RunnableStruct1::run()))
+impl RunnableCommand for RunnableCommandStruct1 {
+    fn run(self, app_name: &'static str) {
+        print!("Run {}", stringify!(RunnableCommandStruct1::run()))
     }
 }
 
-#[derive(Runnable)]
-enum RunnableEnum {
-    Struct1(RunnableStruct1),
+#[derive(RunnableCommand)]
+enum RunnableCommandEnum {
+    Struct1(RunnableCommandStruct1),
 }
 
-#[derive(Runnable)]
-struct RunnableStruct2 {
-    #[runnable]
-    runnable: RunnableEnum,
+#[derive(RunnableCommand)]
+struct RunnableCommandStruct2 {
+    #[runnable_command]
+    runnable: RunnableCommandEnum,
 }
 
 #[tokio::test]
 async fn test() {
-    let runnable = RunnableStruct2 {
-        runnable: RunnableEnum::Struct1(RunnableStruct1),
+    let runnable = RunnableCommandStruct2 {
+        runnable: RunnableCommandEnum::Struct1(RunnableCommandStruct1),
     };
-    runnable.run("runnable_app").await;
+    runnable.run("runnable_app");
 }

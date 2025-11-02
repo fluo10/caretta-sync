@@ -3,10 +3,8 @@ use std::marker::PhantomData;
 use iroh::Endpoint;
 use sea_orm::{Database, DatabaseConnection};
 use sea_orm_migration::MigratorTrait;
-use tonic::transport::Server;
-use tracing_subscriber::registry::Data;
 
-use crate::{config::{P2pConfig, ParsedConfig, RpcConfig, StorageConfig}, error::Error};
+use crate::{config::{LogConfig, P2pConfig, ParsedConfig, RpcConfig, StorageConfig}, error::Error};
 
 pub struct ServerContext {
     pub rpc_config: RpcConfig,
@@ -26,7 +24,6 @@ impl ServerContext {
         let storage_config = config.to_storage_config()?;
         let database_connection = storage_config.to_database_connection::<M>().await?;
         let iroh_endpoint = p2p_config.to_endpoint().await?;
-
         Ok(Self { rpc_config, storage_config, database_connection, iroh_endpoint })
     }
 

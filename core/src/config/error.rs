@@ -1,6 +1,8 @@
 use http::uri::InvalidUri;
 use sea_orm::DbErr;
 
+use crate::config::LogLevelParseError;
+
 #[derive(thiserror::Error, Debug)]
 pub enum ConfigError {
     #[error("missing config: {0}")]
@@ -17,4 +19,6 @@ pub enum ConfigError {
     Db(#[from] DbErr),
     #[error("Failed to get config dir")]
     ConfigDir,
+    #[error("Invalid log level: {0}")]
+    LogLevel(#[from] LogLevelParseError),
 }

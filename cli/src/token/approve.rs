@@ -1,4 +1,4 @@
-use caretta_sync_core::utils::runnable::Runnable;
+use caretta_sync_core::utils::runnable::RunnableCommand;
 use clap::Args;
 use mtid::Dtid;
 
@@ -12,7 +12,7 @@ struct ApproveCommandArgs {
     passcode: Dtid,
 }
 
-impl Runnable for ApproveCommandArgs {
+impl RunnableCommand for ApproveCommandArgs {
     fn run(self, app_name: &'static str) {
         todo!()
     }

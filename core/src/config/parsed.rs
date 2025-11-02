@@ -2,7 +2,7 @@ use base64::engine::Config;
 use sea_orm_migration::MigratorTrait;
 use serde::{ser::Error, Deserialize, Serialize};
 
-use crate::{config::{ConfigError, P2pConfig, PartialP2pConfig, PartialRpcConfig, PartialStorageConfig, RpcConfig, StorageConfig}, context::{ClientContext, ServerContext}, models::P2pConfigModel, utils::{emptiable::Emptiable, mergeable::Mergeable}};
+use crate::{config::{ConfigError, LogConfig, P2pConfig, PartialP2pConfig, PartialRpcConfig, PartialStorageConfig, RpcConfig, StorageConfig, log::PartialLogConfig}, context::{ClientContext, ServerContext}, models::P2pConfigModel, utils::{emptiable::Emptiable, mergeable::Mergeable}};
 use std::{fmt::{Display, write}, fs::File, io::Read, marker::PhantomData, path::{Path, PathBuf}};
 
 #[cfg_attr(feature="cli", derive(clap::Args))]
@@ -14,6 +14,9 @@ pub struct ParsedConfig {
     pub rpc: Option<PartialRpcConfig>,
     #[cfg_attr(feature="cli", command(flatten))]
     pub p2p: Option<PartialP2pConfig>,
+    #[cfg_attr(feature="cli", command(flatten))]
+    pub log: Option<PartialLogConfig>,
+
 }
 
 
@@ -26,6 +29,7 @@ impl ParsedConfig {
             storage: Some(PartialStorageConfig::default(app_name)),
             rpc: Some(PartialRpcConfig::default(app_name)),
             p2p: None,
+            log: Some(PartialLogConfig::default(app_name))
         }
     }
 
@@ -50,7 +54,10 @@ impl ParsedConfig {
     pub fn to_rpc_config(&self) -> Result<RpcConfig, ConfigError> {
         self.rpc.as_ref().ok_or(ConfigError::MissingConfig("rpc.*"))?.clone().try_into()
     }
-
+    /// Build [`LogConfig`] from own [`PartialLogConfig`]
+    pub fn to_log_config(&self) -> Result<LogConfig, ConfigError> {
+        self.log.as_ref().ok_or(ConfigError::MissingConfig("log.*"))?.clone().try_into()
+    }
     /// Read or create target config file
     pub fn read_or_create_from_path<T>(path: T) -> Result<Self, ConfigError>
     where
@@ -97,11 +104,12 @@ impl Emptiable for ParsedConfig {
             p2p: None,
             storage: None,
             rpc: None,
+            log: None,
         }
     }
 
     fn is_empty(&self) -> bool {
-        self.p2p.is_empty() && self.rpc.is_empty() && self.storage.is_empty()
+        self.p2p.is_empty() && self.rpc.is_empty() && self.storage.is_empty() && self.log.is_empty()
     }
 }
 
@@ -110,6 +118,7 @@ impl Mergeable for ParsedConfig {
         self.p2p.merge(other.p2p);
         self.rpc.merge(other.rpc);
         self.storage.merge(other.storage);
+        self.log.merge(other.log);
     }
 }
 

@@ -1,9 +1,10 @@
 use bevy::prelude::*;
-use caretta_sync::{bevy::peer::PeerPlugin, utils::Runnable};
+use caretta_sync::{bevy::peer::PeerPlugin, cli::RunnableCommand};
+
 
 pub struct Gui {}
 
-impl Runnable for Gui {
+impl RunnableCommand for Gui {
     fn run(self, app_name: &'static str) {
         App::new()
             //.add_plugins(DefaultPlugins)

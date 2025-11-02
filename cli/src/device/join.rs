@@ -1,5 +1,4 @@
-use crate::option::{ConfigOptionArgs, DeviceIdentifierArgs};
-use caretta_sync_core::utils::runnable::Runnable;
+use crate::{RunnableCommand, option::{ConfigOptionArgs, DeviceIdentifierArgs}};
 use clap::Args;
 
 #[derive(Debug, Args)]
@@ -10,7 +9,7 @@ pub struct DeviceJoinCommandArgs {
     peer: DeviceIdentifierArgs,
 }
 
-impl Runnable for DeviceJoinCommandArgs {
+impl RunnableCommand for DeviceJoinCommandArgs {
     fn run(self, app_name: &'static str) {
         todo!()
     }

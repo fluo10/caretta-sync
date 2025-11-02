@@ -1,7 +1,7 @@
 use std::{marker::PhantomData, path::PathBuf};
 
 use caretta_sync_core::{
-    config::ParsedConfig, context::{ClientContext, ServerContext}, utils::{emptiable::Emptiable, mergeable::Mergeable}
+    config::{LogConfig, ParsedConfig}, context::{ClientContext, ServerContext}, utils::{emptiable::Emptiable, mergeable::Mergeable}
 };
 use clap::Args;
 
@@ -11,7 +11,7 @@ use tokio::sync::OnceCell;
 #[derive(Args, Clone, Debug)]
 pub struct ConfigOptionArgs
 {
-    #[arg(short = 'c', long = "config")]
+    #[arg(short = 'c', long = "config_path", global = true, env = "CONFIG_PATH")]
     pub file_path: Option<PathBuf>,
     #[command(flatten)]
     pub args: ParsedConfig,

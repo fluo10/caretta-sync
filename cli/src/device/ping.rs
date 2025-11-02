@@ -1,5 +1,6 @@
-use crate::option::{ConfigOptionArgs, DeviceIdentifierArgs};
-use caretta_sync_core::{proto::api::device::{PingRequest, device_service_client::DeviceServiceClient}, utils::runnable::Runnable};
+use crate::{RunnableCommand, option::{ConfigOptionArgs, DeviceIdentifierArgs}};
+use caretta_sync_core::{proto::api::device::{PingRequest, device_service_client::DeviceServiceClient}};
+
 use clap::Args;
 use tonic::Request;
 
@@ -11,7 +12,7 @@ pub struct DevicePingCommandArgs {
     config: ConfigOptionArgs,
 }
 
-impl Runnable for DevicePingCommandArgs {
+impl RunnableCommand for DevicePingCommandArgs {
     #[tokio::main]
     async fn run(self, app_name: &'static str) {
         let mut client = DeviceServiceClient::connect(&self.config.into_client_context(app_name)).await.unwrap();

@@ -4,9 +4,10 @@ mod list;
 use check::*;
 use list::*;
 
-use caretta_sync_core::utils::runnable::Runnable;
 use clap::{Args, Subcommand};
 use sea_orm_migration::MigratorTrait;
+
+use crate::RunnableCommand;
 
 #[derive(Debug, Args)]
 pub struct ConfigCommandArgs<M>
@@ -17,7 +18,7 @@ where
     command: ConfigSubcommand<M>,
 }
 
-impl<M> Runnable for ConfigCommandArgs<M>
+impl<M> RunnableCommand for ConfigCommandArgs<M>
 where 
     M: MigratorTrait
 {
@@ -35,7 +36,7 @@ where
     List(ConfigListCommandArgs<M>),
 }
 
-impl<M> Runnable for ConfigSubcommand<M>
+impl<M> RunnableCommand for ConfigSubcommand<M>
 where 
     M: MigratorTrait
 {

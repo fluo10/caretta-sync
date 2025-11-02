@@ -1,7 +1,7 @@
 use std::marker::PhantomData;
 
-use crate::option::ConfigOptionArgs;
-use caretta_sync_core::{config::ParsedConfig, utils::runnable::Runnable};
+use crate::{RunnableCommand, option::ConfigOptionArgs};
+use caretta_sync_core::{config::ParsedConfig};
 use clap::Args;
 use sea_orm_migration::MigratorTrait;
 
@@ -16,7 +16,7 @@ where
     config: ConfigOptionArgs,
 }
 
-impl<M> Runnable for ConfigCheckCommandArgs<M>
+impl<M> RunnableCommand for ConfigCheckCommandArgs<M>
 where
     M: MigratorTrait,
 {

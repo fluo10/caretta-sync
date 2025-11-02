@@ -18,5 +18,6 @@ syn = { version = "2.0.104", features = ["full"] }
 [dev-dependencies]
 chrono.workspace = true
 caretta-sync-core.workspace = true
+caretta-sync-cli.workspace = true
 tokio.workspace = true
 uuid.workspace = true

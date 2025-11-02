@@ -1,4 +1,5 @@
 pub mod error;
+mod log;
 mod p2p;
 mod rpc;
 mod storage;
@@ -18,6 +19,7 @@ use std::{
 pub use p2p::{P2pConfig, PartialP2pConfig};
 pub use rpc::*;
 pub use storage::{PartialStorageConfig, StorageConfig};
+pub use log::{LogConfig, PartialLogConfig, LogLevel, LogLevelParseError};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 #[cfg(feature = "cli")]

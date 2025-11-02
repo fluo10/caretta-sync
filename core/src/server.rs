@@ -25,10 +25,8 @@ pub struct Server
 
 impl Server 
 {
-    
     pub fn new(context: ServerContext) -> Self {
         let context = Arc::new(context);
-        tracing_subscriber::fmt().init();
         Self {
             context: context.clone(),
             tonic_router: tonic::transport::Server::builder()

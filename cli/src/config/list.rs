@@ -1,7 +1,7 @@
 use std::marker::PhantomData;
 
-use crate::option::ConfigOptionArgs;
-use caretta_sync_core::{config::ParsedConfig, utils::runnable::Runnable};
+use crate::{RunnableCommand, option::ConfigOptionArgs};
+use caretta_sync_core::{config::ParsedConfig};
 use clap::Args;
 use sea_orm_migration::MigratorTrait;
 
@@ -18,7 +18,7 @@ where
     all: bool,
 }
 
-impl<M> Runnable for ConfigListCommandArgs<M>
+impl<M> RunnableCommand for ConfigListCommandArgs<M>
 where 
     M: MigratorTrait
 {
@@ -29,7 +29,8 @@ where
             config = ParsedConfig {
                 storage: Some(config.to_storage_config().unwrap().into()),
                 p2p: Some(config.to_p2p_config(PhantomData::<M>).await.unwrap().into()),
-                rpc: Some(config.to_rpc_config().unwrap().into())
+                rpc: Some(config.to_rpc_config().unwrap().into()),
+                log: Some(config.to_log_config().unwrap().into())
             }
         };
         println!("{}", config)

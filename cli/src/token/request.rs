@@ -1,4 +1,4 @@
-use caretta_sync_core::utils::runnable::Runnable;
+use caretta_sync_core::utils::runnable::RunnableCommand;
 use clap::Args;
 
 use crate::cli::args::VerificationIdentifierArgs;
@@ -10,7 +10,7 @@ struct RejectCommandArgs {
     verification: VerificationIdentifierArgs,
 }
 
-impl Runnable for RejectCommandArgs {
+impl RunnableCommand for RejectCommandArgs {
     fn run(self, app_name: &'static str) {
         todo!()
     }

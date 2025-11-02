@@ -3,7 +3,7 @@ use std::{fs::create_dir_all, path::PathBuf, sync::LazyLock};
 use crate::context::ServerContext;
 
 use crate::config::{
-    ParsedConfig, PartialP2pConfig, PartialRpcConfig, PartialStorageConfig, RpcConfig, StorageConfig
+    LogConfig, ParsedConfig, PartialLogConfig, PartialP2pConfig, PartialRpcConfig, PartialStorageConfig, RpcConfig, StorageConfig
 };
 use crate::models::migration::m20220101_000001_create_table;
 use sea_orm::{Database, DatabaseConnection};
@@ -34,6 +34,7 @@ pub static CONFIG: LazyLock<ParsedConfig> = LazyLock::new(|| {
             }
         ),
         rpc: Some(PartialRpcConfig::default(TEST_APP_NAME)),
+        log: Some(PartialLogConfig::default(TEST_APP_NAME))
     }
 });
 

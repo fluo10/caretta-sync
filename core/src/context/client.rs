@@ -2,7 +2,7 @@ use sea_orm::DatabaseConnection;
 use tonic::transport::Endpoint;
 use url::Url;
 
-use crate::{config::{ConfigError, ParsedConfig, RpcConfig, StorageConfig}, error::Error};
+use crate::{config::{ConfigError, LogConfig, ParsedConfig, RpcConfig, StorageConfig}, error::Error};
 
 /// A context for client
 pub struct ClientContext {
@@ -15,9 +15,9 @@ impl ClientContext {
     pub fn from_parsed_config<T>(config: T) -> Result<Self, ConfigError>
     where T: AsRef<ParsedConfig>
     {
-        let rpc_config = config.as_ref().to_rpc_config()?;
+        let  config= config.as_ref();
+        let rpc_config = config.to_rpc_config()?;
         Ok(Self{rpc_config})
-
     }
 }
 
