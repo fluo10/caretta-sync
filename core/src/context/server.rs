@@ -6,11 +6,13 @@ use sea_orm_migration::MigratorTrait;
 
 use crate::{config::{LogConfig, P2pConfig, ParsedConfig, RpcConfig, StorageConfig}, error::Error};
 
+#[derive(Clone, Debug)]
 pub struct ServerContext {
     pub rpc_config: RpcConfig,
     pub storage_config: StorageConfig,
     pub database_connection: DatabaseConnection,
     pub iroh_endpoint: Option<Endpoint>,
+    pub log_config: LogConfig,
 }
 impl ServerContext {
     pub async fn from_parsed_config<T,M>(config: T, _: PhantomData<M>) -> Result<Self, Error> 
@@ -24,7 +26,12 @@ impl ServerContext {
         let storage_config = config.to_storage_config()?;
         let database_connection = storage_config.to_database_connection::<M>().await?;
         let iroh_endpoint = p2p_config.to_endpoint().await?;
-        Ok(Self { rpc_config, storage_config, database_connection, iroh_endpoint })
+        let log_config = config.to_log_config()?;
+        Ok(Self { rpc_config, storage_config, database_connection, iroh_endpoint, log_config })
+    }
+
+    pub fn init_tracing_subscriber(&self) {
+        self.log_config.init_tracing_subscriber();
     }
 
 }

@@ -110,6 +110,7 @@ impl Emptiable for ParsedConfig {
 
     fn is_empty(&self) -> bool {
         self.p2p.is_empty() && self.rpc.is_empty() && self.storage.is_empty() && self.log.is_empty()
+        
     }
 }
 
@@ -126,5 +127,4 @@ impl Display for ParsedConfig{
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", toml::to_string(self).map_err(|_| std::fmt::Error)?)
     }
-
 }

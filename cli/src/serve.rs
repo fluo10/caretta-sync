@@ -26,8 +26,8 @@ where
 {
     #[tokio::main]
     async fn run(self, app_name: &'static str) {
-        tracing_subscriber::fmt().init();
         let context = self.config.into_server_context(app_name,PhantomData::<M>).await;
-        S::serve(context).await.unwrap()
+        context.init_tracing_subscriber();
+        S::serve(context).await.unwrap();
     }
 }

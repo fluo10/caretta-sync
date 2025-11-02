@@ -22,6 +22,7 @@ pub struct StorageConfig {
 impl StorageConfig {
     const DATABASE_FILE_NAME: &str = "database.sqlite";
     const DOCS_FILE_NAME: &str = "docs.bin";
+
     pub fn to_docs_path(&self) -> PathBuf {
         self.data_dir.join(Self::DOCS_FILE_NAME)
     }

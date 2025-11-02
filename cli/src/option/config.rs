@@ -11,7 +11,7 @@ use tokio::sync::OnceCell;
 #[derive(Args, Clone, Debug)]
 pub struct ConfigOptionArgs
 {
-    #[arg(short = 'c', long = "config_path", global = true, env = "CONFIG_PATH")]
+    #[arg(short = 'c', long = "config-path", global = true, env = "CONFIG_PATH")]
     pub file_path: Option<PathBuf>,
     #[command(flatten)]
     pub args: ParsedConfig,

@@ -102,7 +102,17 @@ impl FromStr for LogLevel {
 
 #[derive(Clone, Debug)]
 pub struct LogConfig {
-    pub level: tracing::Level ,
+    pub level: Option<tracing::Level>,
+}
+
+impl LogConfig {
+    pub fn init_tracing_subscriber(&self) {
+        let mut builder = tracing_subscriber::fmt();
+        if let Some(x) = self.level.as_ref() {
+            builder = builder.with_max_level(*x);
+        }
+        builder.init();
+    }
 }
 
 impl TryFrom<PartialLogConfig> for LogConfig {
@@ -111,8 +121,7 @@ impl TryFrom<PartialLogConfig> for LogConfig {
         Ok(Self {
             level: config
                 .level
-                .ok_or(ConfigError::MissingConfig("log.level"))?
-                .into(),
+                .map(|x| x.into()),
         })
     }
 }
@@ -120,6 +129,7 @@ impl TryFrom<PartialLogConfig> for LogConfig {
 #[cfg_attr(feature = "cli", derive(Args))]
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct PartialLogConfig {
+    #[cfg_attr(feature="cli", arg(long="log-level", env="LOG_LEVEL"))]
     pub level: Option<LogLevel>,
 }
 
@@ -143,7 +153,7 @@ impl Emptiable for PartialLogConfig {
 impl From<LogConfig> for PartialLogConfig {
     fn from(source: LogConfig) -> Self {
         Self {
-            level: Some(source.level.try_into().unwrap()),
+            level: source.level.map( |x| x.try_into().unwrap()),
         }
     }
 }
