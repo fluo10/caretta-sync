@@ -1,8 +1,8 @@
 mod check;
 mod list;
 
-pub use check::*;
-pub use list::*;
+use check::*;
+use list::*;
 
 use caretta_sync_core::utils::runnable::Runnable;
 use clap::{Args, Subcommand};
@@ -10,7 +10,7 @@ use clap::{Args, Subcommand};
 #[derive(Debug, Args)]
 pub struct ConfigCommandArgs {
     #[command(subcommand)]
-    pub command: ConfigSubcommand,
+    command: ConfigSubcommand,
 }
 
 impl Runnable for ConfigCommandArgs {
@@ -20,7 +20,7 @@ impl Runnable for ConfigCommandArgs {
 }
 
 #[derive(Debug, Subcommand)]
-pub enum ConfigSubcommand {
+enum ConfigSubcommand {
     Check(ConfigCheckCommandArgs),
     List(ConfigListCommandArgs),
 }

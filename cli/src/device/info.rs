@@ -1,16 +1,16 @@
-use crate::cli::{ConfigOptionArgs, DeviceIdentifierArgs, DurationOptionArgs};
+use crate::option::{ConfigOptionArgs, DeviceIdentifierArgs};
 use caretta_sync_core::utils::runnable::Runnable;
 use clap::Args;
 
 #[derive(Debug, Args)]
-pub struct DeviceInviteCommandArgs {
+pub struct DeviceInfoCommandArgs {
     #[command(flatten)]
     config: ConfigOptionArgs,
     #[command(flatten)]
-    duration: DurationOptionArgs,
+    peer: DeviceIdentifierArgs,
 }
 
-impl Runnable for DeviceInviteCommandArgs {
+impl Runnable for DeviceInfoCommandArgs {
     fn run(self, app_name: &'static str) {
         todo!()
     }

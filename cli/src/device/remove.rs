@@ -1,4 +1,4 @@
-use crate::cli::{ConfigOptionArgs, args::DeviceIdentifierArgs};
+use crate::option::{ConfigOptionArgs, DeviceIdentifierArgs};
 use caretta_sync_core::utils::runnable::Runnable;
 use clap::Args;
 

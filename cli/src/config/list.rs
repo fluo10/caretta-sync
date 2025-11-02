@@ -1,4 +1,4 @@
-use crate::cli::ConfigOptionArgs;
+use crate::option::ConfigOptionArgs;
 use caretta_sync_core::{config::ParsedConfig, example::migrator::ExampleMigrator, utils::runnable::Runnable};
 use clap::Args;
 

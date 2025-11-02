@@ -3,9 +3,8 @@ pub use caretta_sync_core::*;
 #[cfg(feature = "bevy")]
 pub use caretta_sync_bevy as bevy;
 #[cfg(feature = "cli")]
-pub use caretta_sync_cli::*;
-#[cfg(feature = "mobile")]
-pub use caretta_sync_mobile::*;
+pub use caretta_sync_cli as cli;
+
 
 #[cfg(feature = "macros")]
 pub mod utils {

@@ -5,7 +5,7 @@ use caretta_sync_core::{ server::ServerTrait, utils::runnable::Runnable,
 use clap::Args;
 use sea_orm_migration::MigratorTrait;
 
-use super::ConfigOptionArgs;
+use crate::option::ConfigOptionArgs;
 
 #[derive(Args, Debug)]
 pub struct ServeCommandArgs<M, S>

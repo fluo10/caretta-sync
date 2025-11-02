@@ -18,7 +18,7 @@ use clap::{Args, Subcommand};
 #[derive(Debug, Args)]
 pub struct DeviceCommandArgs {
     #[command(subcommand)]
-    pub command: DeviceSubcommand,
+    command: DeviceSubcommand,
 }
 
 impl Runnable for DeviceCommandArgs {
@@ -28,7 +28,7 @@ impl Runnable for DeviceCommandArgs {
 }
 
 #[derive(Debug, Subcommand)]
-pub enum DeviceSubcommand {
+enum DeviceSubcommand {
     Info(DeviceInfoCommandArgs),
     Invite(DeviceInviteCommandArgs),
     Join(DeviceJoinCommandArgs),
