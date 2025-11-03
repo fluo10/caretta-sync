@@ -34,7 +34,7 @@ pub static CONFIG: LazyLock<ParsedConfig> = LazyLock::new(|| {
             }
         ),
         rpc: Some(PartialRpcConfig::default(TEST_APP_NAME)),
-        log: Some(PartialLogConfig::default(TEST_APP_NAME))
+        log: Some(PartialLogConfig::default())
     }
 });
 

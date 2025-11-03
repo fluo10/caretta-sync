@@ -6,10 +6,12 @@ use clap::Args;
 #[cfg(feature="cli")]
 use clap::ValueEnum;
 use serde::{Deserialize, Serialize};
+use tracing_subscriber::{EnvFilter, fmt::{FormatEvent, format::Compact}};
 
 use crate::config::error::ConfigError;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
 pub enum LogLevel {
     Error,
     Warn,
@@ -102,16 +104,14 @@ impl FromStr for LogLevel {
 
 #[derive(Clone, Debug)]
 pub struct LogConfig {
-    pub level: Option<tracing::Level>,
+    pub level: tracing::Level,
 }
 
 impl LogConfig {
     pub fn init_tracing_subscriber(&self) {
-        let mut builder = tracing_subscriber::fmt();
-        if let Some(x) = self.level.as_ref() {
-            builder = builder.with_max_level(*x);
-        }
-        builder.init();
+        tracing_subscriber::fmt()
+            .with_max_level(self.level)
+            .init();
     }
 }
 
@@ -121,7 +121,8 @@ impl TryFrom<PartialLogConfig> for LogConfig {
         Ok(Self {
             level: config
                 .level
-                .map(|x| x.into()),
+                .ok_or(ConfigError::MissingConfig("log.level"))?
+                .into(),
         })
     }
 }
@@ -134,9 +135,9 @@ pub struct PartialLogConfig {
 }
 
 impl PartialLogConfig {
-    pub fn default(_: &'static str) -> Self {
+    pub fn default() -> Self {
         Self {
-            level: Some(LogLevel::Warn),
+            level: Some(LogLevel::Info),
         }
     }
 }
@@ -153,7 +154,7 @@ impl Emptiable for PartialLogConfig {
 impl From<LogConfig> for PartialLogConfig {
     fn from(source: LogConfig) -> Self {
         Self {
-            level: source.level.map( |x| x.try_into().unwrap()),
+            level: Some(source.level.try_into().unwrap()),
         }
     }
 }

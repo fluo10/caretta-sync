@@ -24,30 +24,46 @@ pub struct ParsedConfig {
 /// A partial config parsed from config file, cli args, etc.
 impl ParsedConfig {
 
-    pub fn default(app_name: &'static str) -> Self {
+    fn default(app_name: &'static str) -> Self {
         Self {
             storage: Some(PartialStorageConfig::default(app_name)),
             rpc: Some(PartialRpcConfig::default(app_name)),
             p2p: None,
-            log: Some(PartialLogConfig::default(app_name))
+            log: Some(PartialLogConfig::default())
         }
+    }
+
+    /// Fill empty configuration fields with default values and return. 
+    pub fn with_default(self, app_name: &'static str) -> Self {
+        let mut result = Self::default(app_name);
+        result.merge(self);
+        result
+    }
+
+    /// Fill empty configuration fields with the values read from database.
+    /// 
+    /// This function requires `self.storage` field is filled beforehand.
+    pub async fn with_database<T>(mut self, migrator: PhantomData<T>) -> Result<ParsedConfig, ConfigError>
+    where T: MigratorTrait
+    {
+        let connection =  self.to_storage_config()?.to_database_connection(migrator).await?;
+        let mut p2p_config = PartialP2pConfig::from(P2pConfig::from(P2pConfigModel::get_or_try_init(&connection).await?));
+        if let Some(x) = self.p2p {
+            (p2p_config.merge(x));
+        } 
+        self.p2p = Some(p2p_config);
+        Ok(self)
     }
 
     /// Build [`StorageConfig`] from own [`PartialStorageConfig`]
     pub fn to_storage_config(&self) -> Result<StorageConfig, ConfigError> {
-        self.storage.as_ref().ok_or(ConfigError::MissingConfig("[storage]"))?.clone().try_into()
+        self.storage.as_ref().ok_or(ConfigError::MissingConfig("storage.*"))?.clone().try_into()
     }
 
     /// Build [`P2pConfig`] from own [`PartialP2pConfig`]
-    pub async fn to_p2p_config<T>(&self, _: PhantomData<T>) -> Result<P2pConfig, ConfigError>
-    where T: MigratorTrait
+    pub fn to_p2p_config(&self) -> Result<P2pConfig, ConfigError>
     {
-        let p2p_config = self.p2p.clone().unwrap_or(PartialP2pConfig::empty());
-        let storage_config = self.to_storage_config()?;
-        let connection =  storage_config.to_database_connection::<T>().await?;
-        let mut config = PartialP2pConfig::from(P2pConfig::from(P2pConfigModel::get_or_try_init(&connection).await?));
-        config.merge(p2p_config);
-        Ok(P2pConfig::try_from(config)?)
+        self.p2p.as_ref().ok_or(ConfigError::MissingConfig("P2P.*"))?.clone().try_into()
     }
 
     /// Build [`RpcConfig`] from own [`PartialRpcConfig`]
@@ -89,6 +105,9 @@ impl ParsedConfig {
     pub fn read_or_create(app_name: &'static str) -> Result<Self, ConfigError> {
         let config_dir = Self::default_config_path(app_name)?;
         Self::read_or_create_from_path(config_dir)
+    }
+    pub fn init_tracing_subscriber(&self) {
+        self.to_log_config().unwrap().init_tracing_subscriber();
     }
 }
 

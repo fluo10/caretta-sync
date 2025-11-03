@@ -8,7 +8,6 @@ use crate::{config::{ConfigError, LogConfig, ParsedConfig, RpcConfig, StorageCon
 #[derive(Clone, Debug,)]
 pub struct ClientContext {
     pub rpc_config: RpcConfig,
-    pub log_config: LogConfig,
 }
 
 impl ClientContext {
@@ -19,16 +18,8 @@ impl ClientContext {
     {
         let  config= config.as_ref();
         let rpc_config = config.to_rpc_config()?;
-        let log_config = config.to_log_config()?;
-        Ok(Self{rpc_config, log_config})
+        Ok(Self{rpc_config})
     }
-
-    pub fn init_tracing_subscriber(&self, verbose: bool) {
-        if verbose {
-            self.log_config.init_tracing_subscriber();
-        }
-    }
-
 }
 
 impl AsRef<ClientContext> for ClientContext {

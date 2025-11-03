@@ -1,5 +1,5 @@
 use crate::{RunnableCommand, option::ConfigOptionArgs};
-use caretta_sync_core::{proto::api::device::{device_service_client::DeviceServiceClient, list_request::Status, ListRequest}};
+use caretta_sync_core::{context::ClientContext, proto::api::device::{ListRequest, device_service_client::DeviceServiceClient, list_request::Status}};
 use clap::Args;
 use iroh::EndpointId;
 use mtid::Dtid;
@@ -33,12 +33,19 @@ pub struct DeviceListCommandArgs {
     config: ConfigOptionArgs,
     #[command(flatten)]
     filter: FilterOptionArgs,
+    #[arg(short, long)]
+    verbose: bool
 }
 
 impl RunnableCommand for DeviceListCommandArgs {
     #[tokio::main]
     async fn run(self, app_name: &'static str) {
-        let mut client = DeviceServiceClient::connect(&self.config.into_client_context(app_name)).await.unwrap();
+        let config = self.config.into_parsed_config(app_name);
+        if self.verbose {
+            config.init_tracing_subscriber();
+        }
+        let context = ClientContext::from_parsed_config(config).unwrap();
+        let mut client = DeviceServiceClient::connect(&context).await.unwrap();
 
         let list_request = ListRequest::from(self.filter);
         let request = Request::new(list_request);

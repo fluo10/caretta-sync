@@ -25,13 +25,8 @@ where
     #[tokio::main]
     async fn run(self, app_name: &'static str) {
         let mut config = self.config.into_parsed_config(app_name);
-         if self.all {            
-            config = ParsedConfig {
-                storage: Some(config.to_storage_config().unwrap().into()),
-                p2p: Some(config.to_p2p_config(PhantomData::<M>).await.unwrap().into()),
-                rpc: Some(config.to_rpc_config().unwrap().into()),
-                log: Some(config.to_log_config().unwrap().into())
-            }
+        if self.all {
+            config = config.with_default(app_name).with_database(self.migrator).await.unwrap();
         };
         println!("{}", config)
     }

@@ -1,7 +1,7 @@
 use std::marker::PhantomData;
 
 use crate::{RunnableCommand, option::ConfigOptionArgs};
-use caretta_sync_core::{config::ParsedConfig};
+use caretta_sync_core::{config::ParsedConfig, context::{ClientContext, ServerContext}};
 use clap::Args;
 use sea_orm_migration::MigratorTrait;
 
@@ -22,8 +22,10 @@ where
 {
     #[tokio::main]
     async fn run(self, app_name: &'static str) {
-        let _ = self.config.clone().into_server_context(app_name, PhantomData::<M>).await;
-        let _ = self.config.into_client_context(app_name);
+        let config = self.config.into_parsed_config(app_name).with_default(app_name).with_database(self.migrator).await.unwrap();
+
+        let _ = ServerContext::from_parsed_config(config.clone(), self.migrator).await.unwrap();
+        let _ = ClientContext::from_parsed_config(config).unwrap();
         println!("Ok");
     }
 }

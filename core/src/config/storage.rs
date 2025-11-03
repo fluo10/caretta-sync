@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{marker::PhantomData, path::PathBuf};
 
 #[cfg(feature = "cli")]
 use clap::Args;
@@ -32,7 +32,7 @@ impl StorageConfig {
     pub fn to_database_path(&self) -> PathBuf {
         self.data_dir.join(Self::DATABASE_FILE_NAME)
     }
-    pub async fn to_database_connection<T>(&self) -> Result<DatabaseConnection,ConfigError>
+    pub async fn to_database_connection<T>(&self, _: PhantomData<T>) -> Result<DatabaseConnection,ConfigError>
     where T: MigratorTrait {
         let database_path = self.to_database_path();
         if let Some(x) = database_path.parent() {

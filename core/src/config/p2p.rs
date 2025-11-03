@@ -1,9 +1,11 @@
+use std::net::{Ipv4Addr, SocketAddrV4};
+
 #[cfg(feature = "cli")]
 use clap::Args;
 use futures::StreamExt;
 use iroh::{
     Endpoint, SecretKey,
-    discovery::{dns::DnsDiscovery, mdns::MdnsDiscovery},
+    discovery::{dns::DnsDiscovery, mdns::MdnsDiscovery}, protocol::Router,
 };
 use serde::{Deserialize, Serialize};
 use tokio::io::AsyncReadExt;
@@ -21,17 +23,22 @@ pub struct P2pConfig {
 }
 
 impl P2pConfig {
-    pub async fn to_endpoint(&self) -> Result<Option<Endpoint>, crate::error::Error> {
+    pub async fn to_iroh_router(&self) -> Result<Option<Router>, crate::error::Error> {
         if self.enabled {
-            let mut endpoint = Endpoint::builder()
+            let mut endpoint = iroh::endpoint::Builder::empty(iroh::RelayMode::Disabled)
                 .secret_key(self.secret_key.clone());
-            if self.enable_mdns {
-                endpoint = endpoint.discovery(MdnsDiscovery::builder());
-            }
+
+            let endpoint_id = self.secret_key.public();
             if self.enable_n0 {
-                endpoint = endpoint.discovery(DnsDiscovery::n0_dns());
+                endpoint = endpoint.discovery(DnsDiscovery::n0_dns().build());
             }
-            Ok(Some(endpoint.bind().await?))
+            if self.enable_mdns {
+                endpoint = endpoint.discovery(MdnsDiscovery::builder().build(endpoint_id).unwrap());
+            }
+            let endpoint = endpoint.bind().await?;
+            Ok(Some(Router::builder(endpoint)
+                .accept(iroh_ping::ALPN, iroh_ping::Ping::new())
+                .spawn()))
         } else {
             Ok(None)
         }
