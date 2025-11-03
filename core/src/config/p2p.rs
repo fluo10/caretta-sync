@@ -4,8 +4,7 @@ use std::net::{Ipv4Addr, SocketAddrV4};
 use clap::Args;
 use futures::StreamExt;
 use iroh::{
-    Endpoint, SecretKey,
-    discovery::{dns::DnsDiscovery, mdns::{DiscoveryEvent, MdnsDiscovery}}, protocol::Router,
+    Endpoint, PublicKey, SecretKey, discovery::{dns::DnsDiscovery, mdns::{DiscoveryEvent, MdnsDiscovery}}, protocol::Router
 };
 use serde::{Deserialize, Serialize};
 use tokio::io::AsyncReadExt;
@@ -27,7 +26,6 @@ impl P2pConfig {
         if self.enabled {
             let mut endpoint = iroh::endpoint::Builder::empty(iroh::RelayMode::Disabled)
                 .secret_key(self.secret_key.clone());
-            let endpoint_id = self.secret_key.public();
             if self.enable_n0 {
                 endpoint = endpoint.discovery(DnsDiscovery::n0_dns());
             }
@@ -80,8 +78,12 @@ impl From<P2pConfigModel> for P2pConfig {
 pub struct PartialP2pConfig {
     #[cfg_attr(feature = "cli", arg(long = "p2p_enable"))]
     pub enabled: Option<bool>,
+    #[serde(skip_serializing)]
     #[cfg_attr(feature = "cli", arg(long))]
     pub secret_key: Option<SecretKey>,
+    #[serde(skip_deserializing)]
+    #[cfg_attr(feature = "cli", arg(skip))]
+    pub public_key: Option<PublicKey>,
     #[cfg_attr(feature = "cli", arg(long))]
     pub enable_n0: Option<bool>,
     #[cfg_attr(feature = "cli", arg(long))]
@@ -92,7 +94,8 @@ impl From<P2pConfig> for PartialP2pConfig {
     fn from(config: P2pConfig) -> Self {
         Self {
             enabled: Some(config.enabled),
-            secret_key: Some(config.secret_key),
+            secret_key: Some(config.secret_key.clone()),
+            public_key: Some(config.secret_key.public()),
             enable_mdns: Some(config.enable_mdns),
             enable_n0: Some(config.enable_n0)
         }
@@ -104,6 +107,7 @@ impl Emptiable for PartialP2pConfig {
         Self {
             enabled: None,
             secret_key: None,
+            public_key: None,
             enable_mdns: None,
             enable_n0: None
         }
@@ -114,6 +118,7 @@ impl Emptiable for PartialP2pConfig {
             && self.secret_key.is_none()
             && self.enable_mdns.is_none()
             && self.enable_n0.is_none()
+            && self.public_key.is_none()
     }
 }
 
@@ -131,6 +136,9 @@ impl Mergeable for PartialP2pConfig {
         if let Some(x) = other.enable_mdns.take() {
             let _ = self.enable_mdns.insert(x);
         };
+        if let Some(x) = other.public_key.take() {
+            let _ = self.public_key.insert(x);
+        }
     }
 }
 impl Mergeable for Option<PartialP2pConfig> {

@@ -1,6 +1,7 @@
-use std::marker::PhantomData;
+use std::{marker::PhantomData, pin::Pin};
 
-use iroh::{Endpoint, protocol::Router};
+use futures::{Stream, StreamExt};
+use iroh::{Endpoint, discovery::{ConcurrentDiscovery, Discovery, DiscoveryError, DiscoveryItem}, protocol::Router};
 use sea_orm::{Database, DatabaseConnection};
 use sea_orm_migration::MigratorTrait;
 
@@ -28,10 +29,36 @@ impl ServerContext {
         let iroh_router = p2p_config.to_iroh_router(app_name).await?;
         Ok(Self {app_name, rpc_config, storage_config, database_connection, iroh_router})
     }
+    pub fn as_iroh_router(&self) -> Option<&Router> {
+        self.iroh_router.as_ref()
+    }
+    pub fn as_endpoint(&self) -> Option<&Endpoint> {
+        self.as_iroh_router().map(|x| x.endpoint())
+    }
+    pub fn as_discovery(&self) -> Option<&ConcurrentDiscovery> {
+        self.as_endpoint().map(|x| x.discovery())
+    }
+    pub async fn discover(&self, endpoint_id: iroh::EndpointId) ->  Option<Pin<Box<dyn Stream<Item = Result<DiscoveryItem, DiscoveryError>> + std::marker::Send + 'static>>> {
+        if let Some(x) = self.as_discovery() {
+            x.resolve(endpoint_id)
+        } else {
+            None
+        }
+    }
 }
 
 impl AsRef<DatabaseConnection> for ServerContext {
     fn as_ref(&self) -> &DatabaseConnection {
         &self.database_connection
+    }
+}
+impl From<&ServerContext> for Option<Endpoint> {
+    fn from(value: &ServerContext) -> Self {
+        value.iroh_router.as_ref().map(|x| x.endpoint().clone())
+    }
+}
+impl From<&ServerContext> for Option<ConcurrentDiscovery> {
+    fn from(value: &ServerContext) -> Self {
+        value.iroh_router.as_ref().map(|x| x.endpoint().discovery().clone())
     }
 }
