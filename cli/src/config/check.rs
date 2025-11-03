@@ -24,8 +24,8 @@ where
     async fn run(self, app_name: &'static str) {
         let config = self.config.into_parsed_config(app_name).with_default(app_name).with_database(self.migrator).await.unwrap();
 
-        let _ = ServerContext::from_parsed_config(config.clone(), self.migrator).await.unwrap();
-        let _ = ClientContext::from_parsed_config(config).unwrap();
+        let _ = ServerContext::new(app_name, config.clone(), self.migrator).await.unwrap();
+        let _ = ClientContext::new(app_name, config).unwrap();
         println!("Ok");
     }
 }

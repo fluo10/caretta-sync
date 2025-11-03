@@ -44,7 +44,7 @@ impl RunnableCommand for DeviceListCommandArgs {
         if self.verbose {
             config.init_tracing_subscriber();
         }
-        let context = ClientContext::from_parsed_config(config).unwrap();
+        let context = ClientContext::new(app_name, config).unwrap();
         let mut client = DeviceServiceClient::connect(&context).await.unwrap();
 
         let list_request = ListRequest::from(self.filter);

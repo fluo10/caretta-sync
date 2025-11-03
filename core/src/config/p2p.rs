@@ -5,7 +5,7 @@ use clap::Args;
 use futures::StreamExt;
 use iroh::{
     Endpoint, SecretKey,
-    discovery::{dns::DnsDiscovery, mdns::MdnsDiscovery}, protocol::Router,
+    discovery::{dns::DnsDiscovery, mdns::{DiscoveryEvent, MdnsDiscovery}}, protocol::Router,
 };
 use serde::{Deserialize, Serialize};
 use tokio::io::AsyncReadExt;
@@ -23,20 +23,21 @@ pub struct P2pConfig {
 }
 
 impl P2pConfig {
-    pub async fn to_iroh_router(&self) -> Result<Option<Router>, crate::error::Error> {
+    pub async fn to_iroh_router(&self, app_name: &'static str) -> Result<Option<Router>, crate::error::Error> {
         if self.enabled {
             let mut endpoint = iroh::endpoint::Builder::empty(iroh::RelayMode::Disabled)
                 .secret_key(self.secret_key.clone());
-
             let endpoint_id = self.secret_key.public();
             if self.enable_n0 {
-                endpoint = endpoint.discovery(DnsDiscovery::n0_dns().build());
+                endpoint = endpoint.discovery(DnsDiscovery::n0_dns());
             }
             if self.enable_mdns {
-                endpoint = endpoint.discovery(MdnsDiscovery::builder().build(endpoint_id).unwrap());
+                let mdns = MdnsDiscovery::builder()
+                    .service_name(app_name);
+                endpoint = endpoint.discovery(mdns);
             }
-            let endpoint = endpoint.bind().await?;
-            Ok(Some(Router::builder(endpoint)
+            let ep = endpoint.bind().await?;
+            Ok(Some(Router::builder(ep)
                 .accept(iroh_ping::ALPN, iroh_ping::Ping::new())
                 .spawn()))
         } else {

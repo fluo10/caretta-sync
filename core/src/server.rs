@@ -1,6 +1,7 @@
 use std::{convert::Infallible, marker::PhantomData, path::PathBuf, sync::Arc};
 
 use http::{Request};
+use iroh::discovery::mdns::MdnsDiscovery;
 use sea_orm_migration::MigratorTrait;
 use tokio::net::UnixListener;
 use tokio_stream::wrappers::UnixListenerStream;
@@ -44,36 +45,40 @@ impl Server
         self
     }
     pub async fn serve(self) -> Result<(), Error> {
-        let url = &self.context.as_ref().rpc_config.endpoint_url;
-        match url.scheme() {
-            "unix" => {
-                let path = PathBuf::from(url.path());
-                if let Some(x) = path.parent() {
-                    if !x.exists() {
-                        std::fs::create_dir_all(x)
-                        .expect("Failed to create directory for socket file!");
+        let url = self.context.as_ref().rpc_config.endpoint_url.clone();
+        let rpc = tokio::spawn(async move  {
+
+            match url.scheme() {
+                "unix" => {
+                    let path = PathBuf::from(url.path());
+                    if let Some(x) = path.parent() {
+                        if !x.exists() {
+                            std::fs::create_dir_all(x)
+                            .expect("Failed to create directory for socket file!");
+                        }
                     }
+                    if path.exists() {
+                        std::fs::remove_file(&path).expect("Failed to remove existing socket file!")
+                    }
+                    let uds = UnixListener::bind(path).unwrap();
+                    let uds_stream = UnixListenerStream::new(uds);
+                    
+                    self.tonic_router.serve_with_incoming(uds_stream).await.unwrap();
                 }
-                if path.exists() {
-                    std::fs::remove_file(&path).expect("Failed to remove existing socket file!")
+                "http" => {
+                    let host = url
+                        .socket_addrs(|| None)
+                        .expect("http endpoint should have host address and port")
+                        .pop()
+                        .unwrap();
+                    self.tonic_router.serve(host).await.unwrap();
                 }
-                let uds = UnixListener::bind(path).unwrap();
-                let uds_stream = UnixListenerStream::new(uds);
-                
-                self.tonic_router.serve_with_incoming(uds_stream).await.unwrap();
+                _ => {
+                    panic!("Invalid url scheme!")
+                }
             }
-            "http" => {
-                let host = url
-                    .socket_addrs(|| None)
-                    .expect("http endpoint should have host address and port")
-                    .pop()
-                    .unwrap();
-                self.tonic_router.serve(host).await.unwrap();
-            }
-            _ => {
-                panic!("Invalid url scheme!")
-            }
-        }
+        });
+        rpc.await;
         Ok(())
     }
 }

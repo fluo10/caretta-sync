@@ -8,13 +8,14 @@ use crate::{config::{LogConfig, P2pConfig, ParsedConfig, RpcConfig, StorageConfi
 
 #[derive(Clone, Debug)]
 pub struct ServerContext {
+    pub app_name: &'static str,
     pub rpc_config: RpcConfig,
     pub storage_config: StorageConfig,
     pub database_connection: DatabaseConnection,
     pub iroh_router: Option<Router>,
 }
 impl ServerContext {
-    pub async fn from_parsed_config<T,M>(config: T, migrator: PhantomData<M>) -> Result<Self, Error> 
+    pub async fn new<T,M>(app_name: &'static str, config: T, migrator: PhantomData<M>) -> Result<Self, Error> 
     where
         T: AsRef<ParsedConfig>,
         M: MigratorTrait,
@@ -24,8 +25,8 @@ impl ServerContext {
         let p2p_config = config.to_p2p_config()?;
         let storage_config = config.to_storage_config()?;
         let database_connection = storage_config.to_database_connection(migrator).await?;
-        let iroh_router = p2p_config.to_iroh_router().await?;
-        Ok(Self { rpc_config, storage_config, database_connection, iroh_router})
+        let iroh_router = p2p_config.to_iroh_router(app_name).await?;
+        Ok(Self {app_name, rpc_config, storage_config, database_connection, iroh_router})
     }
 }
 

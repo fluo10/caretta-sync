@@ -28,7 +28,7 @@ where
     async fn run(self, app_name: &'static str) {
         let config = self.config.into_parsed_config(app_name).with_default(app_name).with_database(PhantomData::<M>).await.unwrap();
         config.init_tracing_subscriber();
-        let context = ServerContext::from_parsed_config(config, PhantomData::<M>).await.unwrap();
+        let context = ServerContext::new(app_name, config, PhantomData::<M>).await.unwrap();
         S::serve(context).await.unwrap();
     }
 }

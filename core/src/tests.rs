@@ -41,7 +41,7 @@ pub static CONFIG: LazyLock<ParsedConfig> = LazyLock::new(|| {
 pub static SERVER_CONTEXT: OnceCell<ServerContext> = OnceCell::const_new();
 pub async fn get_server_context() -> &'static ServerContext {
     SERVER_CONTEXT.get_or_init(|| async  {
-        ServerContext::from_parsed_config((*CONFIG).clone(), PhantomData::<TestMigrator>).await.unwrap()
+        ServerContext::new("caretta_sync_test", (*CONFIG).clone(), PhantomData::<TestMigrator>).await.unwrap()
     }).await
 }
 

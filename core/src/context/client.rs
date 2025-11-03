@@ -7,18 +7,19 @@ use crate::{config::{ConfigError, LogConfig, ParsedConfig, RpcConfig, StorageCon
 /// A context for client
 #[derive(Clone, Debug,)]
 pub struct ClientContext {
+    pub app_name: &'static str,
     pub rpc_config: RpcConfig,
 }
 
 impl ClientContext {
 
-    /// Convert context from [`ParsedConfig`]
-    pub fn from_parsed_config<T>(config: T) -> Result<Self, ConfigError>
+    /// Create [`ClientContext`]
+    pub fn new<T>(app_name: &'static str, config: T) -> Result<Self, ConfigError>
     where T: AsRef<ParsedConfig>
     {
-        let  config= config.as_ref();
+        let config= config.as_ref();
         let rpc_config = config.to_rpc_config()?;
-        Ok(Self{rpc_config})
+        Ok(Self{app_name, rpc_config})
     }
 }
 
