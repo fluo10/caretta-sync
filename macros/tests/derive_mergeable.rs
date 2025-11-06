@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use caretta_sync_core::{config::PartialP2pConfig, utils::mergeable::Mergeable};
+use caretta_sync_core::{config::ParsedP2pConfig, utils::mergeable::Mergeable};
 use caretta_sync_macros::Mergeable;
 
 #[derive(Clone, Debug, PartialEq)]

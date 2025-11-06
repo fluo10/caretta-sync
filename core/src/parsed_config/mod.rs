@@ -1,20 +1,33 @@
+//! Provides configs parsed from file, command-line args and environment valiables.
+mod error;
+mod log;
+mod p2p;
+mod rpc;
+mod storage;
+pub mod types;
+use clap::Args;
+pub use log::ParsedLogConfig;
+pub use error::ParsedConfigError;
+pub use p2p::ParsedP2pConfig;
+pub use rpc::ParsedRpcConfig;
+pub use storage::ParsedStorageConfig;
+
 use sea_orm_migration::MigratorTrait;
 use serde::{ser::Error, Deserialize, Serialize};
 
-use crate::{config::{ConfigError, LogConfig, P2pConfig, PartialP2pConfig, PartialRpcConfig, PartialStorageConfig, RpcConfig, StorageConfig, log::PartialLogConfig},  utils::{emptiable::Emptiable, mergeable::Mergeable}};
-use std::{fmt::{Display, write}, fs::File, io::Read, marker::PhantomData, path::{Path, PathBuf}};
+use crate::{config::{LogConfig, P2pConfig, RpcConfig, StorageConfig},  utils::{emptiable::Emptiable, mergeable::Mergeable}};
+use std::{fmt::{Display}, fs::File, io::Read, marker::PhantomData, path::{Path, PathBuf}};
 
-#[cfg_attr(feature="cli", derive(clap::Args))]
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Args, Clone, Debug, Deserialize, Serialize)]
 pub struct ParsedConfig {
-    #[cfg_attr(feature="cli", command(flatten))]
-    pub storage: Option<PartialStorageConfig>,
-    #[cfg_attr(feature="cli", command(flatten))]
-    pub rpc: Option<PartialRpcConfig>,
-    #[cfg_attr(feature="cli", command(flatten))]
-    pub p2p: Option<PartialP2pConfig>,
-    #[cfg_attr(feature="cli", command(flatten))]
-    pub log: Option<PartialLogConfig>,
+    #[command(flatten)]
+    pub storage: Option<ParsedStorageConfig>,
+    #[command(flatten)]
+    pub rpc: Option<ParsedRpcConfig>,
+    #[command(flatten)]
+    pub p2p: Option<ParsedP2pConfig>,
+    #[command(flatten)]
+    pub log: Option<ParsedLogConfig>,
 
 }
 
@@ -25,10 +38,10 @@ impl ParsedConfig {
 
     fn default(app_name: &'static str) -> Self {
         Self {
-            storage: Some(PartialStorageConfig::default(app_name)),
-            rpc: Some(PartialRpcConfig::default(app_name)),
+            storage: Some(ParsedStorageConfig::default(app_name)),
+            rpc: Some(ParsedRpcConfig::default(app_name)),
             p2p: None,
-            log: Some(PartialLogConfig::default())
+            log: Some(ParsedLogConfig::default())
         }
     }
 
@@ -39,27 +52,27 @@ impl ParsedConfig {
         result
     }
 
-    /// Build [`StorageConfig`] from own [`PartialStorageConfig`]
-    pub fn to_storage_config(&self) -> Result<StorageConfig, ConfigError> {
-        self.storage.as_ref().ok_or(ConfigError::MissingConfig("storage.*"))?.clone().try_into()
+    /// Build [`StorageConfig`] from own [`ParsedStorageConfig`]
+    pub fn to_storage_config(&self) -> Result<StorageConfig, ParsedConfigError> {
+        self.storage.as_ref().ok_or(ParsedConfigError::MissingConfig("storage.*"))?.clone().try_into()
     }
 
-    /// Build [`P2pConfig`] from own [`PartialP2pConfig`]
-    pub fn to_p2p_config(&self) -> Result<P2pConfig, ConfigError>
+    /// Build [`P2pConfig`] from own [`ParsedP2pConfig`]
+    pub fn to_p2p_config(&self) -> Result<P2pConfig, ParsedConfigError>
     {
-        self.p2p.as_ref().ok_or(ConfigError::MissingConfig("P2P.*"))?.clone().try_into()
+        self.p2p.as_ref().ok_or(ParsedConfigError::MissingConfig("P2P.*"))?.clone().try_into()
     }
 
-    /// Build [`RpcConfig`] from own [`PartialRpcConfig`]
-    pub fn to_rpc_config(&self) -> Result<RpcConfig, ConfigError> {
-        self.rpc.as_ref().ok_or(ConfigError::MissingConfig("rpc.*"))?.clone().try_into()
+    /// Build [`RpcConfig`] from own [`ParsedRpcConfig`]
+    pub fn to_rpc_config(&self) -> Result<RpcConfig, ParsedConfigError> {
+        self.rpc.as_ref().ok_or(ParsedConfigError::MissingConfig("rpc.*"))?.clone().try_into()
     }
-    /// Build [`LogConfig`] from own [`PartialLogConfig`]
-    pub fn to_log_config(&self) -> Result<LogConfig, ConfigError> {
-        self.log.as_ref().ok_or(ConfigError::MissingConfig("log.*"))?.clone().try_into()
+    /// Build [`LogConfig`] from own [`ParsedLogConfig`]
+    pub fn to_log_config(&self) -> Result<LogConfig, ParsedConfigError> {
+        self.log.as_ref().ok_or(ParsedConfigError::MissingConfig("log.*"))?.clone().try_into()
     }
     /// Read or create target config file
-    pub fn read_or_create_from_path<T>(path: T) -> Result<Self, ConfigError>
+    pub fn read_or_create_from_path<T>(path: T) -> Result<Self, ParsedConfigError>
     where
         T: AsRef<Path>,
     {
@@ -77,16 +90,16 @@ impl ParsedConfig {
     }
 
     /// Get default config path
-    pub fn default_config_path(app_name: &'static str) -> Result<PathBuf, ConfigError> {
+    pub fn default_config_path(app_name: &'static str) -> Result<PathBuf, ParsedConfigError> {
         const DEFAULT_FILE_NAME: &str = "config.toml";
-        let mut path = dirs::config_local_dir().ok_or(ConfigError::ConfigDir)?;
+        let mut path = dirs::config_local_dir().ok_or(ParsedConfigError::ConfigDir)?;
         path.push(app_name);
         path.push(DEFAULT_FILE_NAME);
         Ok(path)
     }
 
     /// Read or create target config file at the default config path
-    pub fn read_or_create(app_name: &'static str) -> Result<Self, ConfigError> {
+    pub fn read_or_create(app_name: &'static str) -> Result<Self, ParsedConfigError> {
         let config_dir = Self::default_config_path(app_name)?;
         Self::read_or_create_from_path(config_dir)
     }

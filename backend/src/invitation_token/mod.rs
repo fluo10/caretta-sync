@@ -6,7 +6,7 @@ use iroh::{Endpoint, EndpointId, PublicKey};
 use mtid::Dtid;
 use sea_orm::DatabaseConnection;
 
-use crate::error::Error;
+use crate::error::BackendError;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct InvitationToken{
@@ -53,7 +53,7 @@ impl InvitationToken {
         
         Ok(Self { endpoint_id, token_id, expires_at })
     }
-    pub async fn validate(self, local_endpoint: &Endpoint, db: DatabaseConnection) -> Result<bool, Error> {
+    pub async fn validate(self, local_endpoint: &Endpoint, db: DatabaseConnection) -> Result<bool, BackendError> {
         if self.endpoint_id != local_endpoint.id() {
             return Ok(false);
         }

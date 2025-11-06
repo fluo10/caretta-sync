@@ -6,7 +6,7 @@ use crate::proto::ProtoDeserializeError;
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error("Config error: {0}")]
-    Config(#[from] crate::config::ConfigError),
+    ParsedConfig(#[from] crate::parsed_config::ParsedConfigError),
     #[error("Infallible: {0}")]
     Infallible(#[from] std::convert::Infallible),
     #[error("IO Error: {0}")]
@@ -17,9 +17,6 @@ pub enum Error {
     MissingConfig(&'static str),
     #[error("Parse OsString error: {0:?}")]
     OsStringConvert(std::ffi::OsString),
-    #[cfg(feature = "cli")]
-    #[error("Parse args error: {0}")]
-    ParseCommand(#[from] clap::Error),
     #[error("slice parse error: {0}")]
     SliceTryFrom(#[from] TryFromSliceError),
     #[error("toml deserialization error: {0}")]

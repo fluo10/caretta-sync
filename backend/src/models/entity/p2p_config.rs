@@ -1,3 +1,4 @@
+use caretta_sync_core::config::P2pConfig;
 use iroh::{PublicKey, SecretKey};
 use mtid::Dtid;
 use sea_orm::{entity::prelude::*, sea_query::Mode, ActiveValue::Set};
@@ -39,8 +40,8 @@ pub enum Relation {}
 
 impl ActiveModelBehavior for ActiveModel {}
 
-impl From<P2pConfigModel> for P2pConfig {
-    fn from(value: P2pConfigModel) -> Self {
+impl From<Model> for P2pConfig {
+    fn from(value: Model) -> Self {
         Self {
             enabled: value.enabled,
             secret_key: value.secret_key.into(),

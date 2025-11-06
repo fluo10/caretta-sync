@@ -8,4 +8,4 @@ repository.workspace = true
 publish = false
 
 [dependencies]
-caretta-sync = {workspace = true, features = ["cli", "service"]}
+caretta-sync = {workspace = true, features = ["server"]}

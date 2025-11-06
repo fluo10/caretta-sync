@@ -1,6 +1,5 @@
 use chrono::{DateTime, TimeZone, Timelike, Utc};
 use prost_types::Timestamp;
-pub mod async_convert;
 pub mod emptiable;
 pub mod mergeable;
 
@@ -35,13 +34,4 @@ pub fn utc_to_timestamp(utc: &DateTime<Utc>) -> Timestamp {
 pub fn timestamp_to_utc(t: &Timestamp) -> DateTime<Utc> {
     Utc.timestamp_opt(t.seconds, u32::try_from(t.nanos).unwrap())
         .unwrap()
-}
-
-pub fn get_binary_name() -> Option<String> {
-    std::env::current_exe()
-        .ok()?
-        .file_name()?
-        .to_str()?
-        .to_owned()
-        .into()
 }

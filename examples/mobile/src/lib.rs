@@ -7,7 +7,7 @@ use bevy::{
     winit::WinitSettings,
 };
 use caretta_sync::{
-    config::{Config, PartialConfig, PartialP2pConfig, PartialStorageConfig, StorageConfig},
+    config::{Config, ParsedConfig, ParsedP2pConfig, ParsedStorageConfig, StorageConfig},
     server::ServerTrait,
     utils::{Emptiable, Mergeable},
 };
@@ -15,9 +15,9 @@ use caretta_sync_example_core::{global::APP_NAME, server::Server};
 
 #[tokio::main]
 pub async fn init_config() {
-    let storage_config: StorageConfig = PartialStorageConfig::default(APP_NAME).try_into().unwrap();
+    let storage_config: StorageConfig = ParsedStorageConfig::default(APP_NAME).try_into().unwrap();
     let config_path = storage_config.data_directory.join("config.toml");
-    let mut config = PartialConfig::read_from(&config_path).await.unwrap();
+    let mut config = ParsedConfig::read_from(&config_path).await.unwrap();
     if let Some(x) = if let Some(y) = config.p2p.as_mut() {
         if y.private_key.is_none() {
             Some(y.clone().with_new_private_key())
@@ -25,12 +25,12 @@ pub async fn init_config() {
             None
         }
     } else {
-        Some(PartialP2pConfig::empty().with_new_private_key())
+        Some(ParsedP2pConfig::empty().with_new_private_key())
     } {
         config.p2p = Some(x);
         config.write_to(&config_path).await.unwrap()
     }
-    let mut default = PartialConfig::default(APP_NAME);
+    let mut default = ParsedConfig::default(APP_NAME);
     default.merge(config);
     let config2: Config = default.try_into().unwrap();
     Server::serve_all(&config2);
@@ -89,7 +89,7 @@ fn setup_scene(mut commands: Commands) {
             },
         ))
         .with_child((
-            Text::new(format!("{:?}", PartialConfig::default(APP_NAME))),
+            Text::new(format!("{:?}", ParsedConfig::default(APP_NAME))),
             TextFont {
                 font_size: 16.0,
                 ..default()

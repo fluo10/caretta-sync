@@ -1,9 +1,7 @@
 use sea_orm::DbErr;
 
-use crate::config::LogLevelParseError;
-
 #[derive(thiserror::Error, Debug)]
-pub enum ConfigError {
+pub enum ParsedConfigError {
     #[error("missing config: {0}")]
     MissingConfig(&'static str),
     #[error("Io error: {0}")]
@@ -19,5 +17,5 @@ pub enum ConfigError {
     #[error("Failed to get config dir")]
     ConfigDir,
     #[error("Invalid log level: {0}")]
-    LogLevel(#[from] LogLevelParseError),
+    LogLevel(#[from] crate::parsed_config::types::LogLevelParseError),
 }

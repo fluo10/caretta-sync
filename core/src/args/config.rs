@@ -1,22 +1,22 @@
 use std::{marker::PhantomData, path::PathBuf};
 
 use crate::{
-    config::{LogConfig, ParsedConfig}, utils::{emptiable::Emptiable, mergeable::Mergeable}
+    parsed_config::ParsedConfig, utils::{emptiable::Emptiable, mergeable::Mergeable}
 };
 use clap::Args;
 
 
 /// An arguments about config.
 #[derive(Args, Clone, Debug)]
-pub struct ConfigOptionArgs
+pub struct ConfigArgs
 {
-    #[arg(short = 'c', long = "config", global = true, env = "CONFIG")]
+    #[arg(short = 'f', long = "config-file", env = "CONFIG_FILE")]
     pub file_path: Option<PathBuf>,
     #[command(flatten)]
     pub args: ParsedConfig,
 }
 
-impl ConfigOptionArgs
+impl ConfigArgs
 {
     /// Convert [`ConfigOptionArgs`] into [`ParsedConfig`]
     ///
