@@ -10,8 +10,6 @@ pub enum ProtoDeserializeError {
     MissingField(&'static str),
     #[error("Public key parsing error: {0}")]
     IrohPublicKeyParsing(#[from] iroh::KeyParsingError),
-    #[error("Ticket Parsing error: {0}")]
-    IrohTicketParsing(#[from] iroh_tickets::ParseError),
     #[error("Invalid bytes length error: {0}")]
     SliceTryFrom(#[from] std::array::TryFromSliceError),
     #[error("Int parse error: {0}")]

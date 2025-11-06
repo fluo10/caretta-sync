@@ -39,6 +39,17 @@ pub enum Relation {}
 
 impl ActiveModelBehavior for ActiveModel {}
 
+impl From<P2pConfigModel> for P2pConfig {
+    fn from(value: P2pConfigModel) -> Self {
+        Self {
+            enabled: value.enabled,
+            secret_key: value.secret_key.into(),
+            enable_mdns: value.enable_mdns,
+            enable_n0: value.enable_n0,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use chrono::Local;

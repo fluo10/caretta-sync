@@ -1,12 +1,10 @@
 use std::{marker::PhantomData, path::PathBuf};
 
-use caretta_sync_core::{
-    config::{LogConfig, ParsedConfig}, context::{ClientContext, ServerContext}, utils::{emptiable::Emptiable, mergeable::Mergeable}
+use crate::{
+    config::{LogConfig, ParsedConfig}, utils::{emptiable::Emptiable, mergeable::Mergeable}
 };
 use clap::Args;
 
-use sea_orm_migration::MigratorTrait;
-use tokio::sync::OnceCell;
 
 /// An arguments about config.
 #[derive(Args, Clone, Debug)]

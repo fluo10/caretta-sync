@@ -2,7 +2,7 @@ use std::{marker::PhantomData, path::PathBuf};
 
 #[cfg(feature = "cli")]
 use clap::Args;
-use iroh_docs::store::Store;
+//use iroh_docs::store::Store;
 use sea_orm::{sqlx::database, Database, DatabaseConnection};
 use sea_orm_migration::MigratorTrait;
 
@@ -26,9 +26,9 @@ impl StorageConfig {
     pub fn to_docs_path(&self) -> PathBuf {
         self.data_dir.join(Self::DOCS_FILE_NAME)
     }
-    pub fn to_docs(&self) -> Result<Store, Error> {
-        Ok(Store::persistent(self.to_docs_path()).map_err(|e| Error::DocsOpen(e))?)
-    }
+    // pub fn to_docs(&self) -> Result<Store, Error> {
+    //     Ok(Store::persistent(self.to_docs_path()).map_err(|e| Error::DocsOpen(e))?)
+    // }
     pub fn to_database_path(&self) -> PathBuf {
         self.data_dir.join(Self::DATABASE_FILE_NAME)
     }

@@ -1,8 +1,8 @@
 mod error;
 
 pub use error::InvitationTokenDeserializeError;
-use chrono::{DateTime, Duration, SubsecRound, Utc};
-use iroh::{Endpoint, EndpointId};
+use chrono::{DateTime, Duration, Local, SubsecRound, Utc};
+use iroh::{Endpoint, EndpointId, PublicKey};
 use mtid::Dtid;
 use sea_orm::DatabaseConnection;
 
@@ -12,7 +12,7 @@ use crate::error::Error;
 pub struct InvitationToken{
     endpoint_id: EndpointId,
     token_id: Dtid,
-    expires_at: DateTime<Utc>
+    expires_at: DateTime<Local>
 }
 
 impl InvitationToken {
@@ -27,11 +27,11 @@ impl InvitationToken {
     const EXPIRES_AT_LENGTH: usize = (i64::BITS / 8) as usize;
     const EXPIRES_AT_END: usize = Self::EXPIRES_AT_START + Self::EXPIRES_AT_LENGTH;
 
-    pub fn new(endpoint_id: EndpointId, model: crate::models::InvitationTokenModel) -> Self {
+    pub fn new(endpoint_id: EndpointId, token_id: Dtid, expires_at: DateTime<Local>) -> Self {
         Self {
-            endpoint_id: endpoint_id,
-            token_id: model.public_id,
-            expires_at: model.expires_at.to_utc()
+            endpoint_id,
+            token_id,
+            expires_at
         }
     }
     pub fn to_bytes(&self) -> [u8;Self::LENGTH] {
@@ -49,7 +49,7 @@ impl InvitationToken {
         let expires_at = DateTime::from_timestamp(
             i64::from_be_bytes(bytes[Self::EXPIRES_AT_START..Self::EXPIRES_AT_END].try_into().unwrap()),
             0
-        ).ok_or(InvitationTokenDeserializeError::DateTimeInvalid)?;
+        ).ok_or(InvitationTokenDeserializeError::DateTimeInvalid)?.with_timezone(&Local);
         
         Ok(Self { endpoint_id, token_id, expires_at })
     }
@@ -75,7 +75,7 @@ mod tests {
         let payload = InvitationToken{
             endpoint_id: SecretKey::generate(&mut rand::rng()).public(),
             token_id: Dtid::random(),
-            expires_at : Utc::now().round_subsecs(0),
+            expires_at : Local::now().round_subsecs(0),
         };
         let bytes = payload.to_bytes();
         assert_eq!(payload, InvitationToken::from_bytes(bytes).unwrap());

@@ -58,9 +58,9 @@ impl device_service_server::DeviceService for DeviceServer {
             .ok_or(tonic::Status::not_found("Target device is not found"))?;
         let mut stream = self.context.discover(public_key).await.ok_or(tonic::Status::not_found("Target peer address not found"))?;
         while let Some(x) = stream.next().await {
-            let discovered = x.map_err(|_| tonic::Status::internal("TODO"))?;
+            let discovered = x.map_err(|e| tonic::Status::from_error(Box::new(e)))?;
             
-            let result = iroh_ping::Ping::new().ping(self.context.as_endpoint().unwrap(), discovered.into_endpoint_addr()).await.map_err(|e|tonic::Status::internal("TODO"))?;
+            let result = iroh_ping::Ping::new().ping(self.context.as_endpoint().unwrap(), discovered.into_endpoint_addr()).await.map_err(|e|tonic::Status::internal("ping error"))?;
             let response = PingResponse{
                 rtt: Some(result.try_into().unwrap())
             };

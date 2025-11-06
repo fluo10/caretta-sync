@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 use tokio::io::AsyncReadExt;
 
 use crate::{
-    config::ConfigError, error::Error, models::P2pConfigModel, utils::{emptiable::Emptiable, mergeable::Mergeable}
+    config::ConfigError, error::Error, utils::{emptiable::Emptiable, mergeable::Mergeable}
 };
 
 #[derive(Clone, Debug)]
@@ -22,6 +22,7 @@ pub struct P2pConfig {
 }
 
 impl P2pConfig {
+    #[cfg(feature="service")]
     pub async fn to_iroh_router(&self, app_name: &'static str) -> Result<Option<Router>, crate::error::Error> {
         if self.enabled {
             let mut endpoint = iroh::endpoint::Builder::empty(iroh::RelayMode::Disabled)
@@ -59,17 +60,6 @@ impl TryFrom<PartialP2pConfig> for P2pConfig {
                 .enable_mdns
                 .ok_or(ConfigError::MissingConfig("p2p.enable_mdns"))?,
         })
-    }
-}
-
-impl From<P2pConfigModel> for P2pConfig {
-    fn from(value: P2pConfigModel) -> Self {
-        Self {
-            enabled: value.enabled,
-            secret_key: value.secret_key.into(),
-            enable_mdns: value.enable_mdns,
-            enable_n0: value.enable_n0,
-        }
     }
 }
 

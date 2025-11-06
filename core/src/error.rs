@@ -5,10 +5,8 @@ use crate::proto::ProtoDeserializeError;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
-    #[error("Base64 decode error: {0}")]
-    Base64Decode(#[from] base64::DecodeError),
     #[error("Config error: {0}")]
-    Config(#[from] crate::config::error::ConfigError),
+    Config(#[from] crate::config::ConfigError),
     #[error("Infallible: {0}")]
     Infallible(#[from] std::convert::Infallible),
     #[error("IO Error: {0}")]
@@ -36,8 +34,6 @@ pub enum Error {
     LocalDb(#[from] sea_orm::DbErr),
     #[error("Tripod id error: {0}")]
     Mtid(#[from] mtid::Error),
-    #[error("Docs open error: {0}")]
-    DocsOpen(anyhow::Error),
     #[error("Tonic transport error: {0}")]
     TonicTransport(#[from] tonic::transport::Error)
 }

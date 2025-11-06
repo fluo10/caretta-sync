@@ -10,7 +10,6 @@ publish = false
 [features]
 default = ["cli"]
 cli = ["caretta-sync/cli"]
-gui = ["caretta-sync/bevy", "caretta-sync-example-core/gui"]
 
 [dependencies]
 clap.workspace = true

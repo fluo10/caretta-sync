@@ -1,4 +1,3 @@
-use http::uri::InvalidUri;
 use sea_orm::DbErr;
 
 use crate::config::LogLevelParseError;
@@ -14,7 +13,7 @@ pub enum ConfigError {
     #[error("Toml Serialization Error")]
     TomlSerialization(#[from] toml::ser::Error),
     #[error("Invalid url: {0}")]
-    UriInvalid(#[from] InvalidUri),
+    UriInvalid(#[from] url::ParseError),
     #[error("Db Error: {0}")]
     Db(#[from] DbErr),
     #[error("Failed to get config dir")]

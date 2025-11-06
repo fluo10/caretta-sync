@@ -9,12 +9,10 @@ publish = false
 
 [features]
 default=[]
-gui = ["caretta-sync/bevy"]
 
 [dependencies]
 async-trait.workspace = true
-bevy.workspace = true
-caretta-sync = { path = "../.." }
+caretta-sync = { path = "../.." , features = ["service"]}
 iroh.workspace = true
 tokio.workspace = true
 tokio-stream = { version = "0.1.17", features = ["net"] }

@@ -1,9 +1,10 @@
-pub mod error;
+mod error;
 mod log;
 mod p2p;
 mod rpc;
 mod storage;
 mod parsed;
+
 pub use parsed::ParsedConfig;
 
 pub use error::ConfigError;

@@ -1,8 +1,7 @@
-use base64::engine::Config;
 use sea_orm_migration::MigratorTrait;
 use serde::{ser::Error, Deserialize, Serialize};
 
-use crate::{config::{ConfigError, LogConfig, P2pConfig, PartialP2pConfig, PartialRpcConfig, PartialStorageConfig, RpcConfig, StorageConfig, log::PartialLogConfig}, context::{ClientContext, ServerContext}, models::P2pConfigModel, utils::{emptiable::Emptiable, mergeable::Mergeable}};
+use crate::{config::{ConfigError, LogConfig, P2pConfig, PartialP2pConfig, PartialRpcConfig, PartialStorageConfig, RpcConfig, StorageConfig, log::PartialLogConfig},  utils::{emptiable::Emptiable, mergeable::Mergeable}};
 use std::{fmt::{Display, write}, fs::File, io::Read, marker::PhantomData, path::{Path, PathBuf}};
 
 #[cfg_attr(feature="cli", derive(clap::Args))]
@@ -38,21 +37,6 @@ impl ParsedConfig {
         let mut result = Self::default(app_name);
         result.merge(self);
         result
-    }
-
-    /// Fill empty configuration fields with the values read from database.
-    /// 
-    /// This function requires `self.storage` field is filled beforehand.
-    pub async fn with_database<T>(mut self, migrator: PhantomData<T>) -> Result<ParsedConfig, ConfigError>
-    where T: MigratorTrait
-    {
-        let connection =  self.to_storage_config()?.to_database_connection(migrator).await?;
-        let mut p2p_config = PartialP2pConfig::from(P2pConfig::from(P2pConfigModel::get_or_try_init(&connection).await?));
-        if let Some(x) = self.p2p {
-            (p2p_config.merge(x));
-        } 
-        self.p2p = Some(p2p_config);
-        Ok(self)
     }
 
     /// Build [`StorageConfig`] from own [`PartialStorageConfig`]

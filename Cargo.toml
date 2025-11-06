@@ -9,9 +9,11 @@ exclude = ["/.github", "/.gitignore", "/.gitmodules", "/.vscode"]
 
 [features]
 default = ["macros"]
-bevy = ["dep:caretta-sync-bevy"]
 cli = ["dep:caretta-sync-cli"]
-desktop = ["cli", "bevy"]
+client = ["caretta-sync-core/client"]
+service = ["dep:caretta-sync-service"]
+server = ["service", "caretta-sync-cli/server"]
+
 macros = ["dep:caretta-sync-macros"]
 test = ["caretta-sync-core/test"]
 
@@ -20,12 +22,13 @@ caretta-sync-bevy = { path = "bevy", version = "0.0.2", optional = true }
 caretta-sync-core.workspace = true
 caretta-sync-cli = { path="cli", version = "0.0.2", optional = true }
 caretta-sync-macros = { path="macros", version = "0.0.2", optional = true}
+caretta-sync-service = { workspace = true, optional = true }
 
 [dev-dependencies]
 caretta-sync-core = {workspace = true, features = ["test"]}
 
 [workspace]
-members = [ ".", "core", "macros", "cli", "examples/*" , "bevy"]
+members = [ ".", "core", "macros", "cli", "examples/*" , "bevy", "service"]
 exclude = [ "mtid" ]
 resolver = "3"
 
@@ -43,10 +46,13 @@ mtid = { version = "0.6.0", features=["prost", "sea-orm", "serde",]}
 chrono = "0.4.41"
 ciborium = "0.2.2"
 clap = { version = "4.5.38", features = ["derive"] }
+caretta-sync = {version = "0.0.2", path = "." }
 caretta-sync-core = {version = "0.0.2", path = "core"}
 caretta-sync-cli = {version = "0.0.2", path = "cli"}
+caretta-sync-service = {version = "0.0.2", path = "service"}
 futures = { version = "0.3.31", features = ["executor"] }
 iroh = { version = "0.94.0", features = ["discovery-local-network", "discovery-pkarr-dht"] }
+iroh-ping = "0.6.0"
 iroh-tickets = "0.1.0"
 prost = "0.14.1"
 prost-types = "0.14.1"
