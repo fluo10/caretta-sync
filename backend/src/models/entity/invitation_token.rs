@@ -3,10 +3,13 @@ use std::convert::Infallible;
 
 use chrono::{DateTime, Duration, DurationRound, Local, SubsecRound};
 use mtid::Dtid;
-use sea_orm::{entity::prelude::*, ActiveValue::Set};
+use sea_orm::{ActiveValue::Set, entity::prelude::*};
 use uuid::Uuid;
 
-use crate::{models::{types::TokenStatus, ModelsError}, invitation_token::InvitationToken};
+use crate::{
+    invitation_token::InvitationToken,
+    models::{ModelsError, types::TokenStatus},
+};
 
 /// Request of node authorization.
 #[derive(Debug, Clone, PartialEq, Eq, DeriveEntityModel)]
@@ -20,11 +23,11 @@ pub struct Model {
     pub created_at: DateTime<Local>,
 
     /// The timestamp when the token expires
-    /// 
+    ///
     /// Since the token does not contain subseconds, this timestamp is also rounded to the newarest second.
     pub expires_at: DateTime<Local>,
     pub closed_at: Option<DateTime<Local>>,
-    pub status: TokenStatus
+    pub status: TokenStatus,
 }
 
 impl Model {
@@ -36,16 +39,17 @@ impl Model {
 pub enum Relation {}
 
 impl Entity {
-    pub fn find_by_public_id(id: Dtid) -> Select<Entity>{
+    pub fn find_by_public_id(id: Dtid) -> Select<Entity> {
         Self::find().filter(Column::PublicId.eq(id))
     }
 }
 
 #[async_trait::async_trait]
 impl ActiveModelBehavior for ActiveModel {
-    async fn before_save<C>(mut self,db: &C,insert:bool) ->  Result<Self,DbErr>
-        where C:ConnectionTrait,
-    {   
+    async fn before_save<C>(mut self, db: &C, insert: bool) -> Result<Self, DbErr>
+    where
+        C: ConnectionTrait,
+    {
         if insert {
             for _ in 0..100 {
                 let public_id = Dtid::random();
@@ -56,7 +60,6 @@ impl ActiveModelBehavior for ActiveModel {
                     break;
                 }
             }
-
         }
         Ok(self)
     }
@@ -77,17 +80,14 @@ impl ActiveModel {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{
-        tests::CONFIG,
-    };
+    use crate::tests::CONFIG;
     use iroh::{PublicKey, SecretKey};
     use rand::Rng;
-    use sea_orm::{sea_query::Token, ActiveValue::Set};
+    use sea_orm::{ActiveValue::Set, sea_query::Token};
 
     #[tokio::test]
     async fn insert() {
         let db: &DatabaseConnection = crate::tests::get_server_context().await.as_ref();
-
 
         let active_model = ActiveModel {
             created_at: Set(chrono::Local::now()),

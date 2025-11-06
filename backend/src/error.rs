@@ -28,5 +28,5 @@ pub enum BackendError {
     #[error("Tripod id error: {0}")]
     Mtid(#[from] mtid::Error),
     #[error("Tonic transport error: {0}")]
-    TonicTransport(#[from] tonic::transport::Error)
+    TonicTransport(#[from] tonic::transport::Error),
 }

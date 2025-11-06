@@ -1,12 +1,7 @@
-use std::{fmt::Display, str::FromStr};
-
-use crate::utils::{emptiable::Emptiable, mergeable::Mergeable};
-#[cfg(feature = "cli")]
-use clap::Args;
-#[cfg(feature="cli")]
-use clap::ValueEnum;
-use serde::{Deserialize, Serialize};
-use tracing_subscriber::{EnvFilter, fmt::{FormatEvent, format::Compact}};
+use tracing_subscriber::{
+    EnvFilter,
+    fmt::{FormatEvent, format::Compact},
+};
 
 /// A Config about logging
 #[derive(Clone, Debug)]
@@ -16,8 +11,6 @@ pub struct LogConfig {
 
 impl LogConfig {
     pub fn init_tracing_subscriber(&self) {
-        tracing_subscriber::fmt()
-            .with_max_level(self.level)
-            .init();
+        tracing_subscriber::fmt().with_max_level(self.level).init();
     }
 }

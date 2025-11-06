@@ -6,7 +6,7 @@ use caretta_sync_macros::Mergeable;
 #[derive(Clone, Debug, PartialEq)]
 struct MergeableTuple(Option<u8>);
 
-impl Mergeable for  MergeableTuple{
+impl Mergeable for MergeableTuple {
     fn merge(&mut self, other: Self) {
         if let Some(x) = other.0 {
             self.0.insert(x);
@@ -26,8 +26,12 @@ struct MergeableStruct {
 
 #[cfg(test)]
 fn test() {
-    let zero = MergeableStruct { opt: Some(0).into() };
-    let one = MergeableStruct { opt: Some(1).into() };
+    let zero = MergeableStruct {
+        opt: Some(0).into(),
+    };
+    let one = MergeableStruct {
+        opt: Some(1).into(),
+    };
     let none = MergeableStruct { opt: None.into() };
     let mut zero_with_one = zero.clone();
     zero_with_one.merge(one.clone());

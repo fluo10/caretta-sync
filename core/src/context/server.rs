@@ -1,11 +1,18 @@
 use std::{marker::PhantomData, pin::Pin};
 
 use futures::{Stream, StreamExt};
-use iroh::{Endpoint, discovery::{ConcurrentDiscovery, Discovery, DiscoveryError, DiscoveryItem}, protocol::Router};
+use iroh::{
+    Endpoint,
+    discovery::{ConcurrentDiscovery, Discovery, DiscoveryError, DiscoveryItem},
+    protocol::Router,
+};
 use sea_orm::{Database, DatabaseConnection};
 use sea_orm_migration::MigratorTrait;
 
-use crate::{config::{LogConfig, P2pConfig, ParsedConfig, RpcConfig, StorageConfig}, error::Error};
+use crate::{
+    config::{LogConfig, P2pConfig, ParsedConfig, RpcConfig, StorageConfig},
+    error::Error,
+};
 
 #[derive(Clone, Debug)]
 pub struct ServerContext {
@@ -16,7 +23,11 @@ pub struct ServerContext {
     pub iroh_router: Option<Router>,
 }
 impl ServerContext {
-    pub async fn new<T,M>(app_name: &'static str, config: T, migrator: PhantomData<M>) -> Result<Self, Error> 
+    pub async fn new<T, M>(
+        app_name: &'static str,
+        config: T,
+        migrator: PhantomData<M>,
+    ) -> Result<Self, Error>
     where
         T: AsRef<ParsedConfig>,
         M: MigratorTrait,
@@ -27,7 +38,13 @@ impl ServerContext {
         let storage_config = config.to_storage_config()?;
         let database_connection = storage_config.to_database_connection(migrator).await?;
         let iroh_router = p2p_config.to_iroh_router(app_name).await?;
-        Ok(Self {app_name, rpc_config, storage_config, database_connection, iroh_router})
+        Ok(Self {
+            app_name,
+            rpc_config,
+            storage_config,
+            database_connection,
+            iroh_router,
+        })
     }
     pub fn as_iroh_router(&self) -> Option<&Router> {
         self.iroh_router.as_ref()
@@ -38,7 +55,18 @@ impl ServerContext {
     pub fn as_discovery(&self) -> Option<&ConcurrentDiscovery> {
         self.as_endpoint().map(|x| x.discovery())
     }
-    pub async fn discover(&self, endpoint_id: iroh::EndpointId) ->  Option<Pin<Box<dyn Stream<Item = Result<DiscoveryItem, DiscoveryError>> + std::marker::Send + 'static>>> {
+    pub async fn discover(
+        &self,
+        endpoint_id: iroh::EndpointId,
+    ) -> Option<
+        Pin<
+            Box<
+                dyn Stream<Item = Result<DiscoveryItem, DiscoveryError>>
+                    + std::marker::Send
+                    + 'static,
+            >,
+        >,
+    > {
         if let Some(x) = self.as_discovery() {
             x.resolve(endpoint_id)
         } else {
@@ -59,6 +87,9 @@ impl From<&ServerContext> for Option<Endpoint> {
 }
 impl From<&ServerContext> for Option<ConcurrentDiscovery> {
     fn from(value: &ServerContext) -> Self {
-        value.iroh_router.as_ref().map(|x| x.endpoint().discovery().clone())
+        value
+            .iroh_router
+            .as_ref()
+            .map(|x| x.endpoint().discovery().clone())
     }
 }

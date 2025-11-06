@@ -1,7 +1,7 @@
 use caretta_sync_core::config::P2pConfig;
 use iroh::{PublicKey, SecretKey};
 use mtid::Dtid;
-use sea_orm::{entity::prelude::*, sea_query::Mode, ActiveValue::Set};
+use sea_orm::{ActiveValue::Set, entity::prelude::*, sea_query::Mode};
 
 use crate::models::types::SecretKeyBlob;
 
@@ -29,8 +29,10 @@ impl Model {
                 enabled: Set(true),
                 secret_key: Set(SecretKey::generate(&mut rand::rng()).into()),
                 enable_n0: Set(true),
-                enable_mdns: Set(true)
-            }.insert(db).await?)
+                enable_mdns: Set(true),
+            }
+            .insert(db)
+            .await?)
         }
     }
 }

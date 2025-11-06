@@ -15,7 +15,13 @@ pub enum ParsedLogLevel {
 
 impl ValueEnum for ParsedLogLevel {
     fn value_variants<'a>() -> &'a [Self] {
-        &[Self::Error, Self::Warn, Self::Info, Self::Debug, Self::Trace]
+        &[
+            Self::Error,
+            Self::Warn,
+            Self::Info,
+            Self::Debug,
+            Self::Trace,
+        ]
     }
     fn to_possible_value(&self) -> Option<clap::builder::PossibleValue> {
         use clap::builder::PossibleValue;
@@ -24,7 +30,7 @@ impl ValueEnum for ParsedLogLevel {
     }
 }
 
-#[derive(Debug, thiserror::Error,)]
+#[derive(Debug, thiserror::Error)]
 #[error("Invalid log level")]
 pub struct LogLevelParseError;
 
@@ -67,7 +73,7 @@ impl TryFrom<tracing::Level> for ParsedLogLevel {
             Level::INFO => Ok(Self::Info),
             Level::TRACE => Ok(Self::Trace),
             Level::WARN => Ok(Self::Warn),
-            _ => Err(LogLevelParseError)
+            _ => Err(LogLevelParseError),
         }
     }
 }
@@ -87,7 +93,7 @@ impl FromStr for ParsedLogLevel {
             Self::INFO => Ok(Self::Info),
             Self::DEBUG => Ok(Self::Debug),
             Self::TRACE => Ok(Self::Trace),
-            _ => Err(LogLevelParseError)
+            _ => Err(LogLevelParseError),
         }
     }
 }

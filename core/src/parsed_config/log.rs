@@ -1,11 +1,15 @@
 use clap::Args;
 use serde::{Deserialize, Serialize};
 
-use crate::{config::LogConfig, parsed_config::{error::ParsedConfigError, types::ParsedLogLevel}, utils::{emptiable::Emptiable, mergeable::Mergeable}};
+use crate::{
+    config::LogConfig,
+    parsed_config::{error::ParsedConfigError, types::ParsedLogLevel},
+    utils::{emptiable::Emptiable, mergeable::Mergeable},
+};
 
 #[derive(Args, Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct ParsedLogConfig {
-    #[arg(long="log-level", env="LOG_LEVEL")]
+    #[arg(long = "log-level", env = "LOG_LEVEL")]
     pub level: Option<ParsedLogLevel>,
 }
 

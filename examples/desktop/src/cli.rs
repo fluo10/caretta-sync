@@ -4,7 +4,7 @@ use caretta_sync_example_core::{models::migration::Migrator, server::Server};
 #[cfg(feature = "gui")]
 mod gui;
 
-use caretta_sync::cli::{option::ConfigOptionArgs,RunnableCommand, *};
+use caretta_sync::cli::{RunnableCommand, option::ConfigOptionArgs, *};
 
 use clap::{Parser, Subcommand};
 
@@ -22,7 +22,7 @@ impl RunnableCommand for Cli {
             x.run(app_name)
         } else {
             #[cfg(feature = "gui")]
-            Gui{}.run(app_name);
+            Gui {}.run(app_name);
             #[cfg(not(feature = "gui"))]
             todo!()
         }

@@ -12,8 +12,6 @@ pub mod cli {
 
 #[cfg(feature = "macros")]
 pub mod utils {
-    pub use caretta_sync_core::utils::{
-        emptiable::Emptiable, mergeable::Mergeable,
-    };
+    pub use caretta_sync_core::utils::{emptiable::Emptiable, mergeable::Mergeable};
     pub use caretta_sync_macros::{Emptiable, Mergeable};
 }

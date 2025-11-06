@@ -2,24 +2,30 @@ use sea_orm::DatabaseConnection;
 use tonic::transport::Endpoint;
 use url::Url;
 
-use crate::{config::{ConfigError, LogConfig, ParsedConfig, RpcConfig, StorageConfig}, error::Error};
+use crate::{
+    config::{ConfigError, LogConfig, ParsedConfig, RpcConfig, StorageConfig},
+    error::Error,
+};
 
 /// A context for client
-#[derive(Clone, Debug,)]
+#[derive(Clone, Debug)]
 pub struct ClientContext {
     pub app_name: &'static str,
     pub rpc_config: RpcConfig,
 }
 
 impl ClientContext {
-
     /// Create [`ClientContext`]
     pub fn new<T>(app_name: &'static str, config: T) -> Result<Self, ConfigError>
-    where T: AsRef<ParsedConfig>
+    where
+        T: AsRef<ParsedConfig>,
     {
-        let config= config.as_ref();
+        let config = config.as_ref();
         let rpc_config = config.to_rpc_config()?;
-        Ok(Self{app_name, rpc_config})
+        Ok(Self {
+            app_name,
+            rpc_config,
+        })
     }
 }
 

@@ -6,17 +6,28 @@ mod rpc;
 mod storage;
 pub mod types;
 use clap::Args;
-pub use log::ParsedLogConfig;
 pub use error::ParsedConfigError;
+pub use log::ParsedLogConfig;
 pub use p2p::ParsedP2pConfig;
 pub use rpc::ParsedRpcConfig;
 pub use storage::ParsedStorageConfig;
 
 use sea_orm_migration::MigratorTrait;
-use serde::{ser::Error, Deserialize, Serialize};
+use serde::{Deserialize, Serialize, ser::Error};
 
-use crate::{config::{LogConfig, P2pConfig, RpcConfig, StorageConfig},  utils::{emptiable::Emptiable, mergeable::Mergeable}};
-use std::{fmt::{Display}, fs::File, io::Read, marker::PhantomData, path::{Path, PathBuf}};
+#[cfg(feature="backend")]
+use crate::config::{P2pConfig, StorageConfig};
+use crate::{
+    config::{LogConfig, RpcConfig},
+    utils::{emptiable::Emptiable, mergeable::Mergeable},
+};
+use std::{
+    fmt::Display,
+    fs::File,
+    io::Read,
+    marker::PhantomData,
+    path::{Path, PathBuf},
+};
 
 #[derive(Args, Clone, Debug, Deserialize, Serialize)]
 pub struct ParsedConfig {
@@ -28,24 +39,20 @@ pub struct ParsedConfig {
     pub p2p: Option<ParsedP2pConfig>,
     #[command(flatten)]
     pub log: Option<ParsedLogConfig>,
-
 }
-
-
 
 /// A partial config parsed from config file, cli args, etc.
 impl ParsedConfig {
-
     fn default(app_name: &'static str) -> Self {
         Self {
             storage: Some(ParsedStorageConfig::default(app_name)),
             rpc: Some(ParsedRpcConfig::default(app_name)),
             p2p: None,
-            log: Some(ParsedLogConfig::default())
+            log: Some(ParsedLogConfig::default()),
         }
     }
 
-    /// Fill empty configuration fields with default values and return. 
+    /// Fill empty configuration fields with default values and return.
     pub fn with_default(self, app_name: &'static str) -> Self {
         let mut result = Self::default(app_name);
         result.merge(self);
@@ -53,23 +60,40 @@ impl ParsedConfig {
     }
 
     /// Build [`StorageConfig`] from own [`ParsedStorageConfig`]
+    #[cfg(feature="backend")]
     pub fn to_storage_config(&self) -> Result<StorageConfig, ParsedConfigError> {
-        self.storage.as_ref().ok_or(ParsedConfigError::MissingConfig("storage.*"))?.clone().try_into()
+        self.storage
+            .as_ref()
+            .ok_or(ParsedConfigError::MissingConfig("storage.*"))?
+            .clone()
+            .try_into()
     }
 
     /// Build [`P2pConfig`] from own [`ParsedP2pConfig`]
-    pub fn to_p2p_config(&self) -> Result<P2pConfig, ParsedConfigError>
-    {
-        self.p2p.as_ref().ok_or(ParsedConfigError::MissingConfig("P2P.*"))?.clone().try_into()
+    #[cfg(feature="backend")]
+    pub fn to_p2p_config(&self) -> Result<P2pConfig, ParsedConfigError> {
+        self.p2p
+            .as_ref()
+            .ok_or(ParsedConfigError::MissingConfig("P2P.*"))?
+            .clone()
+            .try_into()
     }
 
     /// Build [`RpcConfig`] from own [`ParsedRpcConfig`]
     pub fn to_rpc_config(&self) -> Result<RpcConfig, ParsedConfigError> {
-        self.rpc.as_ref().ok_or(ParsedConfigError::MissingConfig("rpc.*"))?.clone().try_into()
+        self.rpc
+            .as_ref()
+            .ok_or(ParsedConfigError::MissingConfig("rpc.*"))?
+            .clone()
+            .try_into()
     }
     /// Build [`LogConfig`] from own [`ParsedLogConfig`]
     pub fn to_log_config(&self) -> Result<LogConfig, ParsedConfigError> {
-        self.log.as_ref().ok_or(ParsedConfigError::MissingConfig("log.*"))?.clone().try_into()
+        self.log
+            .as_ref()
+            .ok_or(ParsedConfigError::MissingConfig("log.*"))?
+            .clone()
+            .try_into()
     }
     /// Read or create target config file
     pub fn read_or_create_from_path<T>(path: T) -> Result<Self, ParsedConfigError>
@@ -126,7 +150,6 @@ impl Emptiable for ParsedConfig {
 
     fn is_empty(&self) -> bool {
         self.p2p.is_empty() && self.rpc.is_empty() && self.storage.is_empty() && self.log.is_empty()
-        
     }
 }
 
@@ -139,7 +162,7 @@ impl Mergeable for ParsedConfig {
     }
 }
 
-impl Display for ParsedConfig{
+impl Display for ParsedConfig {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", toml::to_string(self).map_err(|_| std::fmt::Error)?)
     }

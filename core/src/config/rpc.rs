@@ -1,6 +1,3 @@
-use crate::utils::{emptiable::Emptiable, mergeable::Mergeable};
-
-use serde::{Deserialize, Serialize};
 use url::Url;
 
 #[cfg(unix)]

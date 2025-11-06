@@ -1,14 +1,20 @@
 use clap::Args;
 use iroh::{PublicKey, SecretKey};
 use serde::{Deserialize, Serialize};
-
-use crate::{config::P2pConfig, parsed_config::error::ParsedConfigError, utils::{emptiable::Emptiable, mergeable::Mergeable}};
-
+#[cfg(feature="backend")]
+use crate::config::P2pConfig;
+use crate::{
+    parsed_config::error::ParsedConfigError,
+    utils::{emptiable::Emptiable, mergeable::Mergeable},
+};
+#[cfg(feature="backend")]
 impl TryFrom<ParsedP2pConfig> for P2pConfig {
     type Error = ParsedConfigError;
     fn try_from(raw: ParsedP2pConfig) -> Result<P2pConfig, Self::Error> {
         Ok(P2pConfig {
-            enabled: raw.enabled.ok_or(ParsedConfigError::MissingConfig("p2p.enabled"))?,
+            enabled: raw
+                .enabled
+                .ok_or(ParsedConfigError::MissingConfig("p2p.enabled"))?,
             secret_key: raw
                 .secret_key
                 .ok_or(ParsedConfigError::MissingConfig("p2p.secret_key"))?,
@@ -37,7 +43,7 @@ pub struct ParsedP2pConfig {
     #[arg(long)]
     pub enable_mdns: Option<bool>,
 }
-
+#[cfg(feature="backend")]
 impl From<P2pConfig> for ParsedP2pConfig {
     fn from(config: P2pConfig) -> Self {
         Self {
@@ -45,7 +51,7 @@ impl From<P2pConfig> for ParsedP2pConfig {
             secret_key: Some(config.secret_key.clone()),
             public_key: Some(config.secret_key.public()),
             enable_mdns: Some(config.enable_mdns),
-            enable_n0: Some(config.enable_n0)
+            enable_n0: Some(config.enable_n0),
         }
     }
 }
@@ -57,7 +63,7 @@ impl Emptiable for ParsedP2pConfig {
             secret_key: None,
             public_key: None,
             enable_mdns: None,
-            enable_n0: None
+            enable_n0: None,
         }
     }
 

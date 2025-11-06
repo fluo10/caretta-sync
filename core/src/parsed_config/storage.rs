@@ -3,9 +3,14 @@ use std::path::PathBuf;
 use clap::Args;
 use serde::{Deserialize, Serialize};
 
-use crate::{config::StorageConfig, parsed_config::error::ParsedConfigError, utils::{emptiable::Emptiable, mergeable::Mergeable}};
-
-#[derive(Args,Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[cfg(feature="backend")]
+use crate::config::StorageConfig;
+use crate::{
+    parsed_config::error::ParsedConfigError,
+    utils::{emptiable::Emptiable, mergeable::Mergeable},
+};
+/// A storage config parsed from file, args and enviroment variables
+#[derive(Args, Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct ParsedStorageConfig {
     #[arg(long)]
     pub data_dir: Option<PathBuf>,
@@ -58,7 +63,7 @@ impl ParsedStorageConfig {
         }
     }
 }
-
+#[cfg(feature="backend")]
 impl From<StorageConfig> for ParsedStorageConfig {
     fn from(config: StorageConfig) -> ParsedStorageConfig {
         Self {
@@ -102,7 +107,7 @@ impl Mergeable for Option<ParsedStorageConfig> {
         };
     }
 }
-
+#[cfg(feature="backend")]
 impl TryFrom<ParsedStorageConfig> for StorageConfig {
     type Error = ParsedConfigError;
 

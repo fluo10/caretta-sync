@@ -1,11 +1,12 @@
 use std::{marker::PhantomData, path::PathBuf};
 
 //use iroh_docs::store::Store;
-use sea_orm::{sqlx::database, Database, DatabaseConnection};
+use sea_orm::{Database, DatabaseConnection, sqlx::database};
 use sea_orm_migration::MigratorTrait;
 
 use crate::{
-    error::Error, utils::{emptiable::Emptiable, mergeable::Mergeable}
+    error::Error,
+    utils::{emptiable::Emptiable, mergeable::Mergeable},
 };
 
 #[cfg(any(test, feature = "test"))]
@@ -32,20 +33,29 @@ impl StorageConfig {
     }
 
     /// Build database connection.
-    /// 
+    ///
     /// # Panic
     /// If initialize database is failed, then panic.
     pub async fn to_database_connection<T>(&self, _: PhantomData<T>) -> DatabaseConnection
-    where T: MigratorTrait {
+    where
+        T: MigratorTrait,
+    {
         let database_path = self.to_database_path();
         if let Some(x) = database_path.parent() {
             std::fs::create_dir_all(x).expect("Failed to create dir for database");
         }
         let url = "sqlite://".to_owned()
-            + self.to_database_path().to_str().expect("Invalid path string")
+            + self
+                .to_database_path()
+                .to_str()
+                .expect("Invalid path string")
             + "?mode=rwc";
-        let db = Database::connect(url).await.expect("Connecting database must be succeed.");
-        T::up(&db, None).await.expect("Database Migration must be succeed.");
+        let db = Database::connect(url)
+            .await
+            .expect("Connecting database must be succeed.");
+        T::up(&db, None)
+            .await
+            .expect("Database Migration must be succeed.");
         db
     }
 }

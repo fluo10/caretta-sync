@@ -13,7 +13,9 @@ impl From<iroh::PublicKey> for PublicKey {
 }
 impl Display for PublicKey {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        iroh::PublicKey::try_from(self).map_err(|_| std::fmt::Error)?.fmt(f)
+        iroh::PublicKey::try_from(self)
+            .map_err(|_| std::fmt::Error)?
+            .fmt(f)
     }
 }
 impl TryFrom<&PublicKey> for iroh::PublicKey {

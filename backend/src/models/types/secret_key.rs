@@ -2,11 +2,12 @@ use std::array::TryFromSliceError;
 
 use iroh::SecretKey;
 use sea_orm::{
-    sea_query::{Nullable, ValueType, ValueTypeErr}, DbErr, TryGetError, TryGetable, Value
+    DbErr, TryGetError, TryGetable, Value,
+    sea_query::{Nullable, ValueType, ValueTypeErr},
 };
 
 /// A wrapper of iroh::SecretKey to read/write with sea-orm
-/// 
+///
 /// Saved as blob.
 ///
 /// # Examples
@@ -25,14 +26,14 @@ use sea_orm::{
 /// #
 /// # impl ActiveModelBehavior for ActiveModel{}
 /// ```
-#[derive(Clone, Debug,)]
+#[derive(Clone, Debug)]
 pub struct SecretKeyBlob(SecretKey);
 
 impl SecretKeyBlob {
-    pub fn to_bytes(&self) -> [u8;32] {
+    pub fn to_bytes(&self) -> [u8; 32] {
         self.0.to_bytes()
-    } 
-    pub fn from_bytes(bytes: &[u8;32]) -> Self {
+    }
+    pub fn from_bytes(bytes: &[u8; 32]) -> Self {
         Self(SecretKey::from_bytes(bytes))
     }
 }
@@ -42,7 +43,6 @@ impl PartialEq for SecretKeyBlob {
         self.to_bytes().eq(&other.to_bytes())
     }
 }
-
 
 impl From<SecretKey> for SecretKeyBlob {
     fn from(value: SecretKey) -> Self {
@@ -62,8 +62,8 @@ impl From<SecretKeyBlob> for sea_orm::Value {
     }
 }
 
-impl From<&[u8;32]> for SecretKeyBlob {
-    fn from(value: &[u8;32]) -> Self {
+impl From<&[u8; 32]> for SecretKeyBlob {
+    fn from(value: &[u8; 32]) -> Self {
         Self::from_bytes(value)
     }
 }
@@ -71,8 +71,8 @@ impl From<&[u8;32]> for SecretKeyBlob {
 impl TryFrom<&[u8]> for SecretKeyBlob {
     type Error = TryFromSliceError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        let slice: [u8;32] = value[0..32].try_into()?;
-        Ok(Self::from_bytes(&slice)) 
+        let slice: [u8; 32] = value[0..32].try_into()?;
+        Ok(Self::from_bytes(&slice))
     }
 }
 
@@ -82,10 +82,10 @@ impl TryGetable for SecretKeyBlob {
         index: I,
     ) -> Result<Self, sea_orm::TryGetError> {
         let vec = <Vec<u8> as sea_orm::TryGetable>::try_get_by(res, index)?;
-        let slice: [u8;32] =  vec[0..32].try_into().map_err(|x| DbErr::TryIntoErr {
+        let slice: [u8; 32] = vec[0..32].try_into().map_err(|x| DbErr::TryIntoErr {
             from: stringify!(Vec<u8>),
             into: stringify!(SecretKeyBlob),
-            source: Box::new(x)
+            source: Box::new(x),
         })?;
         Ok(SecretKeyBlob::from_bytes(&slice))
     }
@@ -94,7 +94,8 @@ impl TryGetable for SecretKeyBlob {
 impl ValueType for SecretKeyBlob {
     fn try_from(v: Value) -> Result<Self, sea_orm_migration::prelude::ValueTypeErr> {
         let vec = <Vec<u8> as ValueType>::try_from(v)?;
-        let key = <SecretKeyBlob as TryFrom<&[u8]>>::try_from(&vec[0..32]).map_err(|_| ValueTypeErr)?;
+        let key =
+            <SecretKeyBlob as TryFrom<&[u8]>>::try_from(&vec[0..32]).map_err(|_| ValueTypeErr)?;
         Ok(key)
     }
     fn type_name() -> String {

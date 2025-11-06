@@ -2,7 +2,11 @@ use clap::Args;
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-use crate::{config::RpcConfig, parsed_config::error::ParsedConfigError, utils::{emptiable::Emptiable, mergeable::Mergeable}};
+use crate::{
+    config::RpcConfig,
+    parsed_config::error::ParsedConfigError,
+    utils::{emptiable::Emptiable, mergeable::Mergeable},
+};
 
 impl TryFrom<ParsedRpcConfig> for RpcConfig {
     type Error = ParsedConfigError;
