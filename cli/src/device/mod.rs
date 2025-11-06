@@ -5,7 +5,6 @@ mod list;
 mod ping;
 mod remove;
 
-use caretta_sync_core::utils::runnable::Runnable;
 pub use info::DeviceInfoCommandArgs;
 pub use invite::DeviceInviteCommandArgs;
 pub use join::DeviceJoinCommandArgs;
@@ -15,20 +14,22 @@ pub use remove::DeviceRemoveCommandArgs;
 
 use clap::{Args, Subcommand};
 
+use crate::RunnableCommand;
+
 #[derive(Debug, Args)]
 pub struct DeviceCommandArgs {
     #[command(subcommand)]
-    pub command: DeviceSubcommand,
+    command: DeviceSubcommand,
 }
 
-impl Runnable for DeviceCommandArgs {
+impl RunnableCommand for DeviceCommandArgs {
     fn run(self, app_name: &'static str) {
         self.command.run(app_name)
     }
 }
 
 #[derive(Debug, Subcommand)]
-pub enum DeviceSubcommand {
+enum DeviceSubcommand {
     Info(DeviceInfoCommandArgs),
     Invite(DeviceInviteCommandArgs),
     Join(DeviceJoinCommandArgs),
@@ -37,7 +38,7 @@ pub enum DeviceSubcommand {
     Remove(DeviceRemoveCommandArgs),
 }
 
-impl Runnable for DeviceSubcommand {
+impl RunnableCommand for DeviceSubcommand {
     fn run(self, app_name: &'static str) {
         match self {
             Self::Info(x) => x.run(app_name),

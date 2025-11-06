@@ -37,12 +37,14 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/fluo10/caretta-sync" 
 
 [workspace.dependencies]
+async-trait = "0.1.89"
 bevy = "0.17.2"
 mtid = { version = "0.6.0", features=["prost", "sea-orm", "serde",]}
 chrono = "0.4.41"
 ciborium = "0.2.2"
 clap = { version = "4.5.38", features = ["derive"] }
 caretta-sync-core = {version = "0.0.2", path = "core"}
+caretta-sync-cli = {version = "0.0.2", path = "cli"}
 futures = { version = "0.3.31", features = ["executor"] }
 iroh = { version = "0.94.0", features = ["discovery-local-network", "discovery-pkarr-dht"] }
 iroh-tickets = "0.1.0"
@@ -58,6 +60,8 @@ tokio-stream = "0.1.17"
 tonic = "0.14.0"
 tonic-prost = "0.14.0"
 tonic-prost-build = "0.14.0"
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 url = { version = "2.5.7", features = ["serde"] }
 uuid = { version = "1.17.0", features = ["v7"] }
 

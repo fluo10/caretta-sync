@@ -1,18 +1,16 @@
-use caretta_sync_core::utils::runnable::Runnable;
+use caretta_sync_core::utils::runnable::RunnableCommand;
 use clap::Args;
-use mtid::Dtid;
 
 use crate::cli::args::VerificationIdentifierArgs;
 
 /// Approve an authorization request
 #[derive(Args, Debug)]
-struct ApproveCommandArgs {
+struct RejectCommandArgs {
     #[command(flatten)]
     authorization_request: VerificationIdentifierArgs,
-    passcode: Dtid,
 }
 
-impl Runnable for ApproveCommandArgs {
+impl RunnableCommand for RejectCommandArgs {
     fn run(self, app_name: &'static str) {
         todo!()
     }

@@ -1,45 +1,81 @@
+use base64::engine::Config;
 use sea_orm_migration::MigratorTrait;
-use serde::{Deserialize, Serialize};
+use serde::{ser::Error, Deserialize, Serialize};
 
-use crate::{config::{ConfigError, P2pConfig, PartialP2pConfig, PartialRpcConfig, PartialStorageConfig, RpcConfig, StorageConfig}, context::{ClientContext, ServerContext}, models::P2pConfigModel, utils::{emptiable::Emptiable, mergeable::Mergeable}};
-use std::{fs::File, io::Read, path::Path};
+use crate::{config::{ConfigError, LogConfig, P2pConfig, PartialP2pConfig, PartialRpcConfig, PartialStorageConfig, RpcConfig, StorageConfig, log::PartialLogConfig}, context::{ClientContext, ServerContext}, models::P2pConfigModel, utils::{emptiable::Emptiable, mergeable::Mergeable}};
+use std::{fmt::{Display, write}, fs::File, io::Read, marker::PhantomData, path::{Path, PathBuf}};
+
+#[cfg_attr(feature="cli", derive(clap::Args))]
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct ParsedConfig {
+    #[cfg_attr(feature="cli", command(flatten))]
+    pub storage: Option<PartialStorageConfig>,
+    #[cfg_attr(feature="cli", command(flatten))]
+    pub rpc: Option<PartialRpcConfig>,
+    #[cfg_attr(feature="cli", command(flatten))]
+    pub p2p: Option<PartialP2pConfig>,
+    #[cfg_attr(feature="cli", command(flatten))]
+    pub log: Option<PartialLogConfig>,
+
+}
+
+
 
 /// A partial config parsed from config file, cli args, etc.
-pub trait ParsedConfig : for<'a> Deserialize<'a> + Serialize + Emptiable + Mergeable{
+impl ParsedConfig {
 
-    /// A getter of [`PartialStorageConfig`]
-    fn partial_storage_config(&self) -> Option<&PartialStorageConfig>;
-
-    /// Build [`StorageConfig`] from own [`PartialStorageConfig`]
-    fn to_storage_config(&self) -> Result<StorageConfig, ConfigError> {
-        self.partial_storage_config().ok_or(ConfigError::MissingConfig("[storage]"))?.clone().try_into()
+    fn default(app_name: &'static str) -> Self {
+        Self {
+            storage: Some(PartialStorageConfig::default(app_name)),
+            rpc: Some(PartialRpcConfig::default(app_name)),
+            p2p: None,
+            log: Some(PartialLogConfig::default())
+        }
     }
 
-    /// A getter of [`PartialP2pConfig`]
-    fn partial_p2p_config(&self) -> Option<&PartialP2pConfig>;
+    /// Fill empty configuration fields with default values and return. 
+    pub fn with_default(self, app_name: &'static str) -> Self {
+        let mut result = Self::default(app_name);
+        result.merge(self);
+        result
+    }
 
-    /// Build [`P2pConfig`] from own [`PartialP2pConfig`]
-    async fn to_p2p_config<T>(&self) -> Result<P2pConfig, ConfigError>
+    /// Fill empty configuration fields with the values read from database.
+    /// 
+    /// This function requires `self.storage` field is filled beforehand.
+    pub async fn with_database<T>(mut self, migrator: PhantomData<T>) -> Result<ParsedConfig, ConfigError>
     where T: MigratorTrait
     {
-        let mut p2p_config = self.partial_p2p_config().cloned().unwrap_or(PartialP2pConfig::empty());
-        let storage_config = self.to_storage_config()?;
-        let connection =  storage_config.to_database_connection::<T>().await?;
-        let mut config = PartialP2pConfig::from(P2pConfig::from(P2pConfigModel::get_or_try_init(&connection).await?));
-        config.merge(p2p_config);
-        Ok(P2pConfig::try_from(config)?)
+        let connection =  self.to_storage_config()?.to_database_connection(migrator).await?;
+        let mut p2p_config = PartialP2pConfig::from(P2pConfig::from(P2pConfigModel::get_or_try_init(&connection).await?));
+        if let Some(x) = self.p2p {
+            (p2p_config.merge(x));
+        } 
+        self.p2p = Some(p2p_config);
+        Ok(self)
     }
 
-    /// A getter of [`PartialRpcConfig`]
-    fn partial_rpc_config(&self) -> Option<&PartialRpcConfig>;
+    /// Build [`StorageConfig`] from own [`PartialStorageConfig`]
+    pub fn to_storage_config(&self) -> Result<StorageConfig, ConfigError> {
+        self.storage.as_ref().ok_or(ConfigError::MissingConfig("storage.*"))?.clone().try_into()
+    }
+
+    /// Build [`P2pConfig`] from own [`PartialP2pConfig`]
+    pub fn to_p2p_config(&self) -> Result<P2pConfig, ConfigError>
+    {
+        self.p2p.as_ref().ok_or(ConfigError::MissingConfig("P2P.*"))?.clone().try_into()
+    }
 
     /// Build [`RpcConfig`] from own [`PartialRpcConfig`]
-    fn to_rpc_config(&self) -> Result<RpcConfig, ConfigError> {
-        self.partial_rpc_config().ok_or(ConfigError::MissingConfig("rpc.*"))?.clone().try_into()
+    pub fn to_rpc_config(&self) -> Result<RpcConfig, ConfigError> {
+        self.rpc.as_ref().ok_or(ConfigError::MissingConfig("rpc.*"))?.clone().try_into()
     }
-
+    /// Build [`LogConfig`] from own [`PartialLogConfig`]
+    pub fn to_log_config(&self) -> Result<LogConfig, ConfigError> {
+        self.log.as_ref().ok_or(ConfigError::MissingConfig("log.*"))?.clone().try_into()
+    }
     /// Read or create target config file
-    fn read_or_create<T>(path: T) -> Result<Self, ConfigError>
+    pub fn read_or_create_from_path<T>(path: T) -> Result<Self, ConfigError>
     where
         T: AsRef<Path>,
     {
@@ -56,6 +92,58 @@ pub trait ParsedConfig : for<'a> Deserialize<'a> + Serialize + Emptiable + Merge
         Ok(config)
     }
 
-    /// Default config.
-    fn default(app_name: &'static str) -> Self;
+    /// Get default config path
+    pub fn default_config_path(app_name: &'static str) -> Result<PathBuf, ConfigError> {
+        const DEFAULT_FILE_NAME: &str = "config.toml";
+        let mut path = dirs::config_local_dir().ok_or(ConfigError::ConfigDir)?;
+        path.push(app_name);
+        path.push(DEFAULT_FILE_NAME);
+        Ok(path)
+    }
+
+    /// Read or create target config file at the default config path
+    pub fn read_or_create(app_name: &'static str) -> Result<Self, ConfigError> {
+        let config_dir = Self::default_config_path(app_name)?;
+        Self::read_or_create_from_path(config_dir)
+    }
+    pub fn init_tracing_subscriber(&self) {
+        self.to_log_config().unwrap().init_tracing_subscriber();
+    }
+}
+
+impl AsRef<ParsedConfig> for ParsedConfig {
+    fn as_ref(&self) -> &ParsedConfig {
+        self
+    }
+}
+
+impl Emptiable for ParsedConfig {
+    fn empty() -> Self {
+        Self {
+            p2p: None,
+            storage: None,
+            rpc: None,
+            log: None,
+        }
+    }
+
+    fn is_empty(&self) -> bool {
+        self.p2p.is_empty() && self.rpc.is_empty() && self.storage.is_empty() && self.log.is_empty()
+        
+    }
+}
+
+impl Mergeable for ParsedConfig {
+    fn merge(&mut self, other: Self) {
+        self.p2p.merge(other.p2p);
+        self.rpc.merge(other.rpc);
+        self.storage.merge(other.storage);
+        self.log.merge(other.log);
+    }
+}
+
+impl Display for ParsedConfig{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", toml::to_string(self).map_err(|_| std::fmt::Error)?)
+    }
 }

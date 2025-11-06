@@ -133,23 +133,23 @@ pub fn mergeable(input: TokenStream) -> TokenStream {
     }
 }
 
-#[proc_macro_derive(Runnable, attributes(runnable))]
-pub fn runnable(input: TokenStream) -> TokenStream {
+#[proc_macro_derive(RunnableCommand, attributes(runnable_command))]
+pub fn runnable_command(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     let type_ident = input.ident;
     match input.data {
         Data::Struct(ref data) => {
             let mut idents =
-                extract_idents_and_types_from_data_struct_with_attribute(data, "runnable");
+                extract_idents_and_types_from_data_struct_with_attribute(data, "runnable_command");
             let (field_ident, field_type) = unwrap_vec_or_panic(
                 idents,
-                "Runnable struct must have one field with runnable attribute",
+                "RunnableCommand struct must have one field with runnable attribute",
             );
 
             quote! {
-                impl Runnable for #type_ident {
+                impl RunnableCommand for #type_ident {
                     fn run(self, app_name: &'static str) {
-                        <#field_type as Runnable>::run(self.#field_ident, app_name)
+                        <#field_type as RunnableCommand>::run(self.#field_ident, app_name)
                     }
                 }
             }
@@ -159,11 +159,11 @@ pub fn runnable(input: TokenStream) -> TokenStream {
             let quote_vec = extract_idents_and_types_from_enum_struct(&variants);
             let quote_iter = quote_vec.iter().map(|(variant_ident, variant_type)| {
                 quote! {
-                    Self::#variant_ident(x) => <#variant_type as Runnable>::run(x, app_name),
+                    Self::#variant_ident(x) => <#variant_type as RunnableCommand>::run(x, app_name),
                 }
             });
             quote! {
-                impl Runnable for #type_ident {
+                impl RunnableCommand for #type_ident {
                     fn run(self, app_name: &'static str) {
                         match self {
                             #(#quote_iter)*

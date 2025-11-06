@@ -1,36 +1,64 @@
-use iroh::Endpoint;
+use std::{marker::PhantomData, pin::Pin};
+
+use futures::{Stream, StreamExt};
+use iroh::{Endpoint, discovery::{ConcurrentDiscovery, Discovery, DiscoveryError, DiscoveryItem}, protocol::Router};
 use sea_orm::{Database, DatabaseConnection};
 use sea_orm_migration::MigratorTrait;
-use tonic::transport::Server;
-use tracing_subscriber::registry::Data;
 
-use crate::{config::{P2pConfig, ParsedConfig, RpcConfig, StorageConfig}, error::Error};
+use crate::{config::{LogConfig, P2pConfig, ParsedConfig, RpcConfig, StorageConfig}, error::Error};
 
+#[derive(Clone, Debug)]
 pub struct ServerContext {
+    pub app_name: &'static str,
     pub rpc_config: RpcConfig,
     pub storage_config: StorageConfig,
     pub database_connection: DatabaseConnection,
-    pub iroh_endpoint: Option<Endpoint>,
+    pub iroh_router: Option<Router>,
 }
 impl ServerContext {
-    pub async fn from_parsed_config<T,M>(config: T) -> Result<Self, Error> 
+    pub async fn new<T,M>(app_name: &'static str, config: T, migrator: PhantomData<M>) -> Result<Self, Error> 
     where
-        T: ParsedConfig,
+        T: AsRef<ParsedConfig>,
         M: MigratorTrait,
     {
+        let config = config.as_ref();
         let rpc_config = config.to_rpc_config()?;
-        let p2p_config = config.to_p2p_config::<M>().await?;
+        let p2p_config = config.to_p2p_config()?;
         let storage_config = config.to_storage_config()?;
-        let database_connection = storage_config.to_database_connection::<M>().await?;
-        let iroh_endpoint = p2p_config.to_endpoint().await?;
-
-        Ok(Self { rpc_config, storage_config, database_connection, iroh_endpoint })
+        let database_connection = storage_config.to_database_connection(migrator).await?;
+        let iroh_router = p2p_config.to_iroh_router(app_name).await?;
+        Ok(Self {app_name, rpc_config, storage_config, database_connection, iroh_router})
     }
-
+    pub fn as_iroh_router(&self) -> Option<&Router> {
+        self.iroh_router.as_ref()
+    }
+    pub fn as_endpoint(&self) -> Option<&Endpoint> {
+        self.as_iroh_router().map(|x| x.endpoint())
+    }
+    pub fn as_discovery(&self) -> Option<&ConcurrentDiscovery> {
+        self.as_endpoint().map(|x| x.discovery())
+    }
+    pub async fn discover(&self, endpoint_id: iroh::EndpointId) ->  Option<Pin<Box<dyn Stream<Item = Result<DiscoveryItem, DiscoveryError>> + std::marker::Send + 'static>>> {
+        if let Some(x) = self.as_discovery() {
+            x.resolve(endpoint_id)
+        } else {
+            None
+        }
+    }
 }
 
 impl AsRef<DatabaseConnection> for ServerContext {
     fn as_ref(&self) -> &DatabaseConnection {
         &self.database_connection
+    }
+}
+impl From<&ServerContext> for Option<Endpoint> {
+    fn from(value: &ServerContext) -> Self {
+        value.iroh_router.as_ref().map(|x| x.endpoint().clone())
+    }
+}
+impl From<&ServerContext> for Option<ConcurrentDiscovery> {
+    fn from(value: &ServerContext) -> Self {
+        value.iroh_router.as_ref().map(|x| x.endpoint().discovery().clone())
     }
 }

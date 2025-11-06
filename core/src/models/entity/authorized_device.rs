@@ -46,7 +46,6 @@ mod tests {
     use iroh::SecretKey;
     use rand::Rng;
     use sea_orm::ActiveValue::Set;
-    use tracing_subscriber::registry::Data;
 
     use super::*;
     #[tokio::test]
