@@ -1,13 +1,11 @@
 use caretta_sync_core::utils::runnable::RunnableCommand;
 use clap::Args;
 
-use crate::cli::args::VerificationIdentifierArgs;
-
-/// Approve an authorization request
+/// Show infomation of an invitaion token
 #[derive(Args, Debug)]
-struct RejectCommandArgs {
+struct TokenRevokeCommandArgs {
     #[command(flatten)]
-    verification: VerificationIdentifierArgs,
+    target: TokenIdentifierArgs,
 }
 
 impl RunnableCommand for RejectCommandArgs {

@@ -6,6 +6,11 @@ description.workspace = true
 license.workspace = true
 repository.workspace = true
 
+[features]
+default = []
+mobile = []
+server = []
+
 [dependencies]
 async-trait.workspace = true
 axum = "0.8.6"

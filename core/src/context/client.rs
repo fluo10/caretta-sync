@@ -3,7 +3,7 @@ use tonic::transport::Endpoint;
 use url::Url;
 
 use crate::{
-    config::{ConfigError, LogConfig, ParsedConfig, RpcConfig, StorageConfig},
+    config::{RpcConfig, StorageConfig},
     error::Error,
 };
 
@@ -14,20 +14,6 @@ pub struct ClientContext {
     pub rpc_config: RpcConfig,
 }
 
-impl ClientContext {
-    /// Create [`ClientContext`]
-    pub fn new<T>(app_name: &'static str, config: T) -> Result<Self, ConfigError>
-    where
-        T: AsRef<ParsedConfig>,
-    {
-        let config = config.as_ref();
-        let rpc_config = config.to_rpc_config()?;
-        Ok(Self {
-            app_name,
-            rpc_config,
-        })
-    }
-}
 
 impl AsRef<ClientContext> for ClientContext {
     fn as_ref(&self) -> &ClientContext {

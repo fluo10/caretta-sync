@@ -1,13 +1,13 @@
 use std::marker::PhantomData;
 
-use caretta_sync_core::{ context::ServerContext, server::{Server, ServerTrait}};
+use caretta_sync_core::{ context::ServerContext, utils::RunnableCommand};
 use clap::Args;
 use sea_orm_migration::MigratorTrait;
 
-use crate::{RunnableCommand, option::ConfigOptionArgs};
+use crate::{args::ConfigArgs};
 
 #[derive(Args, Debug)]
-pub struct ServeCommandArgs<M, S>
+pub struct ServerArgs<M, S>
 where
     M: MigratorTrait,
     S: ServerTrait,
@@ -17,9 +17,9 @@ where
     #[arg(skip)]
     server: PhantomData<S>,
     #[command(flatten)]
-    config: ConfigOptionArgs,
+    config: ConfigArgs,
 }
-impl<M, S> RunnableCommand for ServeCommandArgs<M, S>
+impl<M, S> RunnableCommand for ServerArgs<M, S>
 where
     M: MigratorTrait,
     S: ServerTrait,

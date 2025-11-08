@@ -1,0 +1,25 @@
+[package]
+name = "caretta-sync-desktop"
+edition.workspace = true
+version.workspace = true
+description.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[features]
+default = []
+cli = ["client"]
+gui = ["client"]
+client = ["caretta-sync-core/client"]
+server = ["caretta-sync-core/server", "dep:caretta-sync-backend"]
+
+[dependencies]
+base32 = "0.5.1"
+caretta-sync-core.workspace = true
+caretta-sync-backend = { workspace = true, features = ["server"], optional = true }
+chrono.workspace = true
+clap.workspace = true
+mtid.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+tokio.workspace = true

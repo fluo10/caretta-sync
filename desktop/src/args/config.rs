@@ -2,8 +2,9 @@ use std::{marker::PhantomData, path::PathBuf};
 
 use crate::{
     parsed_config::ParsedConfig,
-    utils::{emptiable::Emptiable, mergeable::Mergeable},
 };
+
+use caretta_sync_core::utils::{emptiable::Emptiable, mergeable::Mergeable};
 use clap::Args;
 
 /// An arguments about config.

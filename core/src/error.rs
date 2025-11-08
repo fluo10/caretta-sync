@@ -5,9 +5,6 @@ use crate::proto::ProtoDeserializeError;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
-    #[cfg(feature = "desktop")]
-    #[error("Config error: {0}")]
-    ParsedConfig(#[from] crate::parsed_config::ParsedConfigError),
     #[error("Infallible: {0}")]
     Infallible(#[from] std::convert::Infallible),
     #[error("IO Error: {0}")]

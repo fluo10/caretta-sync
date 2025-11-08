@@ -1,6 +1,5 @@
 use chrono::TimeDelta;
 use clap::Args;
-use sea_orm_migration::sea_orm::{prelude::DateTimeLocal};
 
 #[derive(Debug, Args)]
 #[group(multiple=false)]

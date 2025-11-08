@@ -5,8 +5,6 @@ use caretta_sync_core::proto::ProtoDeserializeError;
 
 #[derive(thiserror::Error, Debug)]
 pub enum BackendError {
-    #[error("Config error: {0}")]
-    ParsedConfig(#[from] caretta_sync_core::parsed_config::ParsedConfigError),
     #[error("Infallible: {0}")]
     Infallible(#[from] std::convert::Infallible),
     #[error("IO Error: {0}")]

@@ -130,6 +130,39 @@ impl ParsedConfig {
     pub fn init_tracing_subscriber(&self) {
         self.to_log_config().unwrap().init_tracing_subscriber();
     }
+    #[cfg(feature="server")]
+    pub async fn into_server_context<M>(
+        app_name: &'static str,
+        migrator: PhantomData<M>,
+    ) -> Result<ServerContext, Error>
+    where
+        M: MigratorTrait,
+    {
+        let config = config.as_ref();
+        let rpc_config = config.to_rpc_config()?;
+        let p2p_config = config.to_p2p_config()?;
+        let storage_config = config.to_storage_config()?;
+        let database_connection = storage_config.to_database_connection(migrator).await;
+        let iroh_router = p2p_config.to_iroh_router(app_name).await?;
+        Ok(Self {
+            app_name,
+            storage_config,
+            database_connection,
+            iroh_router,
+        })
+    }
+    #[cfg(feature="client")]
+    pub fn into_client_context<T>(app_name: &'static str, config: T) -> Result<Self, ConfigError>
+    where
+        T: AsRef<ParsedConfig>,
+    {
+        let config = config.as_ref();
+        let rpc_config = config.to_rpc_config()?;
+        Ok(Self {
+            app_name,
+            rpc_config,
+        })
+    }
 }
 
 impl AsRef<ParsedConfig> for ParsedConfig {

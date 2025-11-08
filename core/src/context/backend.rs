@@ -12,7 +12,6 @@ use sea_orm_migration::MigratorTrait;
 use crate::{
     config::{LogConfig, P2pConfig, RpcConfig, StorageConfig},
     error::Error,
-    parsed_config::ParsedConfig,
 };
 
 #[derive(Clone, Debug)]
@@ -23,28 +22,6 @@ pub struct BackendContext {
     pub iroh_router: Option<Router>,
 }
 impl BackendContext {
-    pub async fn new<T, M>(
-        app_name: &'static str,
-        config: T,
-        migrator: PhantomData<M>,
-    ) -> Result<Self, Error>
-    where
-        T: AsRef<ParsedConfig>,
-        M: MigratorTrait,
-    {
-        let config = config.as_ref();
-        let rpc_config = config.to_rpc_config()?;
-        let p2p_config = config.to_p2p_config()?;
-        let storage_config = config.to_storage_config()?;
-        let database_connection = storage_config.to_database_connection(migrator).await;
-        let iroh_router = p2p_config.to_iroh_router(app_name).await?;
-        Ok(Self {
-            app_name,
-            storage_config,
-            database_connection,
-            iroh_router,
-        })
-    }
     pub fn as_iroh_router(&self) -> Option<&Router> {
         self.iroh_router.as_ref()
     }

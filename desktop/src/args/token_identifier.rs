@@ -5,7 +5,7 @@ use mtid::Dtid;
 
 #[derive(Args, Clone, Debug)]
 #[group(multiple = false, required = true)]
-pub struct DeviceIdentifierArgs {
+pub struct TokenIdentifierArgs {
     #[arg(long)]
     id: Option<Dtid>,
     #[arg(long)]
