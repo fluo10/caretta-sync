@@ -13,7 +13,7 @@ use sea_orm::{
 /// # Examples
 /// ```
 /// # use sea_orm::entity::prelude::*;
-/// use caretta_sync_core::models::types::SecretKeyBlob;
+/// use caretta_sync_backend::models::types::SecretKeyBlob;
 /// #[derive(Clone, Debug, PartialEq, DeriveEntityModel)]
 /// #[sea_orm(table_name = "secret_key_example")]
 /// pub struct Model {

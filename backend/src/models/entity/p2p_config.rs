@@ -63,7 +63,7 @@ mod tests {
     use super::*;
     #[tokio::test]
     async fn insert() {
-        let db: &DatabaseConnection = crate::tests::get_server_context().await.as_ref();
+        let db: &DatabaseConnection = crate::tests::backend_conext().await.as_ref();
 
         let model = Model::get_or_try_init(db).await.unwrap();
         assert_eq!(model.id, ID);

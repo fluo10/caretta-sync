@@ -9,16 +9,16 @@ use tonic::{body::Body, server::NamedService};
 use tower_layer::Identity;
 use tower_service::Service;
 
-use crate::{
-    context::ServerContext,
+use caretta_sync_core::{
+    context::{BackendContext, ServerContext},
     error::Error,
     proto::api::{
-        device::{DeviceServer, device_service_server::DeviceServiceServer},
-        invitation_token::{
-            InvitationTokenServer, invitation_token_service_server::InvitationTokenServiceServer,
-        },
+        device::device_service_server::DeviceServiceServer,
+        invitation_token::invitation_token_service_server::InvitationTokenServiceServer,
     },
 };
+
+use crate::service_handler::{DeviceServiceHandler, InvitationTokenServiceHandler};
 
 #[async_trait::async_trait]
 pub trait ServerTrait {
@@ -33,12 +33,14 @@ pub struct Server {
 impl Server {
     pub fn new(context: ServerContext) -> Self {
         let context = Arc::new(context);
+        let backend_context : Arc<dyn AsRef<BackendContext> + Send + Sync> = context.clone();
+        
         Self {
             context: context.clone(),
             tonic_router: tonic::transport::Server::builder()
-                .add_service(DeviceServiceServer::new(DeviceServer::new(context.clone())))
+                .add_service(DeviceServiceServer::new(DeviceServiceHandler::new(&backend_context)))
                 .add_service(InvitationTokenServiceServer::new(
-                    InvitationTokenServer::new(context.clone()),
+                    InvitationTokenServiceHandler::new(&backend_context),
                 )),
         }
     }

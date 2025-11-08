@@ -80,14 +80,13 @@ impl ActiveModel {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::tests::CONFIG;
     use iroh::{PublicKey, SecretKey};
     use rand::Rng;
     use sea_orm::{ActiveValue::Set, sea_query::Token};
 
     #[tokio::test]
     async fn insert() {
-        let db: &DatabaseConnection = crate::tests::get_server_context().await.as_ref();
+        let db: &DatabaseConnection = crate::tests::backend_conext().await.as_ref();
 
         let active_model = ActiveModel {
             created_at: Set(chrono::Local::now()),

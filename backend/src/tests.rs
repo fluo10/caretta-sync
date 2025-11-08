@@ -1,8 +1,7 @@
 use std::{marker::PhantomData, sync::LazyLock};
 
 use caretta_sync_core::{
-    context::BackendContext,
-    parsed_config::{ParsedConfig, ParsedLogConfig, ParsedRpcConfig, ParsedStorageConfig},
+    config::StorageConfig, context::BackendContext
 };
 use tokio::sync::OnceCell;
 
@@ -10,39 +9,26 @@ use crate::models::migration::m20220101_000001_create_table;
 
 const TEST_APP_NAME: &str = "caretta-sync-test";
 
-pub static CONFIG: LazyLock<ParsedConfig> = LazyLock::new(|| {
-    let test_dir = tempfile::Builder::new()
-        .prefix(TEST_APP_NAME)
-        .tempdir()
-        .unwrap()
-        .keep();
-    let data_dir = test_dir.join("data");
-    let cache_dir = test_dir.join("cache");
-
-    ParsedConfig {
-        p2p: None,
-        storage: Some(ParsedStorageConfig {
-            data_dir: Some(data_dir),
-            cache_dir: Some(cache_dir),
-        }),
-        rpc: Some(ParsedRpcConfig::default(TEST_APP_NAME)),
-        log: Some(ParsedLogConfig::default()),
-    }
-});
-
-pub static SERVER_CONTEXT: OnceCell<BackendContext> = OnceCell::const_new();
-pub async fn get_server_context() -> &'static BackendContext {
-    SERVER_CONTEXT
-        .get_or_init(|| async {
-            BackendContext::new(
-                "caretta_sync_test",
-                (*CONFIG).clone(),
-                PhantomData::<TestMigrator>,
-            )
-            .await
+pub static BACKEND_CONTEXT: OnceCell<BackendContext> = OnceCell::const_new();
+pub async fn backend_conext() -> &'static BackendContext {
+    BACKEND_CONTEXT.get_or_init(|| async move {
+        let test_dir = tempfile::Builder::new()
+            .prefix(TEST_APP_NAME)
+            .tempdir()
             .unwrap()
-        })
-        .await
+            .keep();
+        let data_dir = test_dir.join("data");
+        let cache_dir = test_dir.join("cache");
+        let storage_config = StorageConfig {data_dir, cache_dir};
+        let database_connection = storage_config.to_database_connection(PhantomData::<TestMigrator>).await;
+        let iroh_router = None;
+        BackendContext{
+            app_name: TEST_APP_NAME,
+            storage_config,
+            database_connection,
+            iroh_router
+        }
+    }).await
 }
 
 pub struct TestMigrator;

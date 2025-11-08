@@ -14,24 +14,16 @@ use crate::{
     error::Error,
 };
 
-#[derive(Clone, Debug)]
-pub struct BackendContext {
-    pub app_name: &'static str,
-    pub storage_config: StorageConfig,
-    pub database_connection: DatabaseConnection,
-    pub iroh_router: Option<Router>,
-}
-impl BackendContext {
-    pub fn as_iroh_router(&self) -> Option<&Router> {
-        self.iroh_router.as_ref()
-    }
-    pub fn as_endpoint(&self) -> Option<&Endpoint> {
+/// An extension trait for [`BackendContext`]
+pub trait BackendContextExt {
+    fn as_iroh_router(&self) -> Option<&Router>;
+    fn as_endpoint(&self) -> Option<&Endpoint> {
         self.as_iroh_router().map(|x| x.endpoint())
     }
-    pub fn as_discovery(&self) -> Option<&ConcurrentDiscovery> {
+    fn as_discovery(&self) -> Option<&ConcurrentDiscovery> {
         self.as_endpoint().map(|x| x.discovery())
     }
-    pub async fn discover(
+    async fn discover(
         &self,
         endpoint_id: iroh::EndpointId,
     ) -> Option<
@@ -48,6 +40,29 @@ impl BackendContext {
         } else {
             None
         }
+    }
+}
+
+impl<T> BackendContextExt for T 
+where
+    T: AsRef<BackendContext>
+{
+    fn as_iroh_router(&self) -> Option<&Router> {
+        self.as_ref().as_iroh_router()
+    }
+}
+
+/// A context for background process
+#[derive(Clone, Debug)]
+pub struct BackendContext {
+    pub app_name: &'static str,
+    pub storage_config: StorageConfig,
+    pub database_connection: DatabaseConnection,
+    pub iroh_router: Option<Router>,
+}
+impl BackendContextExt for BackendContext {
+    fn as_iroh_router(&self) -> Option<&Router> {
+        self.iroh_router.as_ref()
     }
 }
 

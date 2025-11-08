@@ -8,7 +8,10 @@ mod client;
 mod server;
 
 #[cfg(feature = "backend")]
-pub use backend::BackendContext;
+pub use backend::{
+    BackendContext,
+    BackendContextExt
+};
 
 #[cfg(feature = "client")]
 pub use client::ClientContext;

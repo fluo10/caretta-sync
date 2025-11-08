@@ -10,7 +10,7 @@ use sea_orm::{
 /// # Examples
 /// ```
 /// # use sea_orm::entity::prelude::*;
-/// use caretta_sync_core::models::types::PublicKeyBlob;
+/// # use caretta_sync_backend::models::types::PublicKeyBlob;
 /// #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
 /// #[sea_orm(table_name = "public_key_example")]
 /// pub struct Model {
