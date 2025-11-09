@@ -5,6 +5,7 @@ mod list;
 mod ping;
 mod remove;
 
+use caretta_sync_core::utils::RunnableCommand;
 pub use info::DeviceInfoCommandArgs;
 pub use invite::DeviceInviteCommandArgs;
 pub use join::DeviceJoinCommandArgs;
@@ -13,8 +14,6 @@ pub use ping::DevicePingCommandArgs;
 pub use remove::DeviceRemoveCommandArgs;
 
 use clap::{Args, Subcommand};
-
-use crate::RunnableCommand;
 
 #[derive(Debug, Args)]
 pub struct DeviceCommandArgs {

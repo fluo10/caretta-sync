@@ -1,13 +1,12 @@
+use caretta_sync_core::{config::LogConfig, utils::{emptiable::Emptiable, mergeable::Mergeable}};
 use clap::Args;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    config::LogConfig,
     parsed_config::{error::ParsedConfigError, types::ParsedLogLevel},
-    utils::{emptiable::Emptiable, mergeable::Mergeable},
 };
 
-#[derive(Args, Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[derive(Args, Clone, Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct ParsedLogConfig {
     #[arg(long = "log-level", env = "LOG_LEVEL")]
     pub level: Option<ParsedLogLevel>,
@@ -34,18 +33,6 @@ impl Mergeable for ParsedLogConfig {
         if let Some(x) = other.level {
             self.level = Some(x);
         }
-    }
-}
-
-impl Mergeable for Option<ParsedLogConfig> {
-    fn merge(&mut self, mut other: Self) {
-        if let Some(x) = other.take() {
-            if let Some(y) = self.as_mut() {
-                y.merge(x);
-            } else {
-                let _ = self.insert(x);
-            }
-        };
     }
 }
 

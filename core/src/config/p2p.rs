@@ -22,7 +22,7 @@ pub struct P2pConfig {
 }
 
 impl P2pConfig {
-    #[cfg(feature = "backend")]
+    #[cfg(feature = "service")]
     pub async fn to_iroh_router(
         &self,
         app_name: &'static str,

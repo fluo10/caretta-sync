@@ -1,59 +1,26 @@
 use clap::Args;
-use iroh::{PublicKey, SecretKey};
 use serde::{Deserialize, Serialize};
-#[cfg(feature="backend")]
-use crate::config::P2pConfig;
-use crate::{
-    parsed_config::error::ParsedConfigError,
-    utils::{emptiable::Emptiable, mergeable::Mergeable},
-};
-#[cfg(feature="backend")]
-impl TryFrom<ParsedP2pConfig> for P2pConfig {
-    type Error = ParsedConfigError;
-    fn try_from(raw: ParsedP2pConfig) -> Result<P2pConfig, Self::Error> {
-        Ok(P2pConfig {
-            enabled: raw
-                .enabled
-                .ok_or(ParsedConfigError::MissingConfig("p2p.enabled"))?,
-            secret_key: raw
-                .secret_key
-                .ok_or(ParsedConfigError::MissingConfig("p2p.secret_key"))?,
-            enable_n0: raw
-                .enable_n0
-                .ok_or(ParsedConfigError::MissingConfig("p2p.enable_n0"))?,
-            enable_mdns: raw
-                .enable_mdns
-                .ok_or(ParsedConfigError::MissingConfig("p2p.enable_mdns"))?,
-        })
-    }
-}
 
-#[derive(Args, Clone, Debug, Deserialize, Serialize)]
+use crate::parsed_config::error::ParsedConfigError;
+use caretta_sync_core::{utils::{emptiable::Emptiable, mergeable::Mergeable}};
+use caretta_sync_ui::types::Base32Bytes;
+
+
+
+#[derive(Args, Clone, Debug, Default, Deserialize, Serialize)]
 pub struct ParsedP2pConfig {
-    #[arg(long = "p2p_enable")]
+    #[arg(long = "server")]
     pub enabled: Option<bool>,
     #[serde(skip_serializing)]
     #[arg(long)]
-    pub secret_key: Option<SecretKey>,
+    pub secret_key: Option<Base32Bytes>,
     #[serde(skip_deserializing)]
     #[arg(skip)]
-    pub public_key: Option<PublicKey>,
+    pub public_key: Option<Base32Bytes>,
     #[arg(long)]
     pub enable_n0: Option<bool>,
     #[arg(long)]
     pub enable_mdns: Option<bool>,
-}
-#[cfg(feature="backend")]
-impl From<P2pConfig> for ParsedP2pConfig {
-    fn from(config: P2pConfig) -> Self {
-        Self {
-            enabled: Some(config.enabled),
-            secret_key: Some(config.secret_key.clone()),
-            public_key: Some(config.secret_key.public()),
-            enable_mdns: Some(config.enable_mdns),
-            enable_n0: Some(config.enable_n0),
-        }
-    }
 }
 
 impl Emptiable for ParsedP2pConfig {
@@ -95,14 +62,46 @@ impl Mergeable for ParsedP2pConfig {
         }
     }
 }
-impl Mergeable for Option<ParsedP2pConfig> {
-    fn merge(&mut self, mut other: Self) {
-        if let Some(x) = other.take() {
-            if let Some(y) = self.as_mut() {
-                y.merge(x);
-            } else {
-                let _ = self.insert(x);
+
+#[cfg(feature="server")]
+mod server {
+    use std::array::TryFromSliceError;
+
+    use super::*;
+    use caretta_sync_core::config::P2pConfig;
+    use iroh::SecretKey;
+    impl TryFrom<ParsedP2pConfig> for P2pConfig {
+        type Error = ParsedConfigError;
+        fn try_from(raw: ParsedP2pConfig) -> Result<P2pConfig, Self::Error> {
+            Ok(P2pConfig {
+                enabled: raw
+                    .enabled
+                    .ok_or(ParsedConfigError::MissingConfig("p2p.enabled"))?,
+                secret_key: raw
+                    .secret_key
+                    .ok_or(ParsedConfigError::MissingConfig("p2p.secret_key"))
+                    .map(|x| {
+                        let buf: [u8;32] = x.as_ref().try_into()?;
+                        Result::<SecretKey,TryFromSliceError>::Ok(SecretKey::from_bytes(&buf))
+                    })??,
+                enable_n0: raw
+                    .enable_n0
+                    .ok_or(ParsedConfigError::MissingConfig("p2p.enable_n0"))?,
+                enable_mdns: raw
+                    .enable_mdns
+                    .ok_or(ParsedConfigError::MissingConfig("p2p.enable_mdns"))?,
+            })
+        }
+    }
+    impl From<P2pConfig> for ParsedP2pConfig {
+        fn from(config: P2pConfig) -> Self {
+            Self {
+                enabled: Some(config.enabled),
+                secret_key: Some(config.secret_key.to_bytes()[..].into()),
+                public_key: Some(config.secret_key.public().as_bytes()[..].into()),
+                enable_mdns: Some(config.enable_mdns),
+                enable_n0: Some(config.enable_n0),
             }
-        };
+        }
     }
 }

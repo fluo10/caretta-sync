@@ -1,4 +1,4 @@
-use sea_orm::DbErr;
+use std::array::TryFromSliceError;
 
 #[derive(thiserror::Error, Debug)]
 pub enum ParsedConfigError {
@@ -12,10 +12,10 @@ pub enum ParsedConfigError {
     TomlSerialization(#[from] toml::ser::Error),
     #[error("Invalid url: {0}")]
     UriInvalid(#[from] url::ParseError),
-    #[error("Db Error: {0}")]
-    Db(#[from] DbErr),
     #[error("Failed to get config dir")]
     ConfigDir,
     #[error("Invalid log level: {0}")]
     LogLevel(#[from] crate::parsed_config::types::LogLevelParseError),
+    #[error(transparent)]
+    SliceTryFrom(#[from] TryFromSliceError),
 }

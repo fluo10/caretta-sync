@@ -1,6 +1,6 @@
 use std::{pin::Pin, sync::Arc};
 
-use caretta_sync_core::{context::{BackendContext, BackendContextExt}, proto::api::device::{device_service_server::DeviceService, *}};
+use caretta_sync_core::{context::{ServiceContext, ServiceContextExt}, proto::api::device::{device_service_server::DeviceService, *}};
 use sea_orm::Iden;
 use tokio_stream::StreamExt;
 use tonic::{Request, Response, Streaming};
@@ -8,11 +8,11 @@ use tonic::{Request, Response, Streaming};
 use crate::proto::device::IdentifierExt;
 
 pub struct DeviceServiceHandler{
-    context: Arc<dyn AsRef<BackendContext> + Send + Sync>
+    context: Arc<dyn AsRef<ServiceContext> + Send + Sync>
 }
 
 impl DeviceServiceHandler {
-    pub fn new(context: &Arc<dyn AsRef<BackendContext> + Send + Sync>) -> Self {
+    pub fn new(context: &Arc<dyn AsRef<ServiceContext> + Send + Sync>) -> Self {
         Self{context: context.clone()}
     }
 }

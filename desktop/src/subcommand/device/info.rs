@@ -1,10 +1,12 @@
-use crate::{RunnableCommand, option::{ConfigOptionArgs, DeviceIdentifierArgs}};
+use caretta_sync_core::utils::RunnableCommand;
 use clap::Args;
+
+use crate::args::{ConfigArgs, DeviceIdentifierArgs};
 
 #[derive(Debug, Args)]
 pub struct DeviceInfoCommandArgs {
     #[command(flatten)]
-    config: ConfigOptionArgs,
+    config: ConfigArgs,
     #[command(flatten)]
     peer: DeviceIdentifierArgs,
 }

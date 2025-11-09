@@ -1,6 +1,12 @@
+use caretta_sync_core::utils::RunnableCommand;
+use clap::{Args, Subcommand};
+
+use crate::subcommand::token::{list::TokenListCommandArgs, revoke::TokenRevokeCommandArgs, show::TokenShowCommandArgs};
+
 mod list;
-mod reject;
-mod request;
+mod revoke;
+mod show;
+
 
 #[derive(Debug, Args)]
 pub struct TokenCommandArgs {
@@ -16,23 +22,17 @@ impl RunnableCommand for TokenCommandArgs {
 
 #[derive(Debug, Subcommand)]
 enum TokenSubcommand {
-    Approve(TokenApprove),
-    Invite(DeviceInviteCommandArgs),
-    Join(DeviceJoinCommandArgs),
-    List(DeviceListCommandArgs),
-    Ping(DevicePingCommandArgs),
-    Remove(DeviceRemoveCommandArgs),
+    List(TokenListCommandArgs),
+    Revoke(TokenRevokeCommandArgs),
+    Show(TokenShowCommandArgs),
 }
 
-impl RunnableCommand for DeviceSubcommand {
+impl RunnableCommand for TokenSubcommand {
     fn run(self, app_name: &'static str) {
         match self {
-            Self::Info(x) => x.run(app_name),
-            Self::Invite(x) => x.run(app_name),
-            Self::Join(x) => x.run(app_name),
             Self::List(x) => x.run(app_name),
-            Self::Ping(x) => x.run(app_name),
-            Self::Remove(x) => x.run(app_name),
+            Self::Revoke(x) => x.run(app_name),
+            Self::Show(x) => x.run(app_name),
         }
     }
 }

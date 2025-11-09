@@ -1,16 +1,17 @@
-use caretta_sync_core::utils::runnable::RunnableCommand;
+use caretta_sync_core::utils::RunnableCommand;
 use clap::Args;
 
-use crate::cli::args::VerificationIdentifierArgs;
+use crate::args::TokenIdentifierArgs;
+
 
 /// Approve an authorization request
 #[derive(Args, Debug)]
-struct RejectCommandArgs {
+pub struct TokenRevokeCommandArgs {
     #[command(flatten)]
-    authorization_request: VerificationIdentifierArgs,
+    target: TokenIdentifierArgs,
 }
 
-impl RunnableCommand for RejectCommandArgs {
+impl RunnableCommand for TokenRevokeCommandArgs {
     fn run(self, app_name: &'static str) {
         todo!()
     }

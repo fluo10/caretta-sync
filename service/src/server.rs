@@ -10,7 +10,7 @@ use tower_layer::Identity;
 use tower_service::Service;
 
 use caretta_sync_core::{
-    context::{BackendContext, ServerContext},
+    context::{ServiceContext, ServerContext},
     error::Error,
     proto::api::{
         device::device_service_server::DeviceServiceServer,
@@ -33,7 +33,7 @@ pub struct Server {
 impl Server {
     pub fn new(context: ServerContext) -> Self {
         let context = Arc::new(context);
-        let backend_context : Arc<dyn AsRef<BackendContext> + Send + Sync> = context.clone();
+        let backend_context : Arc<dyn AsRef<ServiceContext> + Send + Sync> = context.clone();
         
         Self {
             context: context.clone(),

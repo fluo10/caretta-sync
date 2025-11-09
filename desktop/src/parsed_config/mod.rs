@@ -5,6 +5,11 @@ mod p2p;
 mod rpc;
 mod storage;
 pub mod types;
+#[cfg(feature="client")]
+use caretta_sync_core::context::ClientContext;
+#[cfg(feature="server")]
+use caretta_sync_core::{config::{P2pConfig, StorageConfig}, context::ServerContext};
+use caretta_sync_service::models::P2pConfigModel;
 use clap::Args;
 pub use error::ParsedConfigError;
 pub use log::ParsedLogConfig;
@@ -15,9 +20,7 @@ pub use storage::ParsedStorageConfig;
 use sea_orm_migration::MigratorTrait;
 use serde::{Deserialize, Serialize, ser::Error};
 
-#[cfg(feature="backend")]
-use crate::config::{P2pConfig, StorageConfig};
-use crate::{
+use caretta_sync_core::{
     config::{LogConfig, RpcConfig},
     utils::{emptiable::Emptiable, mergeable::Mergeable},
 };
@@ -29,26 +32,26 @@ use std::{
     path::{Path, PathBuf},
 };
 
-#[derive(Args, Clone, Debug, Deserialize, Serialize)]
+#[derive(Args, Clone, Debug, Default, Deserialize, Serialize)]
 pub struct ParsedConfig {
     #[command(flatten)]
-    pub storage: Option<ParsedStorageConfig>,
+    pub storage: ParsedStorageConfig,
     #[command(flatten)]
-    pub rpc: Option<ParsedRpcConfig>,
+    pub rpc: ParsedRpcConfig,
     #[command(flatten)]
-    pub p2p: Option<ParsedP2pConfig>,
+    pub p2p: ParsedP2pConfig,
     #[command(flatten)]
-    pub log: Option<ParsedLogConfig>,
+    pub log: ParsedLogConfig,
 }
 
 /// A partial config parsed from config file, cli args, etc.
 impl ParsedConfig {
     fn default(app_name: &'static str) -> Self {
         Self {
-            storage: Some(ParsedStorageConfig::default(app_name)),
-            rpc: Some(ParsedRpcConfig::default(app_name)),
-            p2p: None,
-            log: Some(ParsedLogConfig::default()),
+            storage: ParsedStorageConfig::default(app_name),
+            rpc: ParsedRpcConfig::default(app_name),
+            p2p: ParsedP2pConfig::empty(),
+            log: ParsedLogConfig::default(),
         }
     }
 
@@ -59,22 +62,38 @@ impl ParsedConfig {
         result
     }
 
+    /// Fill empty configuration fields with database values
+    #[cfg(feature="server")]
+    pub async fn with_database<M>(mut self, migrator: PhantomData<M>)  -> Self 
+    where 
+        M: MigratorTrait
+    {
+        let db = self.to_storage_config().unwrap().to_database_connection(migrator).await;
+        let p2p_config = P2pConfig::from(P2pConfigModel::get_or_try_init(&db).await.unwrap());
+        self.merge(ParsedP2pConfig::from(p2p_config));
+        self
+    }
+
+    /// Remove server-only configurations
+    #[cfg(feature="client")]
+    pub fn except_server_only_config(mut self) -> Self {
+        self.p2p = ParsedP2pConfig::empty();
+        self.storage = ParsedStorageConfig::empty();
+        self
+    }
+
     /// Build [`StorageConfig`] from own [`ParsedStorageConfig`]
-    #[cfg(feature="backend")]
+    #[cfg(feature="server")]
     pub fn to_storage_config(&self) -> Result<StorageConfig, ParsedConfigError> {
         self.storage
-            .as_ref()
-            .ok_or(ParsedConfigError::MissingConfig("storage.*"))?
             .clone()
             .try_into()
     }
 
     /// Build [`P2pConfig`] from own [`ParsedP2pConfig`]
-    #[cfg(feature="backend")]
+    #[cfg(feature="server")]
     pub fn to_p2p_config(&self) -> Result<P2pConfig, ParsedConfigError> {
         self.p2p
-            .as_ref()
-            .ok_or(ParsedConfigError::MissingConfig("P2P.*"))?
             .clone()
             .try_into()
     }
@@ -82,16 +101,12 @@ impl ParsedConfig {
     /// Build [`RpcConfig`] from own [`ParsedRpcConfig`]
     pub fn to_rpc_config(&self) -> Result<RpcConfig, ParsedConfigError> {
         self.rpc
-            .as_ref()
-            .ok_or(ParsedConfigError::MissingConfig("rpc.*"))?
             .clone()
             .try_into()
     }
     /// Build [`LogConfig`] from own [`ParsedLogConfig`]
     pub fn to_log_config(&self) -> Result<LogConfig, ParsedConfigError> {
         self.log
-            .as_ref()
-            .ok_or(ParsedConfigError::MissingConfig("log.*"))?
             .clone()
             .try_into()
     }
@@ -130,40 +145,50 @@ impl ParsedConfig {
     pub fn init_tracing_subscriber(&self) {
         self.to_log_config().unwrap().init_tracing_subscriber();
     }
+
+
+
     #[cfg(feature="server")]
     pub async fn into_server_context<M>(
+        self,
         app_name: &'static str,
         migrator: PhantomData<M>,
-    ) -> Result<ServerContext, Error>
+    ) -> Result<ServerContext, ParsedConfigError>
     where
         M: MigratorTrait,
     {
-        let config = config.as_ref();
+        use caretta_sync_core::context::ServiceContext;
+
+        let config = self.as_ref();
         let rpc_config = config.to_rpc_config()?;
         let p2p_config = config.to_p2p_config()?;
         let storage_config = config.to_storage_config()?;
         let database_connection = storage_config.to_database_connection(migrator).await;
-        let iroh_router = p2p_config.to_iroh_router(app_name).await?;
-        Ok(Self {
+        let iroh_router = p2p_config.to_iroh_router(app_name).await.unwrap();
+        let service_context = ServiceContext {
             app_name,
             storage_config,
             database_connection,
-            iroh_router,
+            iroh_router
+        };
+        Ok(ServerContext {
+            app_name,
+            rpc_config,
+            service_context,
         })
     }
     #[cfg(feature="client")]
-    pub fn into_client_context<T>(app_name: &'static str, config: T) -> Result<Self, ConfigError>
-    where
-        T: AsRef<ParsedConfig>,
+    pub fn into_client_context(self, app_name: &'static str) -> Result<ClientContext, ParsedConfigError>
     {
-        let config = config.as_ref();
+        let config = self.as_ref();
         let rpc_config = config.to_rpc_config()?;
-        Ok(Self {
+        Ok(ClientContext {
             app_name,
             rpc_config,
         })
     }
 }
+
 
 impl AsRef<ParsedConfig> for ParsedConfig {
     fn as_ref(&self) -> &ParsedConfig {
@@ -174,10 +199,10 @@ impl AsRef<ParsedConfig> for ParsedConfig {
 impl Emptiable for ParsedConfig {
     fn empty() -> Self {
         Self {
-            p2p: None,
-            storage: None,
-            rpc: None,
-            log: None,
+            p2p: ParsedP2pConfig::empty(),
+            storage: ParsedStorageConfig::empty(),
+            rpc: ParsedRpcConfig::empty(),
+            log: ParsedLogConfig::empty(),
         }
     }
 
@@ -198,5 +223,10 @@ impl Mergeable for ParsedConfig {
 impl Display for ParsedConfig {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", toml::to_string(self).map_err(|_| std::fmt::Error)?)
+    }
+}
+impl Mergeable<ParsedP2pConfig> for ParsedConfig {
+    fn merge(&mut self, other: ParsedP2pConfig) {
+        self.p2p.merge(other);
     }
 }

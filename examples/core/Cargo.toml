@@ -17,5 +17,4 @@ iroh.workspace = true
 tokio.workspace = true
 tokio-stream = { version = "0.1.17", features = ["net"] }
 tonic.workspace = true
-url.workspace = true
 sea-orm-migration.workspace = true

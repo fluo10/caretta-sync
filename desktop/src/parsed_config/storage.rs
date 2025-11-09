@@ -3,14 +3,9 @@ use std::path::PathBuf;
 use clap::Args;
 use serde::{Deserialize, Serialize};
 
-#[cfg(feature="backend")]
-use crate::config::StorageConfig;
-use crate::{
-    parsed_config::error::ParsedConfigError,
-    utils::{emptiable::Emptiable, mergeable::Mergeable},
-};
+use caretta_sync_core::utils::{emptiable::Emptiable, mergeable::Mergeable};
 /// A storage config parsed from file, args and enviroment variables
-#[derive(Args, Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Args, Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct ParsedStorageConfig {
     #[arg(long)]
     pub data_dir: Option<PathBuf>,
@@ -63,15 +58,6 @@ impl ParsedStorageConfig {
         }
     }
 }
-#[cfg(feature="backend")]
-impl From<StorageConfig> for ParsedStorageConfig {
-    fn from(config: StorageConfig) -> ParsedStorageConfig {
-        Self {
-            data_dir: Some(config.data_dir),
-            cache_dir: Some(config.cache_dir),
-        }
-    }
-}
 
 impl Emptiable for ParsedStorageConfig {
     fn empty() -> Self {
@@ -96,29 +82,33 @@ impl Mergeable for ParsedStorageConfig {
     }
 }
 
-impl Mergeable for Option<ParsedStorageConfig> {
-    fn merge(&mut self, mut other: Self) {
-        if let Some(x) = other.take() {
-            if let Some(y) = self.as_mut() {
-                y.merge(x);
-            } else {
-                let _ = self.insert(x);
-            }
-        };
-    }
-}
-#[cfg(feature="backend")]
-impl TryFrom<ParsedStorageConfig> for StorageConfig {
-    type Error = ParsedConfigError;
 
-    fn try_from(value: ParsedStorageConfig) -> Result<Self, Self::Error> {
-        Ok(Self {
-            data_dir: value
-                .data_dir
-                .ok_or(ParsedConfigError::MissingConfig("data_dir"))?,
-            cache_dir: value
-                .cache_dir
-                .ok_or(ParsedConfigError::MissingConfig("cache_dir"))?,
-        })
+
+#[cfg(feature="server")]
+mod server {
+    use super::*;
+    use caretta_sync_core::config::StorageConfig;
+    use crate::parsed_config::error::ParsedConfigError;
+    impl TryFrom<ParsedStorageConfig> for StorageConfig {
+        type Error = ParsedConfigError;
+
+        fn try_from(value: ParsedStorageConfig) -> Result<Self, Self::Error> {
+            Ok(Self {
+                data_dir: value
+                    .data_dir
+                    .ok_or(ParsedConfigError::MissingConfig("data_dir"))?,
+                cache_dir: value
+                    .cache_dir
+                    .ok_or(ParsedConfigError::MissingConfig("cache_dir"))?,
+            })
+        }
+    }
+    impl From<StorageConfig> for ParsedStorageConfig {
+        fn from(config: StorageConfig) -> ParsedStorageConfig {
+            Self {
+                data_dir: Some(config.data_dir),
+                cache_dir: Some(config.cache_dir),
+            }
+        }
     }
 }

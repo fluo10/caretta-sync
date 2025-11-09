@@ -1,13 +1,13 @@
 mod log;
-#[cfg(feature="backend")]
+#[cfg(feature="service")]
 mod p2p;
 mod rpc;
-#[cfg(feature="backend")]
+#[cfg(feature="service")]
 mod storage;
 
 pub use log::LogConfig;
-#[cfg(feature="backend")]
+#[cfg(feature="service")]
 pub use p2p::P2pConfig;
 pub use rpc::RpcConfig;
-#[cfg(feature="backend")]
+#[cfg(feature="service")]
 pub use storage::StorageConfig;

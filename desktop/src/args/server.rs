@@ -1,5 +1,6 @@
 use std::marker::PhantomData;
 
+use caretta_sync_service::server::ServerTrait;
 use caretta_sync_core::{ context::ServerContext, utils::RunnableCommand};
 use clap::Args;
 use sea_orm_migration::MigratorTrait;
@@ -26,9 +27,9 @@ where
 {
     #[tokio::main]
     async fn run(self, app_name: &'static str) {
-        let config = self.config.into_parsed_config(app_name).with_default(app_name).with_database(PhantomData::<M>).await.unwrap();
+        let config = self.config.into_parsed_config(app_name).with_default(app_name).with_database(PhantomData::<M>).await;
         config.init_tracing_subscriber();
-        let context = ServerContext::new(app_name, config, PhantomData::<M>).await.unwrap();
+        let context = config.into_server_context(app_name, self.migrator).await.unwrap();
         S::serve(context).await.unwrap();
     }
 }

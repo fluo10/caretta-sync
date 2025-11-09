@@ -1,49 +1,35 @@
-mod check;
-mod list;
-
-use check::*;
-use list::*;
-
+use caretta_sync_core::utils::RunnableCommand;
 use clap::{Args, Subcommand};
-use sea_orm_migration::MigratorTrait;
 
-use crate::RunnableCommand;
+mod client;
+mod server;
+
+use client::ConfigClientCommandArgs;
+use server::ConfigServerCommandArgs;
 
 #[derive(Debug, Args)]
-pub struct ConfigCommandArgs<M>
-where 
-    M: MigratorTrait
-{
+pub struct ConfigCommandArgs {
     #[command(subcommand)]
-    command: ConfigSubcommand<M>,
+    command: ConfigSubcommand,
 }
 
-impl<M> RunnableCommand for ConfigCommandArgs<M>
-where 
-    M: MigratorTrait
-{
+impl RunnableCommand for ConfigCommandArgs {
     fn run(self, app_name: &'static str) {
         self.command.run(app_name)
     }
 }
 
 #[derive(Debug, Subcommand)]
-enum ConfigSubcommand<M>
-where 
-    M: MigratorTrait
-{
-    Check(ConfigCheckCommandArgs<M>),
-    List(ConfigListCommandArgs<M>),
+enum ConfigSubcommand {
+    Client(ConfigClientCommandArgs),
+    Server(ConfigServerCommandArgs),
 }
 
-impl<M> RunnableCommand for ConfigSubcommand<M>
-where 
-    M: MigratorTrait
-{
+impl RunnableCommand for ConfigSubcommand {
     fn run(self, app_name: &'static str) {
         match self {
-            Self::Check(x) => x.run(app_name),
-            Self::List(x) => x.run(app_name),
+            Self::Client(x) => x.run(app_name),
+            Self::Server(x) => x.run(app_name),
         }
     }
 }

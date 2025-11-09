@@ -17,10 +17,6 @@ pub enum Error {
     OsStringConvert(std::ffi::OsString),
     #[error("slice parse error: {0}")]
     SliceTryFrom(#[from] TryFromSliceError),
-    #[error("toml deserialization error: {0}")]
-    TomlDe(#[from] toml::de::Error),
-    #[error("toml serialization error: {0}")]
-    TomlSer(#[from] toml::ser::Error),
     #[error("protobuf serialization error: {0}")]
     ProtoSerialize(#[from] crate::proto::ProtoSerializeError),
     #[error("protobuf deserialization error: {0}")]

@@ -1,10 +1,10 @@
-use crate::{RunnableCommand, option::ConfigOptionArgs};
-use caretta_sync_core::{context::ClientContext, proto::api::device::{ListRequest, device_service_client::DeviceServiceClient, list_request::Status}};
+use caretta_sync_core::utils::RunnableCommand;
 use clap::Args;
-use iroh::EndpointId;
-use mtid::Dtid;
 use tonic::Request;
 
+use crate::args::{ConfigArgs, DeviceIdentifierArgs};
+use caretta_sync_core::{context::ClientContext, proto::api::device::{ListRequest, device_service_client::DeviceServiceClient, list_request::Status}};
+use mtid::Dtid;
 
 #[derive(Debug, Args)]
 #[group(multiple = false)]
@@ -30,7 +30,7 @@ impl From<FilterOptionArgs> for ListRequest {
 #[derive(Debug, Args)]
 pub struct DeviceListCommandArgs {
     #[command(flatten)]
-    config: ConfigOptionArgs,
+    config: ConfigArgs,
     #[command(flatten)]
     filter: FilterOptionArgs,
     #[arg(short, long)]
@@ -44,7 +44,7 @@ impl RunnableCommand for DeviceListCommandArgs {
         if self.verbose {
             config.init_tracing_subscriber();
         }
-        let context = ClientContext::new(app_name, config).unwrap();
+        let context = config.into_client_context(app_name).unwrap();
         let mut client = DeviceServiceClient::connect(&context).await.unwrap();
 
         let list_request = ListRequest::from(self.filter);

@@ -14,8 +14,8 @@ use crate::{
     error::Error,
 };
 
-/// An extension trait for [`BackendContext`]
-pub trait BackendContextExt {
+/// An extension trait for [`ServiceContext`]
+pub trait ServiceContextExt {
     fn as_iroh_router(&self) -> Option<&Router>;
     fn as_endpoint(&self) -> Option<&Endpoint> {
         self.as_iroh_router().map(|x| x.endpoint())
@@ -43,9 +43,9 @@ pub trait BackendContextExt {
     }
 }
 
-impl<T> BackendContextExt for T 
+impl<T> ServiceContextExt for T 
 where
-    T: AsRef<BackendContext>
+    T: AsRef<ServiceContext>
 {
     fn as_iroh_router(&self) -> Option<&Router> {
         self.as_ref().as_iroh_router()
@@ -54,30 +54,30 @@ where
 
 /// A context for background process
 #[derive(Clone, Debug)]
-pub struct BackendContext {
+pub struct ServiceContext {
     pub app_name: &'static str,
     pub storage_config: StorageConfig,
     pub database_connection: DatabaseConnection,
     pub iroh_router: Option<Router>,
 }
-impl BackendContextExt for BackendContext {
+impl ServiceContextExt for ServiceContext {
     fn as_iroh_router(&self) -> Option<&Router> {
         self.iroh_router.as_ref()
     }
 }
 
-impl AsRef<DatabaseConnection> for BackendContext {
+impl AsRef<DatabaseConnection> for ServiceContext {
     fn as_ref(&self) -> &DatabaseConnection {
         &self.database_connection
     }
 }
-impl From<&BackendContext> for Option<Endpoint> {
-    fn from(value: &BackendContext) -> Self {
+impl From<&ServiceContext> for Option<Endpoint> {
+    fn from(value: &ServiceContext) -> Self {
         value.iroh_router.as_ref().map(|x| x.endpoint().clone())
     }
 }
-impl From<&BackendContext> for Option<ConcurrentDiscovery> {
-    fn from(value: &BackendContext) -> Self {
+impl From<&ServiceContext> for Option<ConcurrentDiscovery> {
+    fn from(value: &ServiceContext) -> Self {
         value
             .iroh_router
             .as_ref()

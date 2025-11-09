@@ -1,6 +1,5 @@
 use sea_orm::DatabaseConnection;
 use tonic::transport::Endpoint;
-use url::Url;
 
 use crate::{
     config::{RpcConfig, StorageConfig},

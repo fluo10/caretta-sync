@@ -10,18 +10,18 @@ use sea_orm::{Database, DatabaseConnection};
 use sea_orm_migration::MigratorTrait;
 
 use crate::{
-    config::{LogConfig, P2pConfig, RpcConfig, StorageConfig}, context::{BackendContext, backend::BackendContextExt}, error::Error
+    config::{LogConfig, P2pConfig, RpcConfig, StorageConfig}, context::{ServiceContext, service::ServiceContextExt}, error::Error
 };
 
 #[derive(Clone, Debug)]
 pub struct ServerContext {
     pub app_name: &'static str,
     pub rpc_config: RpcConfig,
-    pub backend_conext: BackendContext
+    pub service_context: ServiceContext
 }
 
-impl AsRef<BackendContext> for ServerContext {
-    fn as_ref(&self) -> &BackendContext {
-        &self.backend_conext
+impl AsRef<ServiceContext> for ServerContext {
+    fn as_ref(&self) -> &ServiceContext {
+        &self.service_context
     }
 }

@@ -1,5 +1,5 @@
-#[cfg(feature = "backend")]
-mod backend;
+#[cfg(feature = "service")]
+mod service;
 
 #[cfg(feature = "client")]
 mod client;
@@ -7,10 +7,10 @@ mod client;
 #[cfg(feature = "server")]
 mod server;
 
-#[cfg(feature = "backend")]
-pub use backend::{
-    BackendContext,
-    BackendContextExt
+#[cfg(feature = "service")]
+pub use service::{
+    ServiceContext,
+    ServiceContextExt
 };
 
 #[cfg(feature = "client")]

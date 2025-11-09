@@ -2,11 +2,12 @@ use clap::Args;
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-use crate::{
+use caretta_sync_core::{
     config::RpcConfig,
-    parsed_config::error::ParsedConfigError,
     utils::{emptiable::Emptiable, mergeable::Mergeable},
 };
+use crate::parsed_config::error::ParsedConfigError;
+
 
 impl TryFrom<ParsedRpcConfig> for RpcConfig {
     type Error = ParsedConfigError;
@@ -19,7 +20,7 @@ impl TryFrom<ParsedRpcConfig> for RpcConfig {
     }
 }
 
-#[derive(Args, Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[derive(Args, Clone, Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct ParsedRpcConfig {
     pub endpoint_url: Option<Url>,
 }
@@ -72,17 +73,5 @@ impl Mergeable for ParsedRpcConfig {
         if let Some(x) = other.endpoint_url {
             self.endpoint_url = Some(x);
         }
-    }
-}
-
-impl Mergeable for Option<ParsedRpcConfig> {
-    fn merge(&mut self, mut other: Self) {
-        if let Some(x) = other.take() {
-            if let Some(y) = self.as_mut() {
-                y.merge(x);
-            } else {
-                let _ = self.insert(x);
-            }
-        };
     }
 }

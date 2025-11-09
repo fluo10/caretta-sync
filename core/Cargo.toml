@@ -10,15 +10,15 @@ repository.workspace = true
 default = []
 desktop = ["dep:clap", "dep:serde"]
 test = ["dep:tempfile", ]
-backend = ["dep:iroh-ping"]
-server = ["backend", "desktop"]
-mobile = ["backend"]
+service = ["dep:iroh-ping"]
+server = ["service", "desktop"]
+mobile = ["service"]
 client = ["desktop"]
 
 [dependencies]
 chrono.workspace = true
 clap = {workspace = true, optional = true}
-dirs = "6.0.0"
+dirs.workspace = true
 futures.workspace = true
 iroh.workspace = true
 iroh-ping = { workspace = true, optional = true }
@@ -32,14 +32,13 @@ sysinfo = "0.37.0"
 tempfile = { workspace = true, optional = true }
 thiserror.workspace = true
 tokio.workspace = true
-toml = "0.9.8"
 tonic.workspace = true
 tonic-prost = "0.14.0"
 tracing.workspace = true
 tracing-subscriber.workspace = true
 uuid.workspace = true
 url.workspace = true
-whoami = "1.6.1"
+whoami.workspace = true
 rand.workspace = true
 tokio-stream.workspace = true
 async-trait.workspace = true
