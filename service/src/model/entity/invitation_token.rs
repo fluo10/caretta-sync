@@ -8,7 +8,7 @@ use uuid::Uuid;
 
 use crate::{
     invitation_token::InvitationToken,
-    models::{ModelsError, types::TokenStatus},
+    model::{ModelsError, types::TokenStatus},
 };
 
 /// Request of node authorization.

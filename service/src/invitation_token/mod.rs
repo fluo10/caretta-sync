@@ -6,7 +6,7 @@ use iroh::{Endpoint, EndpointId, PublicKey};
 use mtid::Dtid;
 use sea_orm::DatabaseConnection;
 
-use crate::error::BackendError;
+use crate::error::ServiceError;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct InvitationToken {
@@ -80,7 +80,7 @@ impl InvitationToken {
         self,
         local_endpoint: &Endpoint,
         db: DatabaseConnection,
-    ) -> Result<bool, BackendError> {
+    ) -> Result<bool, ServiceError> {
         if self.endpoint_id != local_endpoint.id() {
             return Ok(false);
         }

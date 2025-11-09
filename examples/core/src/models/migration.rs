@@ -5,7 +5,7 @@ pub struct Migrator;
 impl sea_orm_migration::MigratorTrait for Migrator {
     fn migrations() -> Vec<Box<dyn sea_orm_migration::MigrationTrait>> {
         vec![Box::new(
-            caretta_sync::models::migration::m20220101_000001_create_table::Migration,
+            caretta_sync::service::models::migration::m20220101_000001_create_table::Migration,
         )]
     }
 }

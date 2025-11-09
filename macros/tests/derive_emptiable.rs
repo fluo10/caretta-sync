@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use caretta_sync_core::utils::emptiable::Emptiable;
+use caretta_sync_core::util::Emptiable;
 use caretta_sync_macros::Emptiable;
 
 #[derive(Debug, PartialEq, Emptiable)]

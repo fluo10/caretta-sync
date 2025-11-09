@@ -11,7 +11,6 @@ use sea_orm_migration::MigratorTrait;
 
 use crate::{
     config::{LogConfig, P2pConfig, RpcConfig, StorageConfig},
-    error::Error,
 };
 
 /// An extension trait for [`ServiceContext`]

@@ -9,8 +9,7 @@ use iroh::{
 };
 
 use crate::{
-    error::Error,
-    utils::{emptiable::Emptiable, mergeable::Mergeable},
+        util::{Emptiable, Mergeable},
 };
 
 #[derive(Clone, Debug)]

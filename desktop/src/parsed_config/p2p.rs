@@ -2,8 +2,8 @@ use clap::Args;
 use serde::{Deserialize, Serialize};
 
 use crate::parsed_config::error::ParsedConfigError;
-use caretta_sync_core::{utils::{emptiable::Emptiable, mergeable::Mergeable}};
-use caretta_sync_ui::types::Base32Bytes;
+use caretta_sync_core::{util::{Emptiable, Mergeable}};
+use caretta_sync_core::types::Base32Bytes;
 
 
 

@@ -1,8 +1,8 @@
 pub mod error;
 pub mod invitation_token;
-pub mod proto;
+pub mod proto_ext;
 pub mod service_handler;
-pub mod models;
+pub mod model;
 #[cfg(feature = "server")]
 pub mod server;
 #[cfg(test)]

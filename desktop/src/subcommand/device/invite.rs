@@ -1,4 +1,4 @@
-use caretta_sync_core::utils::RunnableCommand;
+use caretta_sync_core::util::RunnableCommand;
 use clap::Args;
 
 use crate::args::{ConfigArgs, DeviceIdentifierArgs, DurationArgs};

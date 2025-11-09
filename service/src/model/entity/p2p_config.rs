@@ -3,7 +3,7 @@ use iroh::{PublicKey, SecretKey};
 use mtid::Dtid;
 use sea_orm::{ActiveValue::Set, entity::prelude::*, sea_query::Mode};
 
-use crate::models::types::SecretKeyBlob;
+use crate::model::types::SecretKeyBlob;
 
 const ID: u32 = 0;
 /// config saved in local database.

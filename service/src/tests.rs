@@ -5,7 +5,7 @@ use caretta_sync_core::{
 };
 use tokio::sync::OnceCell;
 
-use crate::models::migration::m20220101_000001_create_table;
+use crate::model::migration::m20220101_000001_create_table;
 
 const TEST_APP_NAME: &str = "caretta-sync-test";
 

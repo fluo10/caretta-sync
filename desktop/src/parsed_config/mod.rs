@@ -9,7 +9,8 @@ pub mod types;
 use caretta_sync_core::context::ClientContext;
 #[cfg(feature="server")]
 use caretta_sync_core::{config::{P2pConfig, StorageConfig}, context::ServerContext};
-use caretta_sync_service::models::P2pConfigModel;
+#[cfg(feature="server")]
+use caretta_sync_service::model::P2pConfigModel;
 use clap::Args;
 pub use error::ParsedConfigError;
 pub use log::ParsedLogConfig;
@@ -17,12 +18,13 @@ pub use p2p::ParsedP2pConfig;
 pub use rpc::ParsedRpcConfig;
 pub use storage::ParsedStorageConfig;
 
+#[cfg(feature="server")]
 use sea_orm_migration::MigratorTrait;
 use serde::{Deserialize, Serialize, ser::Error};
 
 use caretta_sync_core::{
     config::{LogConfig, RpcConfig},
-    utils::{emptiable::Emptiable, mergeable::Mergeable},
+    util::{Emptiable, Mergeable},
 };
 use std::{
     fmt::Display,

@@ -2,7 +2,7 @@ use caretta_sync_core::proto::{ProtoDeserializeError, api::device::*};
 use iroh::PublicKey;
 
 #[async_trait::async_trait]
-impl IdentifierExt for Identifier {
+impl DeviceIdentifierExt for Identifier {
     async fn to_public_key(&self) -> Result<Option<PublicKey>, ProtoDeserializeError>{
         use identifier::Value;
         if let Some(x) = self.value.as_ref() {
@@ -19,6 +19,6 @@ impl IdentifierExt for Identifier {
 
 /// An extension trait for [`Identifier`]
 #[async_trait::async_trait]
-pub trait IdentifierExt {
+pub trait DeviceIdentifierExt {
     async fn to_public_key(&self) -> Result<Option<PublicKey>, ProtoDeserializeError>;
 }

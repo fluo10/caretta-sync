@@ -1,4 +1,4 @@
-use caretta_sync_core::utils::RunnableCommand;
+use caretta_sync_core::util::RunnableCommand;
 use clap::{Args, Subcommand};
 
 use crate::subcommand::token::{list::TokenListCommandArgs, revoke::TokenRevokeCommandArgs, show::TokenShowCommandArgs};

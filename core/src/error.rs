@@ -4,7 +4,7 @@ use tonic::Status;
 use crate::proto::ProtoDeserializeError;
 
 #[derive(thiserror::Error, Debug)]
-pub enum Error {
+pub enum CoreError {
     #[error("Infallible: {0}")]
     Infallible(#[from] std::convert::Infallible),
     #[error("IO Error: {0}")]
@@ -29,16 +29,16 @@ pub enum Error {
     TonicTransport(#[from] tonic::transport::Error),
 }
 
-impl From<std::ffi::OsString> for Error {
-    fn from(s: OsString) -> Error {
+impl From<std::ffi::OsString> for CoreError {
+    fn from(s: OsString) -> CoreError {
         Self::OsStringConvert(s)
     }
 }
 
-impl From<Error> for Status {
-    fn from(value: Error) -> Self {
+impl From<CoreError> for Status {
+    fn from(value: CoreError) -> Self {
         match value {
-            Error::ProtoDeserialize(x) => match x {
+            CoreError::ProtoDeserialize(x) => match x {
                 ProtoDeserializeError::MissingField(x) => {
                     Self::invalid_argument(format!("{} is required", x))
                 }

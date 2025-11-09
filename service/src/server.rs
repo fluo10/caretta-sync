@@ -11,18 +11,17 @@ use tower_service::Service;
 
 use caretta_sync_core::{
     context::{ServiceContext, ServerContext},
-    error::Error,
     proto::api::{
         device::device_service_server::DeviceServiceServer,
         invitation_token::invitation_token_service_server::InvitationTokenServiceServer,
     },
 };
 
-use crate::service_handler::{DeviceServiceHandler, InvitationTokenServiceHandler};
+use crate::{error::ServiceError, service_handler::{DeviceServiceHandler, InvitationTokenServiceHandler}};
 
 #[async_trait::async_trait]
 pub trait ServerTrait {
-    async fn serve(context: ServerContext) -> Result<(), Error>;
+    async fn serve(context: ServerContext) -> Result<(), ServiceError>;
 }
 
 pub struct Server {
@@ -58,7 +57,7 @@ impl Server {
         self.tonic_router = self.tonic_router.add_service(svc);
         self
     }
-    pub async fn serve(self) -> Result<(), Error> {
+    pub async fn serve(self) -> Result<(), ServiceError> {
         let url = self.context.as_ref().rpc_config.endpoint_url.clone();
         let rpc = tokio::spawn(async move {
             match url.scheme() {

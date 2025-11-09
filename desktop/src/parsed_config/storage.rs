@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use clap::Args;
 use serde::{Deserialize, Serialize};
 
-use caretta_sync_core::utils::{emptiable::Emptiable, mergeable::Mergeable};
+use caretta_sync_core::util::{Emptiable, Mergeable};
 /// A storage config parsed from file, args and enviroment variables
 #[derive(Args, Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct ParsedStorageConfig {

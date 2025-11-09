@@ -4,7 +4,7 @@ use iroh::PublicKey;
 use mtid::Dtid;
 use sea_orm::{ActiveValue::Set, entity::prelude::*};
 
-use crate::models::types::PublicKeyBlob;
+use crate::model::types::PublicKeyBlob;
 
 /// RemoteNode information cached in local database.
 ///

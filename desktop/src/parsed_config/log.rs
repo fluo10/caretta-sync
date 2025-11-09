@@ -1,4 +1,4 @@
-use caretta_sync_core::{config::LogConfig, utils::{emptiable::Emptiable, mergeable::Mergeable}};
+use caretta_sync_core::{config::LogConfig, util::{Emptiable, Mergeable}};
 use clap::Args;
 use serde::{Deserialize, Serialize};
 

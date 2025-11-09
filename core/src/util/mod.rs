@@ -1,9 +1,11 @@
 use chrono::{DateTime, TimeZone, Timelike, Utc};
 use prost_types::Timestamp;
-pub mod emptiable;
-pub mod mergeable;
+mod emptiable;
+mod mergeable;
 mod runnable_command;
 
+pub use emptiable::Emptiable;
+pub use mergeable::Mergeable;
 pub use runnable_command::RunnableCommand;
 
 /// ## Examples

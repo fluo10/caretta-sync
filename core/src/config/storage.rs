@@ -5,8 +5,7 @@ use sea_orm::{Database, DatabaseConnection, sqlx::database};
 use sea_orm_migration::MigratorTrait;
 
 use crate::{
-    error::Error,
-    utils::{emptiable::Emptiable, mergeable::Mergeable},
+    util::{Emptiable, Mergeable},
 };
 
 #[cfg(any(test, feature = "test"))]

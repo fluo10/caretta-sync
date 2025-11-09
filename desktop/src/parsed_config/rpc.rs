@@ -4,7 +4,7 @@ use url::Url;
 
 use caretta_sync_core::{
     config::RpcConfig,
-    utils::{emptiable::Emptiable, mergeable::Mergeable},
+    util::{Emptiable, Mergeable},
 };
 use crate::parsed_config::error::ParsedConfigError;
 

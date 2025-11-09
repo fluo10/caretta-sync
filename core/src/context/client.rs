@@ -3,7 +3,7 @@ use tonic::transport::Endpoint;
 
 use crate::{
     config::{RpcConfig, StorageConfig},
-    error::Error,
+    error::CoreError,
 };
 
 /// A context for client
@@ -21,7 +21,7 @@ impl AsRef<ClientContext> for ClientContext {
 }
 
 impl TryFrom<&ClientContext> for Endpoint {
-    type Error = Error;
+    type Error = CoreError;
     fn try_from(value: &ClientContext) -> Result<Self, Self::Error> {
         Ok(value.rpc_config.endpoint_url.to_string().try_into()?)
     }

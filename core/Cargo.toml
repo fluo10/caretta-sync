@@ -16,6 +16,7 @@ mobile = ["service"]
 client = ["desktop"]
 
 [dependencies]
+base32.workspace = true
 chrono.workspace = true
 clap = {workspace = true, optional = true}
 dirs.workspace = true

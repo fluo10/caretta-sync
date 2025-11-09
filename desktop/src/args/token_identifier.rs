@@ -1,4 +1,4 @@
-use caretta_sync_ui::types::Base32Bytes;
+use caretta_sync_core::types::Base32Bytes;
 use clap::Args;
 use mtid::Dtid;
 

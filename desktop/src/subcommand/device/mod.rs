@@ -5,7 +5,7 @@ mod list;
 mod ping;
 mod remove;
 
-use caretta_sync_core::utils::RunnableCommand;
+use caretta_sync_core::util::RunnableCommand;
 pub use info::DeviceInfoCommandArgs;
 pub use invite::DeviceInviteCommandArgs;
 pub use join::DeviceJoinCommandArgs;

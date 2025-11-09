@@ -1,7 +1,7 @@
 use std::marker::PhantomData;
 
 
-use caretta_sync_core::utils::RunnableCommand;
+use caretta_sync_core::util::RunnableCommand;
 use clap::Args;
 use sea_orm_migration::MigratorTrait;
 

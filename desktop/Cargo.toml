@@ -10,13 +10,12 @@ repository.workspace = true
 default = []
 cli = ["client"]
 gui = ["client"]
-client = ["caretta-sync-core/client", "dep:caretta-sync-ui" ]
-server = ["caretta-sync-core/server", "dep:caretta-sync-service", "dep:sea-orm-migration"]
+client = ["caretta-sync-core/client" ]
+server = ["caretta-sync-core/server", "dep:caretta-sync-service", "dep:sea-orm-migration", "dep:iroh"]
 
 [dependencies]
-caretta-sync-core.workspace = true
+caretta-sync-core = { workspace = true, features = [ "desktop" ] }
 caretta-sync-service = { workspace = true, features = ["server"], optional = true }
-caretta-sync-ui = { workspace = true, features = [ "desktop" ], optional = true }
 chrono.workspace = true
 clap.workspace = true
 dirs.workspace = true

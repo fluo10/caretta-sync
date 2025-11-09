@@ -4,7 +4,7 @@ use tonic::Status;
 use caretta_sync_core::proto::ProtoDeserializeError;
 
 #[derive(thiserror::Error, Debug)]
-pub enum BackendError {
+pub enum ServiceError {
     #[error("Infallible: {0}")]
     Infallible(#[from] std::convert::Infallible),
     #[error("IO Error: {0}")]

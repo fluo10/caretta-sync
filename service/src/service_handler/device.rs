@@ -5,7 +5,7 @@ use sea_orm::Iden;
 use tokio_stream::StreamExt;
 use tonic::{Request, Response, Streaming};
 
-use crate::proto::device::IdentifierExt;
+use crate::proto_ext::DeviceIdentifierExt;
 
 pub struct DeviceServiceHandler{
     context: Arc<dyn AsRef<ServiceContext> + Send + Sync>
