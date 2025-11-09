@@ -4,9 +4,7 @@ use std::{marker::PhantomData, path::PathBuf};
 use sea_orm::{Database, DatabaseConnection, sqlx::database};
 use sea_orm_migration::MigratorTrait;
 
-use crate::{
-    util::{Emptiable, Mergeable},
-};
+use crate::util::{Emptiable, Mergeable};
 
 #[cfg(any(test, feature = "test"))]
 use tempfile::tempdir;

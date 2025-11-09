@@ -5,11 +5,14 @@ mod p2p;
 mod rpc;
 mod storage;
 pub mod types;
-#[cfg(feature="client")]
+#[cfg(feature = "client")]
 use caretta_sync_core::context::ClientContext;
-#[cfg(feature="server")]
-use caretta_sync_core::{config::{P2pConfig, StorageConfig}, context::ServerContext};
-#[cfg(feature="server")]
+#[cfg(feature = "server")]
+use caretta_sync_core::{
+    config::{P2pConfig, StorageConfig},
+    context::ServerContext,
+};
+#[cfg(feature = "server")]
 use caretta_sync_service::model::P2pConfigModel;
 use clap::Args;
 pub use error::ParsedConfigError;
@@ -18,7 +21,7 @@ pub use p2p::ParsedP2pConfig;
 pub use rpc::ParsedRpcConfig;
 pub use storage::ParsedStorageConfig;
 
-#[cfg(feature="server")]
+#[cfg(feature = "server")]
 use sea_orm_migration::MigratorTrait;
 use serde::{Deserialize, Serialize, ser::Error};
 
@@ -65,19 +68,23 @@ impl ParsedConfig {
     }
 
     /// Fill empty configuration fields with database values
-    #[cfg(feature="server")]
-    pub async fn with_database<M>(mut self, migrator: PhantomData<M>)  -> Self 
-    where 
-        M: MigratorTrait
+    #[cfg(feature = "server")]
+    pub async fn with_database<M>(mut self, migrator: PhantomData<M>) -> Self
+    where
+        M: MigratorTrait,
     {
-        let db = self.to_storage_config().unwrap().to_database_connection(migrator).await;
+        let db = self
+            .to_storage_config()
+            .unwrap()
+            .to_database_connection(migrator)
+            .await;
         let p2p_config = P2pConfig::from(P2pConfigModel::get_or_try_init(&db).await.unwrap());
         self.merge(ParsedP2pConfig::from(p2p_config));
         self
     }
 
     /// Remove server-only configurations
-    #[cfg(feature="client")]
+    #[cfg(feature = "client")]
     pub fn except_server_only_config(mut self) -> Self {
         self.p2p = ParsedP2pConfig::empty();
         self.storage = ParsedStorageConfig::empty();
@@ -85,32 +92,24 @@ impl ParsedConfig {
     }
 
     /// Build [`StorageConfig`] from own [`ParsedStorageConfig`]
-    #[cfg(feature="server")]
+    #[cfg(feature = "server")]
     pub fn to_storage_config(&self) -> Result<StorageConfig, ParsedConfigError> {
-        self.storage
-            .clone()
-            .try_into()
+        self.storage.clone().try_into()
     }
 
     /// Build [`P2pConfig`] from own [`ParsedP2pConfig`]
-    #[cfg(feature="server")]
+    #[cfg(feature = "server")]
     pub fn to_p2p_config(&self) -> Result<P2pConfig, ParsedConfigError> {
-        self.p2p
-            .clone()
-            .try_into()
+        self.p2p.clone().try_into()
     }
 
     /// Build [`RpcConfig`] from own [`ParsedRpcConfig`]
     pub fn to_rpc_config(&self) -> Result<RpcConfig, ParsedConfigError> {
-        self.rpc
-            .clone()
-            .try_into()
+        self.rpc.clone().try_into()
     }
     /// Build [`LogConfig`] from own [`ParsedLogConfig`]
     pub fn to_log_config(&self) -> Result<LogConfig, ParsedConfigError> {
-        self.log
-            .clone()
-            .try_into()
+        self.log.clone().try_into()
     }
     /// Read or create target config file
     pub fn read_or_create_from_path<T>(path: T) -> Result<Self, ParsedConfigError>
@@ -148,9 +147,7 @@ impl ParsedConfig {
         self.to_log_config().unwrap().init_tracing_subscriber();
     }
 
-
-
-    #[cfg(feature="server")]
+    #[cfg(feature = "server")]
     pub async fn into_server_context<M>(
         self,
         app_name: &'static str,
@@ -171,7 +168,7 @@ impl ParsedConfig {
             app_name,
             storage_config,
             database_connection,
-            iroh_router
+            iroh_router,
         };
         Ok(ServerContext {
             app_name,
@@ -179,9 +176,11 @@ impl ParsedConfig {
             service_context,
         })
     }
-    #[cfg(feature="client")]
-    pub fn into_client_context(self, app_name: &'static str) -> Result<ClientContext, ParsedConfigError>
-    {
+    #[cfg(feature = "client")]
+    pub fn into_client_context(
+        self,
+        app_name: &'static str,
+    ) -> Result<ClientContext, ParsedConfigError> {
         let config = self.as_ref();
         let rpc_config = config.to_rpc_config()?;
         Ok(ClientContext {
@@ -190,7 +189,6 @@ impl ParsedConfig {
         })
     }
 }
-
 
 impl AsRef<ParsedConfig> for ParsedConfig {
     fn as_ref(&self) -> &ParsedConfig {

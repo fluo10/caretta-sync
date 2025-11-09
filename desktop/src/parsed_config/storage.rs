@@ -82,13 +82,11 @@ impl Mergeable for ParsedStorageConfig {
     }
 }
 
-
-
-#[cfg(feature="server")]
+#[cfg(feature = "server")]
 mod server {
     use super::*;
-    use caretta_sync_core::config::StorageConfig;
     use crate::parsed_config::error::ParsedConfigError;
+    use caretta_sync_core::config::StorageConfig;
     impl TryFrom<ParsedStorageConfig> for StorageConfig {
         type Error = ParsedConfigError;
 

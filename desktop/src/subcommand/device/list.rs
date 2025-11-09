@@ -3,7 +3,12 @@ use clap::Args;
 use tonic::Request;
 
 use crate::args::{ConfigArgs, DeviceIdentifierArgs};
-use caretta_sync_core::{context::ClientContext, proto::api::device::{ListRequest, device_service_client::DeviceServiceClient, list_request::Status}};
+use caretta_sync_core::{
+    context::ClientContext,
+    proto::api::device::{
+        ListRequest, device_service_client::DeviceServiceClient, list_request::Status,
+    },
+};
 use mtid::Dtid;
 
 #[derive(Debug, Args)]
@@ -21,7 +26,7 @@ impl From<FilterOptionArgs> for ListRequest {
             (true, true) => unreachable!(),
             (true, false) => vec![Status::Discovered.into()],
             (false, true) => vec![Status::Discovered.into(), Status::Authorized.into()],
-            (false, false) => vec![Status::Authorized.into()]
+            (false, false) => vec![Status::Authorized.into()],
         };
         ListRequest { statuses }
     }
@@ -34,7 +39,7 @@ pub struct DeviceListCommandArgs {
     #[command(flatten)]
     filter: FilterOptionArgs,
     #[arg(short, long)]
-    verbose: bool
+    verbose: bool,
 }
 
 impl RunnableCommand for DeviceListCommandArgs {

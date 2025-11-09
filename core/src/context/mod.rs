@@ -8,10 +8,7 @@ mod client;
 mod server;
 
 #[cfg(feature = "service")]
-pub use service::{
-    ServiceContext,
-    ServiceContextExt
-};
+pub use service::{ServiceContext, ServiceContextExt};
 
 #[cfg(feature = "client")]
 pub use client::ClientContext;

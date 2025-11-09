@@ -9,9 +9,7 @@ use iroh::{
 use sea_orm::{Database, DatabaseConnection};
 use sea_orm_migration::MigratorTrait;
 
-use crate::{
-    config::{LogConfig, P2pConfig, RpcConfig, StorageConfig},
-};
+use crate::config::{LogConfig, P2pConfig, RpcConfig, StorageConfig};
 
 /// An extension trait for [`ServiceContext`]
 pub trait ServiceContextExt {
@@ -42,9 +40,9 @@ pub trait ServiceContextExt {
     }
 }
 
-impl<T> ServiceContextExt for T 
+impl<T> ServiceContextExt for T
 where
-    T: AsRef<ServiceContext>
+    T: AsRef<ServiceContext>,
 {
     fn as_iroh_router(&self) -> Option<&Router> {
         self.as_ref().as_iroh_router()

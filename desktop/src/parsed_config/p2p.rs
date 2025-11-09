@@ -2,10 +2,8 @@ use clap::Args;
 use serde::{Deserialize, Serialize};
 
 use crate::parsed_config::error::ParsedConfigError;
-use caretta_sync_core::{util::{Emptiable, Mergeable}};
 use caretta_sync_core::types::Base32Bytes;
-
-
+use caretta_sync_core::util::{Emptiable, Mergeable};
 
 #[derive(Args, Clone, Debug, Default, Deserialize, Serialize)]
 pub struct ParsedP2pConfig {
@@ -63,7 +61,7 @@ impl Mergeable for ParsedP2pConfig {
     }
 }
 
-#[cfg(feature="server")]
+#[cfg(feature = "server")]
 mod server {
     use std::array::TryFromSliceError;
 
@@ -81,8 +79,8 @@ mod server {
                     .secret_key
                     .ok_or(ParsedConfigError::MissingConfig("p2p.secret_key"))
                     .map(|x| {
-                        let buf: [u8;32] = x.as_ref().try_into()?;
-                        Result::<SecretKey,TryFromSliceError>::Ok(SecretKey::from_bytes(&buf))
+                        let buf: [u8; 32] = x.as_ref().try_into()?;
+                        Result::<SecretKey, TryFromSliceError>::Ok(SecretKey::from_bytes(&buf))
                     })??,
                 enable_n0: raw
                     .enable_n0

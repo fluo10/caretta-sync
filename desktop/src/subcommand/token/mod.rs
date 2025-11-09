@@ -1,12 +1,13 @@
 use caretta_sync_core::util::RunnableCommand;
 use clap::{Args, Subcommand};
 
-use crate::subcommand::token::{list::TokenListCommandArgs, revoke::TokenRevokeCommandArgs, show::TokenShowCommandArgs};
+use crate::subcommand::token::{
+    list::TokenListCommandArgs, revoke::TokenRevokeCommandArgs, show::TokenShowCommandArgs,
+};
 
 mod list;
 mod revoke;
 mod show;
-
 
 #[derive(Debug, Args)]
 pub struct TokenCommandArgs {

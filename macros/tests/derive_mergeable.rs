@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use caretta_sync_core::{util::Mergeable};
+use caretta_sync_core::util::Mergeable;
 use caretta_sync_macros::Mergeable;
 
 #[derive(Clone, Debug, PartialEq)]

@@ -1,6 +1,5 @@
 use std::marker::PhantomData;
 
-
 use caretta_sync_core::util::RunnableCommand;
 use clap::Args;
 use sea_orm_migration::MigratorTrait;
@@ -8,8 +7,7 @@ use sea_orm_migration::MigratorTrait;
 use crate::args::ConfigArgs;
 
 #[derive(Debug, Args)]
-pub struct ConfigClientCommandArgs
-{
+pub struct ConfigClientCommandArgs {
     #[command(flatten)]
     config: ConfigArgs,
     /// Include default config.
@@ -17,8 +15,7 @@ pub struct ConfigClientCommandArgs
     all: bool,
 }
 
-impl RunnableCommand for ConfigClientCommandArgs
-{
+impl RunnableCommand for ConfigClientCommandArgs {
     #[tokio::main]
     async fn run(self, app_name: &'static str) {
         let mut config = self.config.into_parsed_config(app_name);

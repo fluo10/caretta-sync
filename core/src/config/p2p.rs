@@ -1,4 +1,3 @@
-
 use iroh::{
     Endpoint, PublicKey, SecretKey,
     discovery::{
@@ -8,9 +7,7 @@ use iroh::{
     protocol::Router,
 };
 
-use crate::{
-        util::{Emptiable, Mergeable},
-};
+use crate::util::{Emptiable, Mergeable};
 
 #[derive(Clone, Debug)]
 pub struct P2pConfig {

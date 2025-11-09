@@ -1,8 +1,6 @@
 use std::{marker::PhantomData, path::PathBuf};
 
-use crate::{
-    parsed_config::ParsedConfig,
-};
+use crate::parsed_config::ParsedConfig;
 
 use caretta_sync_core::util::{Emptiable, Mergeable};
 use clap::Args;

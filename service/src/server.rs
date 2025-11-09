@@ -10,14 +10,17 @@ use tower_layer::Identity;
 use tower_service::Service;
 
 use caretta_sync_core::{
-    context::{ServiceContext, ServerContext},
+    context::{ServerContext, ServiceContext},
     proto::api::{
         device::device_service_server::DeviceServiceServer,
         invitation_token::invitation_token_service_server::InvitationTokenServiceServer,
     },
 };
 
-use crate::{error::ServiceError, service_handler::{DeviceServiceHandler, InvitationTokenServiceHandler}};
+use crate::{
+    error::ServiceError,
+    service_handler::{DeviceServiceHandler, InvitationTokenServiceHandler},
+};
 
 #[async_trait::async_trait]
 pub trait ServerTrait {
@@ -32,12 +35,14 @@ pub struct Server {
 impl Server {
     pub fn new(context: ServerContext) -> Self {
         let context = Arc::new(context);
-        let backend_context : Arc<dyn AsRef<ServiceContext> + Send + Sync> = context.clone();
-        
+        let backend_context: Arc<dyn AsRef<ServiceContext> + Send + Sync> = context.clone();
+
         Self {
             context: context.clone(),
             tonic_router: tonic::transport::Server::builder()
-                .add_service(DeviceServiceServer::new(DeviceServiceHandler::new(&backend_context)))
+                .add_service(DeviceServiceServer::new(DeviceServiceHandler::new(
+                    &backend_context,
+                )))
                 .add_service(InvitationTokenServiceServer::new(
                     InvitationTokenServiceHandler::new(&backend_context),
                 )),

@@ -13,7 +13,6 @@ pub struct ClientContext {
     pub rpc_config: RpcConfig,
 }
 
-
 impl AsRef<ClientContext> for ClientContext {
     fn as_ref(&self) -> &ClientContext {
         self

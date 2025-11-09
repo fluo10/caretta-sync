@@ -16,6 +16,8 @@ pub struct Server;
 #[async_trait::async_trait]
 impl ServerTrait for Server {
     async fn serve(context: ServerContext) -> Result<(), Error> {
-        caretta_sync::core::server::Server::new(context).serve().await
+        caretta_sync::core::server::Server::new(context)
+            .serve()
+            .await
     }
 }

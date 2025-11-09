@@ -3,7 +3,6 @@ use clap::Args;
 
 use crate::args::TokenIdentifierArgs;
 
-
 /// Approve an authorization request
 #[derive(Args, Debug)]
 pub struct TokenRevokeCommandArgs {

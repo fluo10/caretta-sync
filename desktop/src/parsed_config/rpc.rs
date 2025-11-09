@@ -2,12 +2,11 @@ use clap::Args;
 use serde::{Deserialize, Serialize};
 use url::Url;
 
+use crate::parsed_config::error::ParsedConfigError;
 use caretta_sync_core::{
     config::RpcConfig,
     util::{Emptiable, Mergeable},
 };
-use crate::parsed_config::error::ParsedConfigError;
-
 
 impl TryFrom<ParsedRpcConfig> for RpcConfig {
     type Error = ParsedConfigError;

@@ -3,12 +3,14 @@ use std::sync::Arc;
 use caretta_sync_core::{context::ServiceContext, proto::api::invitation_token::*};
 use tonic::{Request, Response};
 pub struct InvitationTokenServiceHandler {
-    context: Arc<dyn AsRef<ServiceContext> + Send + Sync>
+    context: Arc<dyn AsRef<ServiceContext> + Send + Sync>,
 }
 
 impl InvitationTokenServiceHandler {
     pub fn new(context: &Arc<dyn AsRef<ServiceContext> + Send + Sync>) -> Self {
-        Self{context: context.clone()}
+        Self {
+            context: context.clone(),
+        }
     }
 }
 

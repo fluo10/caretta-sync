@@ -15,13 +15,15 @@ impl From<TokenIdentifierArgs> for caretta_sync_core::proto::api::invitation_tok
     fn from(value: TokenIdentifierArgs) -> Self {
         use caretta_sync_core::proto::api::invitation_token::identifier::Value;
         Self {
-            value: Some(
-                match (value.id, value.token) {
-                    (Some(x), None) => Value::Id(x.into()),
-                    (None, Some(x)) => Value::Token(caretta_sync_core::proto::api::invitation_token::InvitationToken { value: x.into()}),
-                    (_, _) => unreachable!("The parsed argument must be one."),
-                },
-            ),
+            value: Some(match (value.id, value.token) {
+                (Some(x), None) => Value::Id(x.into()),
+                (None, Some(x)) => Value::Token(
+                    caretta_sync_core::proto::api::invitation_token::InvitationToken {
+                        value: x.into(),
+                    },
+                ),
+                (_, _) => unreachable!("The parsed argument must be one."),
+            }),
         }
     }
 }
