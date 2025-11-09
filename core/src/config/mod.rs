@@ -1,16 +1,13 @@
-pub mod error;
 mod log;
+#[cfg(feature = "service")]
 mod p2p;
 mod rpc;
+#[cfg(feature = "service")]
 mod storage;
-mod parsed;
-pub use parsed::ParsedConfig;
 
-pub use error::ConfigError;
-
-
-pub use p2p::{P2pConfig, PartialP2pConfig};
-pub use rpc::*;
-pub use storage::{PartialStorageConfig, StorageConfig};
-pub use log::{LogConfig, PartialLogConfig, LogLevel, LogLevelParseError};
-
+pub use log::LogConfig;
+#[cfg(feature = "service")]
+pub use p2p::P2pConfig;
+pub use rpc::RpcConfig;
+#[cfg(feature = "service")]
+pub use storage::StorageConfig;

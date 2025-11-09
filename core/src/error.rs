@@ -4,11 +4,7 @@ use tonic::Status;
 use crate::proto::ProtoDeserializeError;
 
 #[derive(thiserror::Error, Debug)]
-pub enum Error {
-    #[error("Base64 decode error: {0}")]
-    Base64Decode(#[from] base64::DecodeError),
-    #[error("Config error: {0}")]
-    Config(#[from] crate::config::error::ConfigError),
+pub enum CoreError {
     #[error("Infallible: {0}")]
     Infallible(#[from] std::convert::Infallible),
     #[error("IO Error: {0}")]
@@ -19,15 +15,8 @@ pub enum Error {
     MissingConfig(&'static str),
     #[error("Parse OsString error: {0:?}")]
     OsStringConvert(std::ffi::OsString),
-    #[cfg(feature = "cli")]
-    #[error("Parse args error: {0}")]
-    ParseCommand(#[from] clap::Error),
     #[error("slice parse error: {0}")]
     SliceTryFrom(#[from] TryFromSliceError),
-    #[error("toml deserialization error: {0}")]
-    TomlDe(#[from] toml::de::Error),
-    #[error("toml serialization error: {0}")]
-    TomlSer(#[from] toml::ser::Error),
     #[error("protobuf serialization error: {0}")]
     ProtoSerialize(#[from] crate::proto::ProtoSerializeError),
     #[error("protobuf deserialization error: {0}")]
@@ -36,22 +25,20 @@ pub enum Error {
     LocalDb(#[from] sea_orm::DbErr),
     #[error("Tripod id error: {0}")]
     Mtid(#[from] mtid::Error),
-    #[error("Docs open error: {0}")]
-    DocsOpen(anyhow::Error),
     #[error("Tonic transport error: {0}")]
-    TonicTransport(#[from] tonic::transport::Error)
+    TonicTransport(#[from] tonic::transport::Error),
 }
 
-impl From<std::ffi::OsString> for Error {
-    fn from(s: OsString) -> Error {
+impl From<std::ffi::OsString> for CoreError {
+    fn from(s: OsString) -> CoreError {
         Self::OsStringConvert(s)
     }
 }
 
-impl From<Error> for Status {
-    fn from(value: Error) -> Self {
+impl From<CoreError> for Status {
+    fn from(value: CoreError) -> Self {
         match value {
-            Error::ProtoDeserialize(x) => match x {
+            CoreError::ProtoDeserialize(x) => match x {
                 ProtoDeserializeError::MissingField(x) => {
                     Self::invalid_argument(format!("{} is required", x))
                 }

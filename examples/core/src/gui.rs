@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 use caretta_sync::{bevy::peer::PeerPlugin, cli::RunnableCommand};
 
-
 pub struct Gui {}
 
 impl RunnableCommand for Gui {

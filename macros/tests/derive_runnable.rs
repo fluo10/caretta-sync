@@ -1,4 +1,4 @@
-use caretta_sync_cli::RunnableCommand;
+use caretta_sync_core::util::RunnableCommand;
 use caretta_sync_macros::RunnableCommand;
 
 struct RunnableCommandStruct1;

@@ -9,24 +9,29 @@ exclude = ["/.github", "/.gitignore", "/.gitmodules", "/.vscode"]
 
 [features]
 default = ["macros"]
-bevy = ["dep:caretta-sync-bevy"]
-cli = ["dep:caretta-sync-cli"]
-desktop = ["cli", "bevy"]
+service = ["dep:caretta-sync-service", "caretta-sync-core/service"]
+desktop = ["dep:caretta-sync-desktop"]
+client = ["caretta-sync-core/client", "desktop"]
+cli = ["client", "caretta-sync-desktop/cli"]
+gui = ["client", "caretta-sync-desktop/gui"]
+server = ["service", "desktop", "caretta-sync-desktop/server"]
+
 macros = ["dep:caretta-sync-macros"]
 test = ["caretta-sync-core/test"]
 
 [dependencies]
 caretta-sync-bevy = { path = "bevy", version = "0.0.2", optional = true }
 caretta-sync-core.workspace = true
-caretta-sync-cli = { path="cli", version = "0.0.2", optional = true }
+caretta-sync-desktop = { workspace = true, optional = true }
 caretta-sync-macros = { path="macros", version = "0.0.2", optional = true}
+caretta-sync-service = { workspace = true, optional = true }
+thiserror.workspace = true
 
 [dev-dependencies]
 caretta-sync-core = {workspace = true, features = ["test"]}
 
 [workspace]
-members = [ ".", "core", "macros", "cli", "examples/*" , "bevy"]
-exclude = [ "mtid" ]
+members = [ ".", "core", "macros", "examples/*" , "bevy", "service", "desktop",]
 resolver = "3"
 
 [workspace.package]
@@ -38,15 +43,20 @@ repository = "https://github.com/fluo10/caretta-sync"
 
 [workspace.dependencies]
 async-trait = "0.1.89"
+base32 = "0.5.1"
 bevy = "0.17.2"
 mtid = { version = "0.6.0", features=["prost", "sea-orm", "serde",]}
 chrono = "0.4.41"
 ciborium = "0.2.2"
 clap = { version = "4.5.38", features = ["derive"] }
+caretta-sync = {version = "0.0.2", path = "." }
 caretta-sync-core = {version = "0.0.2", path = "core"}
-caretta-sync-cli = {version = "0.0.2", path = "cli"}
+caretta-sync-desktop = {version = "0.0.2", path = "desktop"}
+caretta-sync-service = {version = "0.0.2", path = "service"}
+dirs = "6.0.0"
 futures = { version = "0.3.31", features = ["executor"] }
 iroh = { version = "0.94.0", features = ["discovery-local-network", "discovery-pkarr-dht"] }
+iroh-ping = "0.6.0"
 iroh-tickets = "0.1.0"
 prost = "0.14.1"
 prost-types = "0.14.1"
@@ -54,6 +64,7 @@ rand = "0.9.2"
 sea-orm = {version = "1.1.16", default-features = false, features=["macros", "with-chrono", "with-uuid", "runtime-tokio-rustls", "sqlx-sqlite"]}
 sea-orm-migration = "1.1.16"
 serde = { version = "1.0.219", features = ["derive"] }
+tempfile = "3.20.0"
 thiserror = "2.0.12"
 tokio = { version = "1.45.0", features = ["macros", "rt", "rt-multi-thread"] }
 tokio-stream = "0.1.17"
@@ -62,9 +73,9 @@ tonic-prost = "0.14.0"
 tonic-prost-build = "0.14.0"
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
-url = { version = "2.5.7", features = ["serde"] }
+url = "2.5.7"
 uuid = { version = "1.17.0", features = ["v7"] }
-
+whoami = "1.6.1"
 
 [profile.dev]
 opt-level = 1
