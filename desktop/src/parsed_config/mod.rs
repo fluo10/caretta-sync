@@ -22,7 +22,7 @@ pub use rpc::ParsedRpcConfig;
 pub use storage::ParsedStorageConfig;
 
 #[cfg(feature = "server")]
-use sea_orm_migration::MigratorTrait;
+use sea_orm_migration::{sea_orm::DatabaseConnection, MigratorTrait};
 use serde::{Deserialize, Serialize, ser::Error};
 
 use caretta_sync_core::{
@@ -37,15 +37,21 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use crate::types::Verbosity;
+
 #[derive(Args, Clone, Debug, Default, Deserialize, Serialize)]
 pub struct ParsedConfig {
     #[command(flatten)]
+    #[serde(default, skip_serializing_if  = "ParsedStorageConfig::is_empty")]
     pub storage: ParsedStorageConfig,
     #[command(flatten)]
+    #[serde(default, skip_serializing_if  = "ParsedRpcConfig::is_empty")]
     pub rpc: ParsedRpcConfig,
     #[command(flatten)]
+    #[serde(default, skip_serializing_if  = "ParsedP2pConfig::is_empty")]
     pub p2p: ParsedP2pConfig,
     #[command(flatten)]
+    #[serde(default, skip_serializing_if  = "ParsedLogConfig::is_empty")]
     pub log: ParsedLogConfig,
 }
 
@@ -69,7 +75,7 @@ impl ParsedConfig {
 
     /// Fill empty configuration fields with database values
     #[cfg(feature = "server")]
-    pub async fn with_database<M>(mut self, migrator: PhantomData<M>) -> Self
+    pub async fn with_database<M>(mut self, migrator: PhantomData<M>) -> (Self, DatabaseConnection)
     where
         M: MigratorTrait,
     {
@@ -80,7 +86,7 @@ impl ParsedConfig {
             .await;
         let p2p_config = P2pConfig::from(P2pConfigModel::get_or_try_init(&db).await.unwrap());
         self.merge(ParsedP2pConfig::from(p2p_config));
-        self
+        (self, db)
     }
 
     /// Remove server-only configurations
@@ -148,13 +154,11 @@ impl ParsedConfig {
     }
 
     #[cfg(feature = "server")]
-    pub async fn into_server_context<M>(
+    pub async fn into_server_context(
         self,
         app_name: &'static str,
-        migrator: PhantomData<M>,
+        database_connection: DatabaseConnection
     ) -> Result<ServerContext, ParsedConfigError>
-    where
-        M: MigratorTrait,
     {
         use caretta_sync_core::context::ServiceContext;
 
@@ -162,7 +166,6 @@ impl ParsedConfig {
         let rpc_config = config.to_rpc_config()?;
         let p2p_config = config.to_p2p_config()?;
         let storage_config = config.to_storage_config()?;
-        let database_connection = storage_config.to_database_connection(migrator).await;
         let iroh_router = p2p_config.to_iroh_router(app_name).await.unwrap();
         let service_context = ServiceContext {
             app_name,

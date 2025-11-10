@@ -11,27 +11,45 @@ exclude = ["/.github", "/.gitignore", "/.gitmodules", "/.vscode"]
 default = ["macros"]
 service = ["dep:caretta-sync-service", "caretta-sync-core/service"]
 desktop = ["dep:caretta-sync-desktop"]
+mobile = ["dep:caretta-sync-mobile", "service", "egui" ]
 client = ["caretta-sync-core/client", "desktop"]
 cli = ["client", "caretta-sync-desktop/cli"]
 gui = ["client", "caretta-sync-desktop/gui"]
+egui = ["dep:caretta-sync-egui"]
 server = ["service", "desktop", "caretta-sync-desktop/server"]
 
 macros = ["dep:caretta-sync-macros"]
 test = ["caretta-sync-core/test"]
 
+[[example]]
+name = "cli"
+required-features = ["cli"]
+
+[[example]]
+name = "server"
+required-features = ["server"]
+
+[[example]]
+name = "gui"
+required-features = ["gui", "egui", "macros"]
+
 [dependencies]
-caretta-sync-bevy = { path = "bevy", version = "0.0.2", optional = true }
 caretta-sync-core.workspace = true
 caretta-sync-desktop = { workspace = true, optional = true }
+caretta-sync-egui = { workspace = true, optional = true }
 caretta-sync-macros = { path="macros", version = "0.0.2", optional = true}
+caretta-sync-mobile = { workspace = true, optional = true }
 caretta-sync-service = { workspace = true, optional = true }
 thiserror.workspace = true
 
 [dev-dependencies]
+async-trait.workspace = true
 caretta-sync-core = {workspace = true, features = ["test"]}
+clap.workspace = true
+sea-orm-migration.workspace = true
 
 [workspace]
-members = [ ".", "core", "macros", "examples/*" , "bevy", "service", "desktop",]
+members = [ ".", "core", "macros", "examples/mobile" , "bevy", "service", "desktop", "egui", "mobile",]
 resolver = "3"
 
 [workspace.package]
@@ -51,8 +69,10 @@ ciborium = "0.2.2"
 clap = { version = "4.5.38", features = ["derive"] }
 caretta-sync = {version = "0.0.2", path = "." }
 caretta-sync-core = {version = "0.0.2", path = "core"}
-caretta-sync-desktop = {version = "0.0.2", path = "desktop"}
-caretta-sync-service = {version = "0.0.2", path = "service"}
+caretta-sync-desktop = { version = "0.0.2", path = "desktop" }
+caretta-sync-egui = { version = "0.0.2", path = "egui" }
+caretta-sync-mobile = { version = "0.0.2", path = "mobile" }
+caretta-sync-service = { version = "0.0.2", path = "service" }
 dirs = "6.0.0"
 futures = { version = "0.3.31", features = ["executor"] }
 iroh = { version = "0.94.0", features = ["discovery-local-network", "discovery-pkarr-dht"] }

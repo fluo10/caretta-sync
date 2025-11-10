@@ -7,17 +7,17 @@ use caretta_sync_core::util::{Emptiable, Mergeable};
 
 #[derive(Args, Clone, Debug, Default, Deserialize, Serialize)]
 pub struct ParsedP2pConfig {
-    #[arg(long = "server")]
+    #[arg(long = "p2p-enabled", env = "P2P_ENABLED")]
     pub enabled: Option<bool>,
     #[serde(skip_serializing)]
-    #[arg(long)]
+    #[arg(long = "p2p-secret-key", env = "P2P_SECRET_KEY")]
     pub secret_key: Option<Base32Bytes>,
     #[serde(skip_deserializing)]
     #[arg(skip)]
     pub public_key: Option<Base32Bytes>,
-    #[arg(long)]
+    #[arg(long = "p2p-enable-n0", env = "P2P_ENABLE_N0")]
     pub enable_n0: Option<bool>,
-    #[arg(long)]
+    #[arg(long = "p2p-enable-mdns", env = "P2P_ENABLE_MDNS")]
     pub enable_mdns: Option<bool>,
 }
 

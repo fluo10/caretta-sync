@@ -21,6 +21,7 @@ impl TryFrom<ParsedRpcConfig> for RpcConfig {
 
 #[derive(Args, Clone, Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct ParsedRpcConfig {
+    #[arg(long = "rpc-endpoint-url", env = "RPC_ENDPOINT_URL")]
     pub endpoint_url: Option<Url>,
 }
 
