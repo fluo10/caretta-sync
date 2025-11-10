@@ -9,6 +9,8 @@ pub use caretta_sync_service::{invitation_token, model, proto_ext, service_handl
 
 #[cfg(feature = "desktop")]
 pub use caretta_sync_desktop::{args, parsed_config};
+#[cfg(any(feature = "gui", feature = "server"))]
+pub use caretta_sync_desktop::{parser};
 
 #[cfg(feature = "cli")]
 pub use caretta_sync_desktop::subcommand;

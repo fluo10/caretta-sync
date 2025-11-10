@@ -1,10 +1,9 @@
 [package]
-name = "caretta-sync-example-cli"
+name = "caretta-sync-mobile"
 edition.workspace = true
 version.workspace = true
 description.workspace = true
 license.workspace = true
 repository.workspace = true
-publish = false
 
 [dependencies]

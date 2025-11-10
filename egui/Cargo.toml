@@ -1,0 +1,17 @@
+[package]
+name = "caretta-sync-egui"
+edition.workspace = true
+version.workspace = true
+description = "GUI implementation using egui for caretta-sync"
+license.workspace = true
+repository.workspace = true
+
+[features]
+default = []
+desktop = []
+mobile = ["dep:caretta-sync-service", "dep:caretta-sync-mobile"]
+
+[dependencies]
+caretta-sync-core.workspace = true
+caretta-sync-mobile = { workspace = true, optional = true }
+caretta-sync-service = { workspace = true, optional = true }

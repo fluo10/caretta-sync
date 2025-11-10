@@ -2,7 +2,7 @@ use sea_orm::DatabaseConnection;
 use tonic::transport::Endpoint;
 
 use crate::{
-    config::{RpcConfig, StorageConfig},
+    config::{RpcConfig},
     error::CoreError,
 };
 

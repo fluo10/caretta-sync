@@ -7,9 +7,9 @@ use caretta_sync_core::util::{Emptiable, Mergeable};
 /// A storage config parsed from file, args and enviroment variables
 #[derive(Args, Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct ParsedStorageConfig {
-    #[arg(long)]
+    #[arg(long, env)]
     pub data_dir: Option<PathBuf>,
-    #[arg(long)]
+    #[arg(long, env)]
     pub cache_dir: Option<PathBuf>,
 }
 
