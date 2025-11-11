@@ -75,8 +75,8 @@ caretta-sync-mobile = { version = "0.0.2", path = "mobile" }
 caretta-sync-service = { version = "0.0.2", path = "service" }
 dirs = "6.0.0"
 futures = { version = "0.3.31", features = ["executor"] }
-iroh = { version = "0.94.0", features = ["discovery-local-network", "discovery-pkarr-dht"] }
-iroh-ping = "0.6.0"
+iroh = { version = "0.95.1", features = ["discovery-local-network", "discovery-pkarr-dht"] }
+iroh-ping = "0.7.0"
 iroh-tickets = "0.1.0"
 prost = "0.14.1"
 prost-types = "0.14.1"
