@@ -3,7 +3,7 @@ mod error;
 use chrono::{DateTime, Duration, Local, SubsecRound, Utc};
 pub use error::InvitationTokenDeserializeError;
 use iroh::{Endpoint, EndpointId, PublicKey};
-use mtid::Dtid;
+use caretta_id::CarettaId;
 use sea_orm::DatabaseConnection;
 
 use crate::error::ServiceError;
@@ -11,7 +11,7 @@ use crate::error::ServiceError;
 #[derive(Clone, Debug, PartialEq)]
 pub struct InvitationToken {
     endpoint_id: EndpointId,
-    token_id: Dtid,
+    token_id: CarettaId,
     expires_at: DateTime<Local>,
 }
 
@@ -22,13 +22,13 @@ impl InvitationToken {
     const ENDPOINT_LENGTH: usize = EndpointId::LENGTH;
     const ENDPOINT_ID_END: usize = Self::ENDPOINT_ID_START + EndpointId::LENGTH;
     const TOKEN_ID_START: usize = Self::ENDPOINT_ID_END;
-    const TOKEN_ID_LENGTH: usize = ((u32::BITS / 8) as usize);
+    const TOKEN_ID_LENGTH: usize = ((u64::BITS / 8) as usize);
     const TOKEN_ID_END: usize = Self::TOKEN_ID_START + Self::TOKEN_ID_LENGTH;
     const EXPIRES_AT_START: usize = Self::TOKEN_ID_END;
     const EXPIRES_AT_LENGTH: usize = (i64::BITS / 8) as usize;
     const EXPIRES_AT_END: usize = Self::EXPIRES_AT_START + Self::EXPIRES_AT_LENGTH;
 
-    pub fn new(endpoint_id: EndpointId, token_id: Dtid, expires_at: DateTime<Local>) -> Self {
+    pub fn new(endpoint_id: EndpointId, token_id: CarettaId, expires_at: DateTime<Local>) -> Self {
         Self {
             endpoint_id,
             token_id,
@@ -40,7 +40,7 @@ impl InvitationToken {
         buf[Self::ENDPOINT_ID_START..Self::ENDPOINT_ID_END]
             .copy_from_slice(self.endpoint_id.as_bytes());
         buf[Self::TOKEN_ID_START..Self::TOKEN_ID_END]
-            .copy_from_slice(&u32::from(self.token_id).to_be_bytes());
+            .copy_from_slice(&u64::from(self.token_id).to_be_bytes());
         buf[Self::EXPIRES_AT_START..Self::EXPIRES_AT_END]
             .copy_from_slice(&self.expires_at.timestamp().to_be_bytes());
 
@@ -53,7 +53,7 @@ impl InvitationToken {
                 .try_into()
                 .unwrap(),
         )?;
-        let token_id = u32::from_be_bytes(
+        let token_id = u64::from_be_bytes(
             bytes[Self::TOKEN_ID_START..Self::TOKEN_ID_END]
                 .try_into()
                 .unwrap(),
@@ -91,7 +91,7 @@ impl InvitationToken {
 #[cfg(test)]
 mod tests {
     use iroh::SecretKey;
-    use mtid::Dtid;
+    use caretta_id::CarettaId;
 
     use super::*;
 
@@ -99,7 +99,7 @@ mod tests {
     fn bytes_conversion() {
         let payload = InvitationToken {
             endpoint_id: SecretKey::generate(&mut rand::rng()).public(),
-            token_id: Dtid::random(),
+            token_id: CarettaId::random(),
             expires_at: Local::now().round_subsecs(0),
         };
         let bytes = payload.to_bytes();

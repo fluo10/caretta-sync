@@ -1,6 +1,6 @@
 use caretta_sync_core::config::P2pConfig;
 use iroh::{PublicKey, SecretKey};
-use mtid::Dtid;
+use caretta_id::CarettaId;
 use sea_orm::{ActiveValue::Set, entity::prelude::*, sea_query::Mode};
 
 use crate::model::types::SecretKeyBlob;

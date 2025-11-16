@@ -9,7 +9,7 @@ use caretta_sync_core::{
         ListRequest, device_service_client::DeviceServiceClient, list_request::Status,
     },
 };
-use mtid::Dtid;
+use caretta_id::CarettaId;
 
 #[derive(Debug, Args)]
 #[group(multiple = false)]

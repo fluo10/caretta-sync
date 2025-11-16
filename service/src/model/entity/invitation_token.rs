@@ -2,7 +2,7 @@ use core::time;
 use std::convert::Infallible;
 
 use chrono::{DateTime, Duration, DurationRound, Local, SubsecRound};
-use mtid::Dtid;
+use caretta_id::CarettaId;
 use sea_orm::{ActiveValue::Set, entity::prelude::*};
 use uuid::Uuid;
 
@@ -18,8 +18,8 @@ pub struct Model {
     #[sea_orm(primary_key)]
     pub id: u32,
 
-    /// Public [`Dtid`]
-    pub public_id: Dtid,
+    /// Public [`CarettaId`]
+    pub public_id: CarettaId,
     pub created_at: DateTime<Local>,
 
     /// The timestamp when the token expires
@@ -39,7 +39,7 @@ impl Model {
 pub enum Relation {}
 
 impl Entity {
-    pub fn find_by_public_id(id: Dtid) -> Select<Entity> {
+    pub fn find_by_public_id(id: CarettaId) -> Select<Entity> {
         Self::find().filter(Column::PublicId.eq(id))
     }
 }
@@ -52,7 +52,7 @@ impl ActiveModelBehavior for ActiveModel {
     {
         if insert {
             for _ in 0..100 {
-                let public_id = Dtid::random();
+                let public_id = CarettaId::random();
                 if let Some(_) = Entity::find_by_public_id(public_id).one(db).await? {
                     continue;
                 } else {

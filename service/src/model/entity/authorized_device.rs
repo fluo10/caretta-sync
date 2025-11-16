@@ -1,7 +1,7 @@
 //! Structs about cached remote_node.
 
 use iroh::PublicKey;
-use mtid::Dtid;
+use caretta_id::CarettaId;
 use sea_orm::{ActiveValue::Set, entity::prelude::*};
 
 use crate::model::types::PublicKeyBlob;
@@ -22,8 +22,8 @@ pub struct Model {
 
     pub uuid: Uuid,
 
-    /// public [`Dtid`] of the node.
-    pub public_id: Dtid,
+    /// public [`CarettaId`] of the node.
+    pub public_id: CarettaId,
 
     /// Iroh public key
     pub public_key: PublicKeyBlob,
@@ -54,7 +54,7 @@ mod tests {
 
         let active_model = ActiveModel {
             uuid: Set(Uuid::now_v7()),
-            public_id: Set(Dtid::random()),
+            public_id: Set(CarettaId::random()),
             public_key: Set(PublicKeyBlob::from(
                 iroh::SecretKey::generate(&mut rand::rng()).public(),
             )),
