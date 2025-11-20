@@ -14,8 +14,6 @@ pub enum ServiceError {
     OsStringConvert(std::ffi::OsString),
     #[error("slice parse error: {0}")]
     SliceTryFrom(#[from] TryFromSliceError),
-    #[error("Local record error: {0}")]
-    LocalDb(#[from] sea_orm::DbErr),
-    #[error("Tripod id error: {0}")]
-    Mtid(#[from] caretta_id::Error),
+    #[error("Caretta id error: {0}")]
+    CarettaId(#[from] caretta_id::Error),
 }

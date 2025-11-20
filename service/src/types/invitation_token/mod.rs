@@ -1,10 +1,10 @@
 mod error;
 
+use caretta_sync_core::context::ServiceContextExt;
 use chrono::{DateTime, Duration, Local, SubsecRound, Utc};
 pub use error::InvitationTokenDeserializeError;
 use iroh::{Endpoint, EndpointId, PublicKey};
 use caretta_id::CarettaId;
-use sea_orm::DatabaseConnection;
 
 use crate::error::ServiceError;
 
@@ -22,19 +22,12 @@ impl InvitationToken {
     const ENDPOINT_LENGTH: usize = EndpointId::LENGTH;
     const ENDPOINT_ID_END: usize = Self::ENDPOINT_ID_START + EndpointId::LENGTH;
     const TOKEN_ID_START: usize = Self::ENDPOINT_ID_END;
-    const TOKEN_ID_LENGTH: usize = ((u64::BITS / 8) as usize);
+    const TOKEN_ID_LENGTH: usize = 5;
     const TOKEN_ID_END: usize = Self::TOKEN_ID_START + Self::TOKEN_ID_LENGTH;
     const EXPIRES_AT_START: usize = Self::TOKEN_ID_END;
     const EXPIRES_AT_LENGTH: usize = (i64::BITS / 8) as usize;
     const EXPIRES_AT_END: usize = Self::EXPIRES_AT_START + Self::EXPIRES_AT_LENGTH;
 
-    pub fn new(endpoint_id: EndpointId, token_id: CarettaId, expires_at: DateTime<Local>) -> Self {
-        Self {
-            endpoint_id,
-            token_id,
-            expires_at,
-        }
-    }
     pub fn to_bytes(&self) -> [u8; Self::LENGTH] {
         let mut buf = [0u8; Self::LENGTH];
         buf[Self::ENDPOINT_ID_START..Self::ENDPOINT_ID_END]
@@ -76,14 +69,18 @@ impl InvitationToken {
             expires_at,
         })
     }
-    pub async fn validate(
-        self,
-        local_endpoint: &Endpoint,
-        db: DatabaseConnection,
-    ) -> Result<bool, ServiceError> {
-        if self.endpoint_id != local_endpoint.id() {
-            return Ok(false);
-        }
+    pub async fn validate<T>(
+        &self,
+        context: &T
+    ) -> Result<bool, ServiceError>
+    where T: ServiceContextExt
+    {
+        todo!()
+    }
+    pub async fn new<T>(context: &T) -> Result<Self, ServiceError> 
+    where 
+    T: ServiceContextExt
+    {
         todo!()
     }
 }

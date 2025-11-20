@@ -6,8 +6,7 @@ use iroh::{
     discovery::{ConcurrentDiscovery, Discovery, DiscoveryError, DiscoveryItem},
     protocol::Router,
 };
-use sea_orm::{Database, DatabaseConnection};
-use sea_orm_migration::MigratorTrait;
+use redb::Database;
 
 use crate::config::{LogConfig, P2pConfig, RpcConfig, StorageConfig};
 
@@ -38,6 +37,9 @@ pub trait ServiceContextExt {
             None
         }
     }
+    fn as_local_database(&self) -> &Database;
+    fn as_cache_database(&self) -> &Database;
+
 }
 
 impl<T> ServiceContextExt for T
@@ -47,25 +49,32 @@ where
     fn as_iroh_router(&self) -> Option<&Router> {
         self.as_ref().as_iroh_router()
     }
+    fn as_local_database(&self) -> &Database {
+        self.as_ref().as_local_database()
+    }
+    fn as_cache_database(&self) -> &Database {
+        self.as_ref().as_cache_database()
+    }
 }
 
 /// A context for background process
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct ServiceContext {
     pub app_name: &'static str,
     pub storage_config: StorageConfig,
-    pub database_connection: DatabaseConnection,
+    pub local_database: Database,
+    pub cache_database: Database,
     pub iroh_router: Option<Router>,
 }
 impl ServiceContextExt for ServiceContext {
     fn as_iroh_router(&self) -> Option<&Router> {
         self.iroh_router.as_ref()
     }
-}
-
-impl AsRef<DatabaseConnection> for ServiceContext {
-    fn as_ref(&self) -> &DatabaseConnection {
-        &self.database_connection
+    fn as_cache_database(&self) -> &Database {
+        &self.cache_database
+    }
+    fn as_local_database(&self) -> &Database {
+        &self.local_database
     }
 }
 impl From<&ServiceContext> for Option<Endpoint> {

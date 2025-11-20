@@ -12,10 +12,8 @@ pub enum CoreError {
     OsStringConvert(std::ffi::OsString),
     #[error("slice parse error: {0}")]
     SliceTryFrom(#[from] TryFromSliceError),
-    #[error("Local record error: {0}")]
-    LocalDb(#[from] sea_orm::DbErr),
     #[error("Caretta id error: {0}")]
-    Mtid(#[from] caretta_id::Error),
+    CarettaId(#[from] caretta_id::Error),
 }
 
 impl From<std::ffi::OsString> for CoreError {

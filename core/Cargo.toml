@@ -10,7 +10,7 @@ repository.workspace = true
 default = []
 desktop = ["dep:clap"]
 test = ["dep:tempfile", ]
-service = ["dep:iroh-ping"]
+service = ["dep:iroh-ping", "dep:redb"]
 server = ["service", "desktop"]
 mobile = ["service"]
 client = ["desktop"]
@@ -19,16 +19,14 @@ client = ["desktop"]
 base32.workspace = true
 caretta-id.workspace = true
 chrono.workspace = true
+ciborium.workspace = true
 clap = {workspace = true, optional = true}
 dirs.workspace = true
 futures.workspace = true
 iroh.workspace = true
 iroh-ping = { workspace = true, optional = true }
 irpc.workspace = true
-prost.workspace = true
-prost-types.workspace = true
-sea-orm.workspace = true
-sea-orm-migration.workspace = true
+redb = { workspace = true, optional = true }
 serde.workspace = true
 sysinfo = "0.37.0"
 tempfile = { workspace = true, optional = true }
