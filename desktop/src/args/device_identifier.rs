@@ -1,12 +1,12 @@
 use caretta_sync_core::types::Base32Bytes;
 use clap::Args;
-use mtid::Dtid;
+use caretta_id::CarettaId;
 
 #[derive(Args, Clone, Debug)]
 #[group(multiple = false, required = true)]
 pub struct DeviceIdentifierArgs {
     #[arg(long)]
-    id: Option<Dtid>,
+    id: Option<CarettaId>,
     #[arg(long)]
     public_key: Option<Base32Bytes>,
     #[arg(long)]

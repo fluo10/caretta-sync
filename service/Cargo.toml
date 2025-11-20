@@ -13,23 +13,22 @@ server = ["caretta-sync-core/server"]
 
 [dependencies]
 async-trait.workspace = true
-axum = "0.8.6"
+caretta-id.workspace = true
 caretta-sync-core = { workspace=true, features = ["service"] }
 chrono.workspace = true
+ciborium.workspace = true
 clap.workspace = true
-http = "1.3.1"
 iroh.workspace = true
 iroh-ping.workspace = true
-mtid.workspace = true
+irpc.workspace = true
+n0-future.workspace = true
 rand.workspace = true
-sea-orm.workspace = true
-sea-orm-migration.workspace = true
+redb.workspace = true
+serde.workspace = true
 thiserror.workspace = true
 tokio.workspace = true
 tokio-stream.workspace = true
-tonic.workspace = true
-tower-layer = "0.3.3"
-tower-service = "0.3.3"
+tracing.workspace = true
 uuid.workspace = true
 
 [dev-dependencies]
