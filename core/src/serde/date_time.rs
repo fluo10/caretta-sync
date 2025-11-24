@@ -1,15 +1,15 @@
 //! Ser/de [`DateTime<Local>`]
 //! 
-//! Intended for use with serde's width attribute.
+//! Intended for use with serde's with attribute.
 //! 
 //! # Example
 //! ```
-//! # use caretta_sync_core::serde::date_time_local;
+//! # use caretta_sync_core::serde::date_time;
 //! # use chrono::{DateTime, NaiveDate, Utc};
 //! # use serde::{Deserialize, Serialize};
 //! #[derive(Debug, PartialEq, Deserialize, Serialize)]
 //! struct Foo {
-//!     #[serde(with = "date_time_local")]
+//!     #[serde(with = "date_time")]
 //!     timestamp: DateTime<Utc>
 //! }
 //! 
