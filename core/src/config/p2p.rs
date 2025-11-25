@@ -6,6 +6,7 @@ use iroh::{
     },
     protocol::Router,
 };
+use redb::Database;
 use serde::{Deserialize, Serialize};
 
 use crate::util::{Emptiable, Mergeable};

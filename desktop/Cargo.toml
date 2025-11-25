@@ -21,6 +21,8 @@ chrono.workspace = true
 clap.workspace = true
 dirs.workspace = true
 iroh = { workspace = true, optional = true }
+irpc.workspace = true
+redb.workspace = true
 serde.workspace = true
 thiserror.workspace = true
 tokio.workspace = true

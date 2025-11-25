@@ -44,7 +44,7 @@ impl StorageConfig {
     ///
     /// # Panic
     /// If initialize database is failed, then panic.
-    pub async fn to_local_database(&self) -> Database
+    pub fn to_local_database(&self) -> Database
     {
         Database::create(self.to_local_database_path()).expect("Failed to open local database")
     }
@@ -52,7 +52,7 @@ impl StorageConfig {
     ///
     /// # Panic
     /// If initialize database is failed, then panic.
-    pub async fn to_cache_database(&self) -> Database
+    pub fn to_cache_database(&self) -> Database
     {
         Database::create(self.to_cache_database_path()).expect("Failed to open local database")
     }

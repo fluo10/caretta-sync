@@ -21,9 +21,8 @@ pub async fn service_conext() -> &'static ServiceContext {
                 cache_dir,
             };
             let local_database = storage_config
-                .to_local_database()
-                .await;
-            let cache_database = storage_config.to_cache_database().await;
+                .to_local_database();
+            let cache_database = storage_config.to_cache_database();
             let iroh_router = None;
             ServiceContext {
                 app_name: TEST_APP_NAME,

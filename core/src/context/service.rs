@@ -8,7 +8,7 @@ use iroh::{
 };
 use redb::Database;
 
-use crate::config::{LogConfig, P2pConfig, RpcConfig, StorageConfig};
+use crate::config::{LogConfig, P2pConfig, StorageConfig};
 
 /// An extension trait for [`ServiceContext`]
 pub trait ServiceContextExt {

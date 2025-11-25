@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::parsed_config::error::ParsedConfigError;
 use caretta_sync_core::{
-    serde::byte_array,
+    serde::byte_array_option,
     util::{Emptiable, Mergeable},
 };
 
@@ -11,12 +11,12 @@ use caretta_sync_core::{
 pub struct ParsedP2pConfig {
     #[arg(long = "p2p-enabled", env = "P2P_ENABLED")]
     pub enabled: Option<bool>,
-    #[serde(skip_serializing, with = "byte_array")]
+    #[serde(skip_serializing)]
     #[arg(long = "p2p-secret-key", env = "P2P_SECRET_KEY")]
-    pub secret_key: Option<[u8;32]>,
+    pub secret_key: Option<Vec<u8>>,
     #[serde(skip_deserializing)]
     #[arg(skip)]
-    pub public_key: Option<[u8;32]>,
+    pub public_key: Option<Vec<u8>>,
     #[arg(long = "p2p-enable-n0", env = "P2P_ENABLE_N0")]
     pub enable_n0: Option<bool>,
     #[arg(long = "p2p-enable-mdns", env = "P2P_ENABLE_MDNS")]
@@ -81,7 +81,7 @@ mod server {
                     .secret_key
                     .ok_or(ParsedConfigError::MissingConfig("p2p.secret_key"))
                     .map(|x| {
-                        let buf: [u8; 32] = x.as_ref().try_into()?;
+                        let buf: [u8; 32] = x.as_slice().try_into()?;
                         Result::<SecretKey, TryFromSliceError>::Ok(SecretKey::from_bytes(&buf))
                     })??,
                 enable_n0: raw

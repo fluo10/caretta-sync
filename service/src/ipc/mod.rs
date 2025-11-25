@@ -10,7 +10,7 @@ use tracing::info;
 
 use crate::ipc::device_identifier::DeviceIdentifierExt;
 
-struct IpcActor {
+pub struct IpcActor {
     recv: tokio::sync::mpsc::Receiver<IpcMessage>,
     context: Arc<dyn AsRef<ServiceContext> + Sync + Send>
 }
