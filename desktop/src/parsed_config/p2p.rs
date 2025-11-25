@@ -2,19 +2,21 @@ use clap::Args;
 use serde::{Deserialize, Serialize};
 
 use crate::parsed_config::error::ParsedConfigError;
-use caretta_sync_core::types::Base32Bytes;
-use caretta_sync_core::util::{Emptiable, Mergeable};
+use caretta_sync_core::{
+    serde::byte_array,
+    util::{Emptiable, Mergeable},
+};
 
 #[derive(Args, Clone, Debug, Default, Deserialize, Serialize)]
 pub struct ParsedP2pConfig {
     #[arg(long = "p2p-enabled", env = "P2P_ENABLED")]
     pub enabled: Option<bool>,
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, with = "byte_array")]
     #[arg(long = "p2p-secret-key", env = "P2P_SECRET_KEY")]
-    pub secret_key: Option<Base32Bytes>,
+    pub secret_key: Option<[u8;32]>,
     #[serde(skip_deserializing)]
     #[arg(skip)]
-    pub public_key: Option<Base32Bytes>,
+    pub public_key: Option<[u8;32]>,
     #[arg(long = "p2p-enable-n0", env = "P2P_ENABLE_N0")]
     pub enable_n0: Option<bool>,
     #[arg(long = "p2p-enable-mdns", env = "P2P_ENABLE_MDNS")]

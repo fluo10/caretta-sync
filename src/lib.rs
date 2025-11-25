@@ -1,6 +1,6 @@
 pub mod error;
 
-pub use caretta_sync_core::{config, context, proto};
+pub use caretta_sync_core::{config, context};
 
 #[cfg(feature = "server")]
 pub use caretta_sync_service::server;
