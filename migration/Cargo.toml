@@ -1,0 +1,9 @@
+[package]
+name = "caretta-sync-migration"
+version.workspace = true
+edition = "2024"
+rust-version = "1.85.0"
+
+[dependencies]
+sea-orm-migration.workspace = true
+tokio.workspace = true

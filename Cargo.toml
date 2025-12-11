@@ -8,18 +8,16 @@ repository.workspace = true
 exclude = ["/.github", "/.gitignore", "/.gitmodules", "/.vscode"]
 
 [features]
-default = ["macros"]
-service = ["dep:caretta-sync-service", "caretta-sync-core/service"]
-desktop = ["dep:caretta-sync-desktop"]
-mobile = ["dep:caretta-sync-mobile", "service", "egui" ]
-client = ["caretta-sync-core/client", "desktop"]
-cli = ["client", "caretta-sync-desktop/cli"]
-gui = ["client", "caretta-sync-desktop/gui"]
-egui = ["dep:caretta-sync-egui"]
-server = ["service", "desktop", "caretta-sync-desktop/server"]
+default = []
+engine = []
+desktop = []
+gui = []
+mobile = ["engine", "gui"]
+client = ["desktop"]
+cli = ["client", "desktop"]
+server = ["engine", "desktop"]
 
 macros = ["dep:caretta-sync-macros"]
-test = ["caretta-sync-core/test"]
 
 [[example]]
 name = "cli"
@@ -31,24 +29,41 @@ required-features = ["server"]
 
 [[example]]
 name = "gui"
-required-features = ["gui", "egui", "macros"]
+required-features = ["gui", "desktop", "macros"]
 
 [dependencies]
-caretta-sync-core.workspace = true
-caretta-sync-desktop = { workspace = true, optional = true }
-caretta-sync-egui = { workspace = true, optional = true }
-caretta-sync-macros = { path="macros", version = "0.0.2", optional = true}
-caretta-sync-mobile = { workspace = true, optional = true }
-caretta-sync-service = { workspace = true, optional = true }
-thiserror.workspace = true
+base32 = "0.5.1"
+caretta-id = { version = "0.11.0-rc.1", features = [ "sea-orm", "serde" ] }
+caretta-sync-macros = {workspace = true, optional = true}
+caretta-sync-migration.workspace = true
+chrono.workspace = true
+ciborium = "0.2.2"
+ed25519-dalek = "3.0.0-pre"
+iroh = { version = "0.95.1", features = [ "discovery-local-network", "discovery-pkarr-dht" ] }
+iroh-docs = "0.95.0"
+iroh-ping = "0.7.0"
+irpc = "0.11.0"
+n0-future = "0.3.1"
+quinn = { package = "iroh-quinn", version = "0.14.0", default-features = false }
+rand = "0.9.2"
+sea-orm = { version = "2.0.0-rc", features = [ "sqlx-sqlite", "runtime-tokio-rustls", "macros", "with-uuid", "with-chrono" ] }
+sea-orm-migration = { version = "2.0.0-rc", features = [ "sqlx-sqlite", "runtime-tokio-rustls" ] }
+serde = "1.0.228"
+thiserror = "2.0.17"
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+uuid = { version = "1.18.1", features = ["v7"] }
+gethostname = "1.1.0"
+async-trait.workspace = true
+iroh-blobs = "0.97.0"
+iroh-gossip = "0.95.0"
 
 [dev-dependencies]
-async-trait.workspace = true
-caretta-sync-core = {workspace = true, features = ["test"]}
-clap.workspace = true
+tempfile.workspace = true
 
 [workspace]
-members = [ ".", "core", "macros", "examples/mobile" , "bevy", "service", "desktop", "egui", "mobile",]
+members = [ ".", "macros", "examples/mobile" , "migration",]
 resolver = "3"
 
 [workspace.package]
@@ -65,11 +80,8 @@ base32 = "0.5.1"
 bevy = "0.17.2"
 caretta-id = { version = "0.9.1", features=[ "redb", "serde" ]}
 caretta-sync = {version = "0.0.2", path = "." }
-caretta-sync-core = {version = "0.0.2", path = "core"}
-caretta-sync-desktop = { version = "0.0.2", path = "desktop" }
-caretta-sync-egui = { version = "0.0.2", path = "egui" }
-caretta-sync-mobile = { version = "0.0.2", path = "mobile" }
-caretta-sync-service = { version = "0.0.2", path = "service" }
+caretta-sync-macros = { version = "0.0.2", path = "macros" }
+caretta-sync-migration = {version = "0.0.2", path = "migration"}
 chrono = { version = "0.4.41", features = [ "serde" ]}
 ciborium = "0.2.2"
 clap = { version = "4.5.38", features = [ "derive", "env" ] }
@@ -83,7 +95,7 @@ n0-future = "0.3.1"
 quinn = { package = "iroh-quinn", version = "0.14.0" }
 quinn-udp = "0.5.14"
 rand = "0.9.2"
-redb = "3.1.0"
+sea-orm-migration = { version = "2.0.0-rc", features = [ "runtime-tokio-rustls", "sqlx-postgres" ] }
 serde = { version = "1.0.219", features = ["derive"] }
 tempfile = "3.20.0"
 thiserror = "2.0.12"
