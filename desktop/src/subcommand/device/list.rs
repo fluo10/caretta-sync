@@ -1,15 +1,11 @@
 use caretta_sync_core::util::RunnableCommand;
 use clap::Args;
-use tonic::Request;
 
 use crate::args::{ConfigArgs, DeviceIdentifierArgs};
 use caretta_sync_core::{
     context::ClientContext,
-    proto::api::device::{
-        ListRequest, device_service_client::DeviceServiceClient, list_request::Status,
-    },
 };
-use mtid::Dtid;
+use caretta_id::CarettaId;
 
 #[derive(Debug, Args)]
 #[group(multiple = false)]
@@ -20,17 +16,6 @@ struct FilterOptionArgs {
     all: bool,
 }
 
-impl From<FilterOptionArgs> for ListRequest {
-    fn from(value: FilterOptionArgs) -> Self {
-        let statuses: Vec<i32> = match (value.discovered, value.all) {
-            (true, true) => unreachable!(),
-            (true, false) => vec![Status::Discovered.into()],
-            (false, true) => vec![Status::Discovered.into(), Status::Authorized.into()],
-            (false, false) => vec![Status::Authorized.into()],
-        };
-        ListRequest { statuses }
-    }
-}
 
 #[derive(Debug, Args)]
 pub struct DeviceListCommandArgs {
@@ -50,11 +35,6 @@ impl RunnableCommand for DeviceListCommandArgs {
             config.init_tracing_subscriber();
         }
         let context = config.into_client_context(app_name).unwrap();
-        let mut client = DeviceServiceClient::connect(&context).await.unwrap();
-
-        let list_request = ListRequest::from(self.filter);
-        let request = Request::new(list_request);
-        let response = client.list(request).await.unwrap().into_inner();
-        println!("{:?}", response.items)
+        todo!()
     }
 }

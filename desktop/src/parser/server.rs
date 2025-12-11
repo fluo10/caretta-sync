@@ -3,7 +3,6 @@ use std::marker::PhantomData;
 use caretta_sync_core::{context::ServerContext, util::RunnableCommand};
 use caretta_sync_service::server::ServerTrait;
 use clap::Parser;
-use sea_orm_migration::MigratorTrait;
 
 use crate::{
     args::ConfigArgs,
@@ -12,13 +11,10 @@ use crate::{
 };
 
 #[derive(Parser, Debug)]
-pub struct ServerParser<M, S>
+pub struct ServerParser<S>
 where
-    M: MigratorTrait,
     S: ServerTrait,
 {
-    #[arg(skip)]
-    migrator: PhantomData<M>,
     #[arg(skip)]
     server: PhantomData<S>,
     #[command(flatten)]
@@ -26,9 +22,8 @@ where
     #[arg(short, long, value_name = "VERBOSITY")]
     check_config: Option<Option<Verbosity>>
 }
-impl<M, S> RunnableCommand for ServerParser<M, S>
+impl<S> RunnableCommand for ServerParser<S>
 where
-    M: MigratorTrait,
     S: ServerTrait,
 {
     #[tokio::main]
@@ -47,10 +42,9 @@ where
             check_config = false;
             verbosity =  Verbosity::Default;
         }
-        let (config, db) = config
+        let config = config
             .with_default(app_name)
-            .with_database(self.migrator)
-            .await;
+            .with_local_database();
         if check_config {
             if verbosity == Verbosity::Verbose {
                 let _ = config_to_print.insert(config.clone());
@@ -59,7 +53,7 @@ where
             config.init_tracing_subscriber();
         }
         let context = config
-            .into_server_context(app_name, db)
+            .into_server_context(app_name)
             .await
             .unwrap();
         if check_config {

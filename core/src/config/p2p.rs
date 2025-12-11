@@ -6,10 +6,12 @@ use iroh::{
     },
     protocol::Router,
 };
+use redb::Database;
+use serde::{Deserialize, Serialize};
 
 use crate::util::{Emptiable, Mergeable};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct P2pConfig {
     pub enabled: bool,
     pub secret_key: SecretKey,
@@ -42,5 +44,46 @@ impl P2pConfig {
         } else {
             Ok(None)
         }
+    }
+}
+
+impl PartialEq for P2pConfig {
+    fn eq(&self, other: &Self) -> bool {
+        (self.enabled == other.enabled)
+         || (self.enable_mdns == other.enable_mdns)
+          || (self.enable_n0 == other.enable_n0) 
+          || (self.secret_key.to_bytes() == other.secret_key.to_bytes())
+    }
+}
+
+#[cfg(feature = "service")]
+impl redb::Value for P2pConfig {
+    type SelfType<'a> = P2pConfig;
+
+    type AsBytes<'a> = Vec<u8>;
+
+    fn fixed_width() -> Option<usize> {
+        None
+    }
+
+    fn from_bytes<'a>(data: &'a [u8]) -> Self::SelfType<'a>
+    where
+        Self: 'a {
+        ciborium::from_reader(data).unwrap()
+    }
+
+    fn as_bytes<'a, 'b: 'a>(value: &'a Self::SelfType<'b>) -> Self::AsBytes<'a>
+    where
+        Self: 'b 
+        {
+        let mut buf = Vec::new();
+        ciborium::into_writer(value, &mut buf).unwrap();
+        buf        
+    }
+
+    fn type_name() -> redb::TypeName {
+        use redb::TypeName;
+
+        TypeName::new(stringify!(P2pConfig))
     }
 }

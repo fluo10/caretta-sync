@@ -11,4 +11,3 @@ bevy.workspace = true
 caretta-sync-core.workspace = true
 futures.workspace = true
 tokio.workspace = true
-tonic.workspace = true

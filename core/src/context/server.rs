@@ -6,18 +6,16 @@ use iroh::{
     discovery::{ConcurrentDiscovery, Discovery, DiscoveryError, DiscoveryItem},
     protocol::Router,
 };
-use sea_orm::{Database, DatabaseConnection};
-use sea_orm_migration::MigratorTrait;
 
 use crate::{
-    config::{LogConfig, P2pConfig, RpcConfig, StorageConfig},
+    config::{LogConfig, P2pConfig, IpcConfig, StorageConfig},
     context::{ServiceContext, service::ServiceContextExt},
 };
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct ServerContext {
     pub app_name: &'static str,
-    pub rpc_config: RpcConfig,
+    pub ipc_config: IpcConfig,
     pub service_context: ServiceContext,
 }
 

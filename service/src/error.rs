@@ -1,7 +1,4 @@
 use std::{array::TryFromSliceError, ffi::OsString};
-use tonic::Status;
-
-use caretta_sync_core::proto::ProtoDeserializeError;
 
 #[derive(thiserror::Error, Debug)]
 pub enum ServiceError {
@@ -17,14 +14,6 @@ pub enum ServiceError {
     OsStringConvert(std::ffi::OsString),
     #[error("slice parse error: {0}")]
     SliceTryFrom(#[from] TryFromSliceError),
-    #[error("protobuf serialization error: {0}")]
-    ProtoSerialize(#[from] caretta_sync_core::proto::ProtoSerializeError),
-    #[error("protobuf deserialization error: {0}")]
-    ProtoDeserialize(#[from] caretta_sync_core::proto::ProtoDeserializeError),
-    #[error("Local record error: {0}")]
-    LocalDb(#[from] sea_orm::DbErr),
-    #[error("Tripod id error: {0}")]
-    Mtid(#[from] mtid::Error),
-    #[error("Tonic transport error: {0}")]
-    TonicTransport(#[from] tonic::transport::Error),
+    #[error("Caretta id error: {0}")]
+    CarettaId(#[from] caretta_id::Error),
 }

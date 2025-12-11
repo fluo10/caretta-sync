@@ -1,25 +1,15 @@
 use std::{convert::Infallible, marker::PhantomData, path::PathBuf, sync::Arc};
 
-use http::Request;
 use iroh::discovery::mdns::MdnsDiscovery;
-use sea_orm_migration::MigratorTrait;
+use irpc::util::make_server_endpoint;
 use tokio::net::UnixListener;
-use tokio_stream::wrappers::UnixListenerStream;
-use tonic::{body::Body, server::NamedService};
-use tower_layer::Identity;
-use tower_service::Service;
 
 use caretta_sync_core::{
-    context::{ServerContext, ServiceContext},
-    proto::api::{
-        device::device_service_server::DeviceServiceServer,
-        invitation_token::invitation_token_service_server::InvitationTokenServiceServer,
-    },
+    context::{ServerContext, ServiceContext}
 };
 
 use crate::{
-    error::ServiceError,
-    service_handler::{DeviceServiceHandler, InvitationTokenServiceHandler},
+    error::ServiceError, ipc::IpcActor,
 };
 
 #[async_trait::async_trait]
@@ -28,7 +18,6 @@ pub trait ServerTrait {
 }
 
 pub struct Server {
-    tonic_router: tonic::transport::server::Router<Identity>,
     context: Arc<ServerContext>,
 }
 
@@ -39,66 +28,13 @@ impl Server {
 
         Self {
             context: context.clone(),
-            tonic_router: tonic::transport::Server::builder()
-                .add_service(DeviceServiceServer::new(DeviceServiceHandler::new(
-                    &backend_context,
-                )))
-                .add_service(InvitationTokenServiceServer::new(
-                    InvitationTokenServiceHandler::new(&backend_context),
-                )),
         }
     }
-    pub fn add_service<S>(mut self, svc: S) -> Self
-    where
-        S: Service<Request<Body>, Error = Infallible>
-            + NamedService
-            + Clone
-            + Send
-            + Sync
-            + 'static,
-        S::Response: axum::response::IntoResponse,
-        S::Future: Send + 'static,
-    {
-        self.tonic_router = self.tonic_router.add_service(svc);
-        self
-    }
-    pub async fn serve(self) -> Result<(), ServiceError> {
-        let url = self.context.as_ref().rpc_config.endpoint_url.clone();
-        let rpc = tokio::spawn(async move {
-            match url.scheme() {
-                "unix" => {
-                    let path = PathBuf::from(url.path());
-                    if let Some(x) = path.parent() {
-                        if !x.exists() {
-                            std::fs::create_dir_all(x)
-                                .expect("Failed to create directory for socket file!");
-                        }
-                    }
-                    if path.exists() {
-                        std::fs::remove_file(&path).expect("Failed to remove existing socket file!")
-                    }
-                    let uds = UnixListener::bind(path).unwrap();
-                    let uds_stream = UnixListenerStream::new(uds);
-
-                    self.tonic_router
-                        .serve_with_incoming(uds_stream)
-                        .await
-                        .unwrap();
-                }
-                "http" => {
-                    let host = url
-                        .socket_addrs(|| None)
-                        .expect("http endpoint should have host address and port")
-                        .pop()
-                        .unwrap();
-                    self.tonic_router.serve(host).await.unwrap();
-                }
-                _ => {
-                    panic!("Invalid url scheme!")
-                }
-            }
-        });
-        rpc.await;
-        Ok(())
+    pub async fn serve(self) {
+        let (server, cert) = make_server_endpoint(self.context.ipc_config.endpoint.clone()).unwrap();
+        let context: Arc<dyn AsRef<ServiceContext> + Send + Sync> = self.context;
+        let actor = IpcActor::spawn(&context);
+        let handle = actor.listen(server).unwrap();
+        handle.await;
     }
 }

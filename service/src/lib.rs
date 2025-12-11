@@ -1,9 +1,11 @@
 pub mod error;
-pub mod invitation_token;
-pub mod model;
-pub mod proto_ext;
+pub mod ipc;
+pub mod local_data;
+pub mod p2p;
 #[cfg(feature = "server")]
 pub mod server;
-pub mod service_handler;
+pub mod synced_data;
+
 #[cfg(test)]
 pub mod tests;
+pub mod types;

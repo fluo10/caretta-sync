@@ -11,22 +11,22 @@ default = []
 cli = ["client"]
 gui = ["client"]
 client = ["caretta-sync-core/client" ]
-server = ["caretta-sync-core/server", "dep:caretta-sync-service", "dep:sea-orm-migration", "dep:iroh"]
+server = ["caretta-sync-core/server", "dep:caretta-sync-service", "dep:iroh"]
 
 [dependencies]
+caretta-id.workspace = true
 caretta-sync-core = { workspace = true, features = [ "desktop" ] }
 caretta-sync-service = { workspace = true, features = ["server"], optional = true }
 chrono.workspace = true
 clap.workspace = true
 dirs.workspace = true
 iroh = { workspace = true, optional = true }
-mtid.workspace = true
-sea-orm-migration = { workspace = true, optional = true }
+irpc.workspace = true
+redb.workspace = true
 serde.workspace = true
 thiserror.workspace = true
 tokio.workspace = true
 toml = "0.9.8"
-tonic.workspace = true
 tracing.workspace = true
 url = { workspace = true, features = ["serde"]}
 whoami.workspace = true
