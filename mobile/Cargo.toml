@@ -1,9 +1,0 @@
-[package]
-name = "caretta-sync-mobile"
-edition.workspace = true
-version.workspace = true
-description.workspace = true
-license.workspace = true
-repository.workspace = true
-
-[dependencies]
