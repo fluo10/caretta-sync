@@ -45,9 +45,9 @@ macro_rules! def_iroh_public_key {
         #[derive(Debug, thiserror::Error)]
         pub enum $TryIntoError{
             #[error("Expected base32 string, found {0}")]
-            InvalidBase32String(#[from] DecodeBase32Error),
+            InvalidBase32String(#[from] crate::util::DecodeBase32Error),
             #[error("invalid length {0}")]
-            InvalidBytesLength(#[from] TryFromSliceError),
+            InvalidBytesLength(#[from] std::array::TryFromSliceError),
             #[error("invalid value {0}")]
             InvalidBytesValue(#[from] $InvalidBytesValueInner),
         }
@@ -105,10 +105,10 @@ macro_rules! impl_iroh_public_key {
                 value.into_inner()
             }
         }
-
+        #[cfg(feature="engine")]
         impl From<$SelfT> for sea_orm::Value {
             fn from(value: $SelfT) -> Self {
-                Value::Bytes(Some(Vec::from(value.as_bytes())))
+                sea_orm::Value::Bytes(Some(Vec::from(value.as_bytes())))
             }
         }
 
@@ -141,27 +141,27 @@ macro_rules! impl_iroh_public_key {
                 <$SelfT>::from_bytes(slice)
             }
         }
-
-        impl TryGetable for $SelfT {
+        #[cfg(feature = "engine")]
+        impl sea_orm::TryGetable for $SelfT {
             fn try_get_by<I: sea_orm::ColIdx>(
                 res: &sea_orm::QueryResult,
                 index: I,
             ) -> Result<Self, sea_orm::TryGetError> {
                 let vec = <Vec<u8> as sea_orm::TryGetable>::try_get_by(res, index)?;
-                let slice: [u8; 32] = vec[0..32].try_into().map_err(|x| DbErr::TryIntoErr {
+                let slice: [u8; 32] = vec[0..32].try_into().map_err(|x| sea_orm::DbErr::TryIntoErr {
                     from: stringify!(Vec<u8>),
                     into: stringify!($SelfT),
-                    source: Arc::new(x),
+                    source: std::sync::Arc::new(x),
                 })?;
-                Ok(<$SelfT>::from_bytes(&slice).map_err(|x| DbErr::TryIntoErr { from: stringify!(Vec<u8>), into: stringify!($SelfT), source: Arc::new(x) })?)
+                Ok(<$SelfT>::from_bytes(&slice).map_err(|x| sea_orm::DbErr::TryIntoErr { from: stringify!(Vec<u8>), into: stringify!($SelfT), source: std::sync::Arc::new(x) })?)
             }
         }
-
-        impl ValueType for $SelfT {
-            fn try_from(v: Value) -> Result<Self, sea_orm_migration::prelude::ValueTypeErr> {
-                let vec = <Vec<u8> as ValueType>::try_from(v)?;
+        #[cfg(feature = "engine")]
+        impl sea_orm::sea_query::ValueType for $SelfT {
+            fn try_from(v: sea_orm::Value) -> Result<Self, sea_orm::sea_query::ValueTypeErr> {
+                let vec = <Vec<u8> as sea_orm::sea_query::ValueType>::try_from(v)?;
                 let key =
-                    <$SelfT as TryFrom<&[u8]>>::try_from(&vec[0..32]).map_err(|_| ValueTypeErr)?;
+                    <$SelfT as TryFrom<&[u8]>>::try_from(&vec[0..32]).map_err(|_| sea_orm::sea_query::ValueTypeErr)?;
                 Ok(key)
             }
             fn type_name() -> String {
@@ -174,14 +174,14 @@ macro_rules! impl_iroh_public_key {
                 sea_orm::sea_query::ColumnType::Blob
             }
         }
-
+        #[cfg(feature = "engine")]
         impl sea_orm::sea_query::Nullable for $SelfT {
-            fn null() -> Value {
-                <Vec<u8> as Nullable>::null()
+            fn null() -> sea_orm::Value {
+                <Vec<u8> as sea_orm::sea_query::Nullable>::null()
             }
         }
 
-        impl Serialize for $SelfT {
+        impl serde::Serialize for $SelfT {
             fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
             where
                 S: serde::Serializer {
@@ -189,7 +189,7 @@ macro_rules! impl_iroh_public_key {
             }
         }
 
-        impl<'de> Deserialize<'de> for $SelfT {
+        impl<'de> serde::Deserialize<'de> for $SelfT {
             fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
                 where
                     D: serde::Deserializer<'de> {
@@ -207,6 +207,7 @@ macro_rules! impl_iroh_secret_key {
         new = $new:path
     } => {
         impl $SelfT {
+            #[cfg(feature = "engine")]
             pub fn new() -> Self {
                 Self($new(&mut rand::rng()))
             }
@@ -237,10 +238,10 @@ macro_rules! impl_iroh_secret_key {
                 value.0
             }
         }
-
+        #[cfg(feature = "engine")]
         impl From<$SelfT> for sea_orm::Value {
             fn from(value: $SelfT) -> Self {
-                Value::Bytes(Some(Vec::from(&value.to_bytes())))
+                sea_orm::Value::Bytes(Some(Vec::from(&value.to_bytes())))
             }
         }
 
@@ -272,27 +273,27 @@ macro_rules! impl_iroh_secret_key {
                 Ok(<$SelfT>::from_bytes(slice))
             }
         }
-
-        impl TryGetable for $SelfT {
+        #[cfg(feature = "engine")]
+        impl sea_orm::TryGetable for $SelfT {
             fn try_get_by<I: sea_orm::ColIdx>(
                 res: &sea_orm::QueryResult,
                 index: I,
             ) -> Result<Self, sea_orm::TryGetError> {
                 let vec = <Vec<u8> as sea_orm::TryGetable>::try_get_by(res, index)?;
-                let slice: [u8; 32] = vec[0..32].try_into().map_err(|x| DbErr::TryIntoErr {
+                let slice: [u8; 32] = vec[0..32].try_into().map_err(|x| sea_orm::DbErr::TryIntoErr {
                     from: stringify!(Vec<u8>),
                     into: stringify!(SecretKey),
-                    source: Arc::new(x),
+                    source: std::sync::Arc::new(x),
                 })?;
                 Ok(<$SelfT>::from_bytes(&slice))
             }
         }
-
-        impl ValueType for $SelfT {
-            fn try_from(v: Value) -> Result<Self, sea_orm_migration::prelude::ValueTypeErr> {
-                let vec = <Vec<u8> as ValueType>::try_from(v)?;
+        #[cfg(feature="engine")]
+        impl sea_orm::sea_query::ValueType for $SelfT {
+            fn try_from(v: sea_orm::Value) -> Result<Self, sea_orm::sea_query::ValueTypeErr> {
+                let vec = <Vec<u8> as sea_orm::sea_query::ValueType>::try_from(v)?;
                 let key =
-                    <$SelfT as TryFrom<&[u8]>>::try_from(&vec[0..32]).map_err(|_| ValueTypeErr)?;
+                    <$SelfT as TryFrom<&[u8]>>::try_from(&vec[0..32]).map_err(|_| sea_orm::sea_query::ValueTypeErr)?;
                 Ok(key)
             }
             fn type_name() -> String {
@@ -305,14 +306,14 @@ macro_rules! impl_iroh_secret_key {
                 sea_orm::sea_query::ColumnType::Blob
             }
         }
-
+        #[cfg(feature="engine")]
         impl sea_orm::sea_query::Nullable for $SelfT {
-            fn null() -> Value {
-                <Vec<u8> as Nullable>::null()
+            fn null() -> sea_orm::sea_query::Value {
+                <Vec<u8> as sea_orm::sea_query::Nullable>::null()
             }
         }
 
-        impl Serialize for $SelfT {
+        impl serde::Serialize for $SelfT {
             fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
             where
                 S: serde::Serializer {
@@ -320,7 +321,7 @@ macro_rules! impl_iroh_secret_key {
             }
         }
 
-        impl<'de> Deserialize<'de> for $SelfT {
+        impl<'de> serde::Deserialize<'de> for $SelfT {
             fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
                 where
                     D: serde::Deserializer<'de> {

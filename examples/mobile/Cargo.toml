@@ -16,6 +16,5 @@ name = "caretta_sync_example"
 crate-type = ["lib", "cdylib"]
 
 [dependencies]
-bevy.workspace = true
 caretta-sync.path = "../.."
 tokio.workspace = true

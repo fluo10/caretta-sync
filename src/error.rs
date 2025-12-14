@@ -1,9 +1,10 @@
 use std::{array::TryFromSliceError, ffi::OsString};
 
 #[derive(thiserror::Error, Debug)]
-pub enum CoreError {
+pub enum Error {
     #[error("IO Error: {0}")]
     Io(#[from] std::io::Error),
+    #[cfg(feature="engine")]
     #[error("Iroh bind error: {0}")]
     IrohBind(#[from] iroh::endpoint::BindError),
     #[error("mandatory config `{0}` is missing")]
@@ -16,8 +17,8 @@ pub enum CoreError {
     CarettaId(#[from] caretta_id::Error),
 }
 
-impl From<std::ffi::OsString> for CoreError {
-    fn from(s: OsString) -> CoreError {
+impl From<std::ffi::OsString> for Error {
+    fn from(s: OsString) -> Error {
         Self::OsStringConvert(s)
     }
 }
