@@ -1,3 +1,5 @@
+use crate::types::NamespaceSecretKey;
+
 crate::types::macros::def_iroh_public_key!{
     Self = NamespacePublicKey,
     Inner = iroh_docs::NamespacePublicKey,
@@ -9,4 +11,5 @@ impl_iroh_public_key!{
     Self = NamespacePublicKey,
     Inner = iroh_docs::NamespacePublicKey,
     TryIntoError = TryIntoNamespacePublicKeyError,
+    SecretKey = NamespaceSecretKey
 }

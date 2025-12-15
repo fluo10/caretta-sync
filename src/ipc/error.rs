@@ -1,18 +1,17 @@
-use caretta_id::CarettaId;
 use serde::{Deserialize, Serialize};
 
-use crate::types::DeviceIdentifier;
+use crate::ipc::types::DeviceIdentifier;
 
 #[derive(Debug, thiserror::Error)]
 pub enum IpcError {
     #[error(transparent)]
-    Actor(#[from] IpcActorError),
+    Actor(#[from] IpcEngineError),
     #[error("RpcError: {0}")]
-    Rpc(#[from] irpc::Error),
+    Mpc(#[from] rmcp::ErrorData),
 }
 
 #[derive(Debug, thiserror::Error, Serialize, Deserialize)]
-pub enum IpcActorError {
+pub enum IpcEngineError {
     #[error("Target device not found: {0}")]
     DeviceNotFound(DeviceIdentifier),
     #[error("Internal error: {0}")]

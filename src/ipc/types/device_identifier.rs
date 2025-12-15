@@ -1,9 +1,10 @@
 use caretta_id::CarettaId;
+use rmcp::schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::types::EndpointPublicKey;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
 pub enum DeviceIdentifier {
     Id(CarettaId),
     Name(String),

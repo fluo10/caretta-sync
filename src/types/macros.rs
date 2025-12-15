@@ -80,6 +80,7 @@ macro_rules! impl_iroh_public_key {
         Self = $SelfT:ty,
         Inner = $Inner:ty,
         TryIntoError = $TryIntoError:ty,
+        SecretKey = $SecretKey:ty
     } => {
         impl $SelfT {
             pub const LENGTH:usize = 32;
@@ -141,6 +142,26 @@ macro_rules! impl_iroh_public_key {
                 <$SelfT>::from_bytes(slice)
             }
         }
+
+         impl schemars::JsonSchema for $SelfT {
+            fn inline_schema() -> bool {
+                true
+            }
+            fn schema_name() -> std::borrow::Cow<'static, str> {
+                stringify!($SelfT).into()
+            }
+            fn schema_id() -> std::borrow::Cow<'static, str> {
+                format!("{}::{}", module_path!(), Self::schema_name()).into()
+            }
+            fn json_schema(_generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+                schemars::json_schema!({
+                    "type": "string",
+                    "description": "base32 encoded public key",
+                    "pattern": "^[a-zA-Z0-9]{52}$"
+                })
+            }
+        }
+
         #[cfg(feature = "engine")]
         impl sea_orm::TryGetable for $SelfT {
             fn try_get_by<I: sea_orm::ColIdx>(
@@ -196,6 +217,20 @@ macro_rules! impl_iroh_public_key {
                 todo!()
             }
         }
+
+        #[cfg(test)]
+        mod tests {
+            use super::*;
+            #[test]
+            fn serde_jron_validate() {
+                let schema = serde_json::Value::from(<$SelfT as schemars::JsonSchema>::json_schema(&mut schemars::SchemaGenerator::new(schemars::generate::SchemaSettings::openapi3())));
+                let instance = serde_json::to_value(<$SecretKey>::new().public()).unwrap();
+
+                jsonschema::validate(&schema, &instance).unwrap();
+            }
+        }
+
+       
     }
 }
 
@@ -204,12 +239,18 @@ macro_rules! impl_iroh_secret_key {
         Self = $SelfT:ty,
         Inner = $Inner:ty,
         TryIntoError = $TryIntoError:ty,
-        new = $new:path
+        PublicKey = $PublicKey:ty,
+        new = $new:path,
+        public_key = $public_key:path
     } => {
         impl $SelfT {
             #[cfg(feature = "engine")]
             pub fn new() -> Self {
                 Self($new(&mut rand::rng()))
+            }
+
+            pub fn public(&self) -> $PublicKey {
+                $public_key(&self.0).into()
             }
 
             pub fn to_bytes(&self) -> [u8; 32] {
@@ -328,6 +369,37 @@ macro_rules! impl_iroh_secret_key {
                 todo!()
             }
         }
+
+        impl schemars::JsonSchema for $SelfT {
+            fn inline_schema() -> bool {
+                true
+            }
+            fn schema_name() -> std::borrow::Cow<'static, str> {
+                stringify!($SelfT).into()
+            }
+            fn schema_id() -> std::borrow::Cow<'static, str> {
+                format!("{}::{}", module_path!(), Self::schema_name()).into()
+            }
+            fn json_schema(_generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+                schemars::json_schema!({
+                    "type": "string",
+                    "description": "base32 encoded secret key",
+                    "pattern": "^[a-zA-Z0-9]{52}$"
+                })
+            }
+        }
+        #[cfg(test)]
+        mod tests {
+            use super::*;
+            #[test]
+            fn serde_jron_validate() {
+                let schema = serde_json::Value::from(<$SelfT as schemars::JsonSchema>::json_schema(&mut schemars::SchemaGenerator::new(schemars::generate::SchemaSettings::openapi3())));
+                let instance = serde_json::to_value(<$SelfT>::new()).unwrap();
+
+                jsonschema::validate(&schema, &instance).unwrap();
+            }
+        }
+
     }
 }
 

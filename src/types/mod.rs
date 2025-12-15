@@ -7,7 +7,6 @@ mod bytes;
 mod author_public_key;
 #[cfg(feature="engine")]
 mod author_secret_key;
-mod device_identifier;
 mod endpoint_public_key;
 mod endpoint_secret_key;
 #[cfg(feature="engine")]
@@ -22,7 +21,6 @@ pub use bytes::*;
 pub use author_public_key::*;
 #[cfg(feature="engine")]
 pub use author_secret_key::*;
-pub use device_identifier::*;
 #[cfg(feature="engine")]
 pub use namespace_public_key::*;
 #[cfg(feature="engine")]

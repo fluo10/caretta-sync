@@ -1,77 +1,37 @@
-use std::{net::SocketAddr, time::Duration};
+use std::time::Duration;
 
-use irpc::{Client, rpc::RemoteService};
-use n0_future::task::{self, AbortOnDropHandle};
-use quinn::Endpoint;
+#[cfg(feature = "service")]
+use rmcp::handler::server::tool::ToolRouter;
 
-use crate::{entity::{authorized_device, invitation_token}, ipc::{DevicePingRequest, DevicePingResponse, IpcApiTrait, IpcError, IpcProtocol, IpcResult}, types::{DeviceIdentifier, InvitationToken}};
+use crate::{ipc::{DeviceIdentifier, DeviceInfo }, types::Bytes};
 
-type IpcApiResult<T> = Result<T, IpcError>;
-pub struct IpcApi {
-    pub inner: Client<IpcProtocol>,
-}
-
-impl IpcApi {
-    pub fn connect (endpoint: Endpoint, addr: SocketAddr) -> Result<Self, IpcError> {
-        Ok(IpcApi {
-            inner: Client::quinn(endpoint, addr)
-        })
-    } 
-    pub fn listen(&self, endpoint: Endpoint) -> Result<AbortOnDropHandle<()>, IpcError> {
-        let local = self
-            .inner
-            .as_local()
-            .expect("cannot listen on remote API");
-        let join_handle = task::spawn(irpc::rpc::listen(
-            endpoint,
-            IpcProtocol::remote_handler(local),
-        ));
-        Ok(AbortOnDropHandle::new(join_handle))
-    }
-
-}
-
+/// A trait for 
 #[async_trait::async_trait]
-impl IpcApiTrait for IpcApi {
-    type Error = IpcError;
-
-    async fn device_get(&self, target: DeviceIdentifier) -> Result<authorized_device::Model, Self::Error> {
-        todo!();
-    }
+pub trait IpcApi: Sized{
+    type Error;
+    /// Get device information
+    async fn device_get(&self, target: DeviceIdentifier) -> Result<DeviceInfo, Self::Error>;
     
-    async fn device_list(&self) -> Result<Vec<authorized_device::Model>, Self::Error>{
-        todo!();
-    }
-
-    async fn device_ping(&self, target: DeviceIdentifier) -> IpcApiResult<Duration>  {
-        Ok(self.inner.rpc(DevicePingRequest { target }).await??.rtt)
-    }
-
-    async fn device_remove(&self, target: DeviceIdentifier) -> Result<(), Self::Error> {
-        todo!();
-    }
-
-    async fn token_get(&self, id: u32) -> Result<invitation_token::Model, Self::Error>{
-        todo!();
-    }
-
-    async fn token_list(&self) -> Result<Vec<invitation_token::Model>, Self::Error> {
-        todo!();
-    }
-
-    async fn token_revoke(&self, id: u32) -> Result<(), Self::Error> {
-        todo!();
-    }
-
-    async fn init(&self) -> Result<(), Self::Error> {
-        todo!();
-    }
+    /// List device information
+    async fn device_list(&self) -> Result<Vec<DeviceInfo>, Self::Error>;
     
-    async fn invite(&self) -> Result<InvitationToken, Self::Error> {
-        todo!();
-    }
+    /// Ping device.
+    /// 
+    /// This function is for connectivity test so it's works between non-authorized devices.
+    async fn device_ping(&self, target: DeviceIdentifier) -> Result<Duration, Self::Error>;
+    
+    /// Remove target device from authorized device table.
+    async fn device_remove(&self, target: DeviceIdentifier) -> Result<(), Self::Error>;
 
-    async fn join(&self, token: InvitationToken) -> Result<(), Self::Error> {
-        todo!();
-    }
+    /// Initialize empty user data.
+    async fn init(&self) -> Result<(), Self::Error>;
+    
+    /// Create new token
+    async fn invite(&self) -> Result<Bytes, Self::Error>;
+
+    /// Join existing cluster and import its user data
+    async fn join(&self, token: Bytes) -> Result<(), Self::Error>;
+
+    #[cfg(feature = "engine")]
+    fn tool_router() -> rmcp::handler::server::tool::ToolRouter<Self> ;
 }

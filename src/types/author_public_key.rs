@@ -1,6 +1,6 @@
 use std::{array::TryFromSliceError, sync::Arc};
 
-use crate::util::DecodeBase32Error;
+use crate::{types::AuthorSecretKey, util::DecodeBase32Error};
 super::macros::def_iroh_public_key!{
     Self = AuthorPublicKey,
     Inner = iroh_docs::AuthorPublicKey,
@@ -12,6 +12,7 @@ super::macros::impl_iroh_public_key!{
     Self = AuthorPublicKey,
     Inner = iroh_docs::AuthorPublicKey,
     TryIntoError = TryIntoAuthorIdError,
+    SecretKey = AuthorSecretKey
 }
 
 
