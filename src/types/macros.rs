@@ -206,7 +206,12 @@ macro_rules! impl_iroh_public_key {
             fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
             where
                 S: serde::Serializer {
-                todo!()
+                let bytes = self.as_bytes();
+                if serializer.is_human_readable() {
+                    serializer.serialize_str(&crate::util::encode_base32(bytes))
+                } else {
+                    serializer.serialize_bytes(bytes)
+                }
             }
         }
 
@@ -214,19 +219,45 @@ macro_rules! impl_iroh_public_key {
             fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
                 where
                     D: serde::Deserializer<'de> {
-                todo!()
+                use serde::de::Error as _;
+                let bytes = if deserializer.is_human_readable() {
+                    crate::util::decode_base32(&String::deserialize(deserializer)?).map_err(D::Error::custom)?
+                } else {
+                    Vec::<u8>::deserialize(deserializer)?
+                };
+                Self::from_bytes(bytes.as_slice().try_into().map_err(D::Error::custom)?).map_err(D::Error::custom)
             }
         }
 
         #[cfg(test)]
         mod tests {
             use super::*;
+            use std::sync::LazyLock;
+
+            static PUBLIC_KEY: LazyLock<$SelfT> = LazyLock::new(|| {
+                <$SecretKey>::new().public_key()
+            });
             #[test]
-            fn serde_jron_validate() {
+            fn jron_schema() {
                 let schema = serde_json::Value::from(<$SelfT as schemars::JsonSchema>::json_schema(&mut schemars::SchemaGenerator::new(schemars::generate::SchemaSettings::openapi3())));
-                let instance = serde_json::to_value(<$SecretKey>::new().public_key()).unwrap();
+                let instance = serde_json::to_value(&*PUBLIC_KEY).unwrap();
 
                 jsonschema::validate(&schema, &instance).unwrap();
+            }
+
+                #[test]
+            fn json_convertion() {
+                let s = serde_json::to_string(&*PUBLIC_KEY).unwrap();
+                let t: $SelfT = serde_json::from_str(&s).unwrap();
+                assert_eq!(t, *PUBLIC_KEY)
+            }
+
+            #[test]
+            fn cbor_conversion() {
+                let mut v: Vec<u8> = Vec::new();
+                ciborium::into_writer(&*PUBLIC_KEY, &mut v).unwrap();
+                let t: $SelfT = ciborium::from_reader(v.as_slice()).unwrap();
+                assert_eq!(t, *PUBLIC_KEY)
             }
         }
 
@@ -314,6 +345,26 @@ macro_rules! impl_iroh_secret_key {
                 Ok(<$SelfT>::from_bytes(slice))
             }
         }
+
+        impl schemars::JsonSchema for $SelfT {
+            fn inline_schema() -> bool {
+                true
+            }
+            fn schema_name() -> std::borrow::Cow<'static, str> {
+                stringify!($SelfT).into()
+            }
+            fn schema_id() -> std::borrow::Cow<'static, str> {
+                format!("{}::{}", module_path!(), Self::schema_name()).into()
+            }
+            fn json_schema(_generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+                schemars::json_schema!({
+                    "type": "string",
+                    "description": "base32 encoded secret key",
+                    "pattern": "^[a-zA-Z0-9]{52}$"
+                })
+            }
+        }
+
         #[cfg(feature = "server")]
         impl sea_orm::TryGetable for $SelfT {
             fn try_get_by<I: sea_orm::ColIdx>(
@@ -358,7 +409,12 @@ macro_rules! impl_iroh_secret_key {
             fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
             where
                 S: serde::Serializer {
-                todo!()
+                let bytes = self.to_bytes();
+                if serializer.is_human_readable() {
+                    serializer.serialize_str(&crate::util::encode_base32(&bytes))
+                } else {
+                    serializer.serialize_bytes(&bytes)
+                }
             }
         }
 
@@ -366,37 +422,46 @@ macro_rules! impl_iroh_secret_key {
             fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
                 where
                     D: serde::Deserializer<'de> {
-                todo!()
+                use serde::de::Error as _;
+                let bytes = if deserializer.is_human_readable() {
+                    crate::util::decode_base32(&String::deserialize(deserializer)?).map_err(D::Error::custom)?
+                } else {
+                    Vec::<u8>::deserialize(deserializer)?
+                };
+                Ok(Self::from_bytes(bytes.as_slice().try_into().map_err(D::Error::custom)?))
             }
         }
 
-        impl schemars::JsonSchema for $SelfT {
-            fn inline_schema() -> bool {
-                true
-            }
-            fn schema_name() -> std::borrow::Cow<'static, str> {
-                stringify!($SelfT).into()
-            }
-            fn schema_id() -> std::borrow::Cow<'static, str> {
-                format!("{}::{}", module_path!(), Self::schema_name()).into()
-            }
-            fn json_schema(_generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
-                schemars::json_schema!({
-                    "type": "string",
-                    "description": "base32 encoded secret key",
-                    "pattern": "^[a-zA-Z0-9]{52}$"
-                })
-            }
-        }
+        
         #[cfg(test)]
         mod tests {
             use super::*;
+            use std::sync::LazyLock;
+
+            static SECRET_KEY: LazyLock<$SelfT> = LazyLock::new(|| {
+                <$SelfT>::new()
+            });
             #[test]
-            fn serde_jron_validate() {
+            fn json_schema() {
                 let schema = serde_json::Value::from(<$SelfT as schemars::JsonSchema>::json_schema(&mut schemars::SchemaGenerator::new(schemars::generate::SchemaSettings::openapi3())));
-                let instance = serde_json::to_value(<$SelfT>::new()).unwrap();
+                let instance = serde_json::to_value(&*SECRET_KEY).unwrap();
 
                 jsonschema::validate(&schema, &instance).unwrap();
+            }
+
+            #[test]
+            fn json_convertion() {
+                let s = serde_json::to_string(&*SECRET_KEY).unwrap();
+                let t: $SelfT = serde_json::from_str(&s).unwrap();
+                assert_eq!(t, *SECRET_KEY)
+            }
+
+            #[test]
+            fn cbor_conversion() {
+                let mut v: Vec<u8> = Vec::new();
+                ciborium::into_writer(&*SECRET_KEY, &mut v).unwrap();
+                let t: $SelfT = ciborium::from_reader(v.as_slice()).unwrap();
+                assert_eq!(t, *SECRET_KEY)
             }
         }
 

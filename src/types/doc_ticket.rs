@@ -95,7 +95,7 @@ mod tests {
     #[test]
     fn cbor_conversion() {
         let mut v: Vec<u8> = Vec::new();
-        ciborium::into_writer(&*DOC_TICKET, &mut v);
+        ciborium::into_writer(&*DOC_TICKET, &mut v).unwrap();
         let t: DocTicket = ciborium::from_reader(v.as_slice()).unwrap();
         assert_eq!(t, *DOC_TICKET);
     }
