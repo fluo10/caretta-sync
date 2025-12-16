@@ -4,7 +4,7 @@ use std::{array::TryFromSliceError, ffi::OsString};
 pub enum Error {
     #[error("IO Error: {0}")]
     Io(#[from] std::io::Error),
-    #[cfg(feature="engine")]
+    #[cfg(feature="server")]
     #[error("Iroh bind error: {0}")]
     IrohBind(#[from] iroh::endpoint::BindError),
     #[error("mandatory config `{0}` is missing")]

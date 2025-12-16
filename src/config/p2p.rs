@@ -6,15 +6,15 @@ use iroh::{
     },
     protocol::Router,
 };
-#[cfg(feature = "engine")]
+#[cfg(feature = "server")]
 use iroh_blobs::BlobsProtocol;
-#[cfg(feature = "engine")]
+#[cfg(feature = "server")]
 use iroh_docs::protocol::Docs;
-#[cfg(feature = "engine")]
+#[cfg(feature = "server")]
 use iroh_gossip::Gossip;
 use serde::{Deserialize, Serialize};
 
-#[cfg(feature = "engine")]
+#[cfg(feature = "server")]
 use crate::config::StorageConfig;
 use crate::{types::EndpointSecretKey, util::{Emptiable, Mergeable}};
 
@@ -26,7 +26,7 @@ pub struct P2pConfig {
 }
 
 impl P2pConfig {
-    #[cfg(feature = "engine")]
+    #[cfg(feature = "server")]
     pub(crate) async fn spawn_iroh_endpoint(&self) -> Result<Endpoint, iroh::endpoint::BindError> {
         let mut endpoint = iroh::endpoint::Builder::empty(iroh::RelayMode::Disabled)
             .secret_key(self.secret_key.clone().into());
@@ -41,7 +41,7 @@ impl P2pConfig {
         }
         endpoint.bind().await
     }
-    #[cfg(feature = "engine")]
+    #[cfg(feature = "server")]
     pub async fn spawn_iroh_protocols(
         &self,
         storage_config: &StorageConfig

@@ -3,27 +3,29 @@
 #[macro_use]
 mod macros;
 mod bytes;
-#[cfg(feature="engine")]
+#[cfg(feature="server")]
 mod author_public_key;
-#[cfg(feature="engine")]
+#[cfg(feature="server")]
 mod author_secret_key;
+mod doc_ticket;
 mod endpoint_public_key;
 mod endpoint_secret_key;
-#[cfg(feature="engine")]
+#[cfg(feature="server")]
 mod namespace_public_key;
-#[cfg(feature="engine")]
+#[cfg(feature="server")]
 mod namespace_secret_key;
 mod token_status;
 
 
 pub use bytes::*;
-#[cfg(feature="engine")]
+#[cfg(feature="server")]
 pub use author_public_key::*;
-#[cfg(feature="engine")]
+#[cfg(feature="server")]
 pub use author_secret_key::*;
-#[cfg(feature="engine")]
+pub use doc_ticket::*;
+#[cfg(feature="server")]
 pub use namespace_public_key::*;
-#[cfg(feature="engine")]
+#[cfg(feature="server")]
 pub use namespace_secret_key::*;
 pub use endpoint_public_key::*;
 pub use endpoint_secret_key::*;

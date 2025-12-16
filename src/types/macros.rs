@@ -106,7 +106,7 @@ macro_rules! impl_iroh_public_key {
                 value.into_inner()
             }
         }
-        #[cfg(feature="engine")]
+        #[cfg(feature="server")]
         impl From<$SelfT> for sea_orm::Value {
             fn from(value: $SelfT) -> Self {
                 sea_orm::Value::Bytes(Some(Vec::from(value.as_bytes())))
@@ -162,7 +162,7 @@ macro_rules! impl_iroh_public_key {
             }
         }
 
-        #[cfg(feature = "engine")]
+        #[cfg(feature = "server")]
         impl sea_orm::TryGetable for $SelfT {
             fn try_get_by<I: sea_orm::ColIdx>(
                 res: &sea_orm::QueryResult,
@@ -177,7 +177,7 @@ macro_rules! impl_iroh_public_key {
                 Ok(<$SelfT>::from_bytes(&slice).map_err(|x| sea_orm::DbErr::TryIntoErr { from: stringify!(Vec<u8>), into: stringify!($SelfT), source: std::sync::Arc::new(x) })?)
             }
         }
-        #[cfg(feature = "engine")]
+        #[cfg(feature = "server")]
         impl sea_orm::sea_query::ValueType for $SelfT {
             fn try_from(v: sea_orm::Value) -> Result<Self, sea_orm::sea_query::ValueTypeErr> {
                 let vec = <Vec<u8> as sea_orm::sea_query::ValueType>::try_from(v)?;
@@ -195,7 +195,7 @@ macro_rules! impl_iroh_public_key {
                 sea_orm::sea_query::ColumnType::Blob
             }
         }
-        #[cfg(feature = "engine")]
+        #[cfg(feature = "server")]
         impl sea_orm::sea_query::Nullable for $SelfT {
             fn null() -> sea_orm::Value {
                 <Vec<u8> as sea_orm::sea_query::Nullable>::null()
@@ -224,7 +224,7 @@ macro_rules! impl_iroh_public_key {
             #[test]
             fn serde_jron_validate() {
                 let schema = serde_json::Value::from(<$SelfT as schemars::JsonSchema>::json_schema(&mut schemars::SchemaGenerator::new(schemars::generate::SchemaSettings::openapi3())));
-                let instance = serde_json::to_value(<$SecretKey>::new().public()).unwrap();
+                let instance = serde_json::to_value(<$SecretKey>::new().public_key()).unwrap();
 
                 jsonschema::validate(&schema, &instance).unwrap();
             }
@@ -244,12 +244,12 @@ macro_rules! impl_iroh_secret_key {
         public_key = $public_key:path
     } => {
         impl $SelfT {
-            #[cfg(feature = "engine")]
+            #[cfg(feature = "server")]
             pub fn new() -> Self {
                 Self($new(&mut rand::rng()))
             }
 
-            pub fn public(&self) -> $PublicKey {
+            pub fn public_key(&self) -> $PublicKey {
                 $public_key(&self.0).into()
             }
 
@@ -279,7 +279,7 @@ macro_rules! impl_iroh_secret_key {
                 value.0
             }
         }
-        #[cfg(feature = "engine")]
+        #[cfg(feature = "server")]
         impl From<$SelfT> for sea_orm::Value {
             fn from(value: $SelfT) -> Self {
                 sea_orm::Value::Bytes(Some(Vec::from(&value.to_bytes())))
@@ -314,7 +314,7 @@ macro_rules! impl_iroh_secret_key {
                 Ok(<$SelfT>::from_bytes(slice))
             }
         }
-        #[cfg(feature = "engine")]
+        #[cfg(feature = "server")]
         impl sea_orm::TryGetable for $SelfT {
             fn try_get_by<I: sea_orm::ColIdx>(
                 res: &sea_orm::QueryResult,
@@ -329,7 +329,7 @@ macro_rules! impl_iroh_secret_key {
                 Ok(<$SelfT>::from_bytes(&slice))
             }
         }
-        #[cfg(feature="engine")]
+        #[cfg(feature="server")]
         impl sea_orm::sea_query::ValueType for $SelfT {
             fn try_from(v: sea_orm::Value) -> Result<Self, sea_orm::sea_query::ValueTypeErr> {
                 let vec = <Vec<u8> as sea_orm::sea_query::ValueType>::try_from(v)?;
@@ -347,7 +347,7 @@ macro_rules! impl_iroh_secret_key {
                 sea_orm::sea_query::ColumnType::Blob
             }
         }
-        #[cfg(feature="engine")]
+        #[cfg(feature="server")]
         impl sea_orm::sea_query::Nullable for $SelfT {
             fn null() -> sea_orm::sea_query::Value {
                 <Vec<u8> as sea_orm::sea_query::Nullable>::null()

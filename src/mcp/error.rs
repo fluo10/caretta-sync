@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::ipc::types::DeviceIdentifier;
+use crate::mcp::model::DeviceIdentifier;
 
 #[derive(Debug, thiserror::Error)]
 pub enum IpcError {

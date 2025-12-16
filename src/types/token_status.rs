@@ -1,11 +1,11 @@
 use std::{fmt::Display, str::FromStr};
 
-#[cfg(feature="engine")]
+#[cfg(feature="server")]
 use sea_orm::{DeriveActiveEnum, EnumIter};
 use serde::Serialize;
-#[cfg_attr(feature = "engine", derive(EnumIter, DeriveActiveEnum))]
+#[cfg_attr(feature = "server", derive(EnumIter, DeriveActiveEnum))]
 #[derive(Copy, Clone, Debug,  PartialEq, Eq)]
-#[cfg_attr(feature = "engine", sea_orm(rs_type = "u8", db_type = "Integer"))]
+#[cfg_attr(feature = "server", sea_orm(rs_type = "u8", db_type = "Integer"))]
 pub enum TokenStatus {
     Pending = 0,
     Used = 1,

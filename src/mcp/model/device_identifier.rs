@@ -11,7 +11,7 @@ pub enum DeviceIdentifier {
     PublicKey(EndpointPublicKey)
 }
 
-#[cfg(feature = "engine")]
+#[cfg(feature = "server")]
 impl DeviceIdentifier {
     pub async fn to_public_key<C>(&self, ctx: C) -> Result<Option<EndpointPublicKey>, crate::error::Error> {
         match self {

@@ -1,34 +1,19 @@
 use std::sync::Arc;
 
 use iroh::protocol::Router;
-use irpc::util::make_server_endpoint;
-#[cfg(feature = "desktop")]
-use n0_future::task::AbortOnDropHandle;
 use sea_orm::DatabaseConnection;
 use tracing::info;
 
-use crate::{config::{IpcConfig, LogConfig, P2pConfig, StorageConfig}, ipc::{IpcActor, IpcContext}};
+use crate::{config::{IpcConfig, LogConfig, P2pConfig, StorageConfig}, };
 
 pub struct Engine{
     iroh_router: Router,
-    #[cfg(feature = "desktop")]
-    ipc_server: AbortOnDropHandle<()>,
     
 }
 
 impl Engine {
     pub fn builder() -> EngineBuilder {
         EngineBuilder::default()
-    }
-
-    pub async fn wait_shutdown(self) -> Result<(), n0_future::task::JoinError> {
-        tokio::signal::ctrl_c().await.unwrap();
-        info!("Receive ctrl-c event.");
-        self.shutdown().await
-    }
-
-    async fn shutdown(self) -> Result<(), n0_future::task::JoinError>{
-        self.iroh_router.shutdown().await
     }
 }
 
@@ -70,16 +55,7 @@ impl EngineBuilder {
             .accept(&iroh_docs::ALPN, docs.clone())
             .spawn();
 
-        let (server, cert) = make_server_endpoint(self.ipc_config.unwrap().endpoint.clone()).unwrap();
-        let actor = IpcActor::spawn(IpcContext {
-            database_connection: self.database_connection.unwrap().clone(),
-            iroh_endpoint: self.p2p_config.unwrap().spawn_iroh_endpoint().await.unwrap(),
-            docs: docs.api().clone()
-        });
-        let handle = actor.listen(server).unwrap();
-        Engine {
-            iroh_router: router,
-            ipc_server: handle
-        }
+
+        todo!()
     }
 }

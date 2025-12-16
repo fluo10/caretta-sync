@@ -1,0 +1,75 @@
+mod device_identifier;
+mod device_info;
+
+pub use device_identifier::*;
+pub use device_info::*;
+
+use std::time::Duration;
+use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
+
+#[cfg(feature = "server")]
+use rmcp::handler::server::tool::ToolRouter;
+
+use crate::types::DocTicket;
+
+#[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
+pub struct DevicePingRequest {
+    pub target: DeviceIdentifier
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
+pub struct DevicePingResponse {
+    pub rtt: Duration
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
+pub struct DeviceGetRequest {
+    pub target: DeviceIdentifier
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
+pub struct DeviceGetResponse {
+    pub info: DeviceInfo
+}
+
+
+#[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
+pub struct DeviceListRequest;
+
+#[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
+pub struct DeviceListResponse {
+    pub info: Vec<DeviceInfo>
+}
+
+
+#[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
+pub struct DeviceRemoveRequest {
+    pub target: DeviceIdentifier
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
+pub struct DeviceRemoveResponse;
+
+
+#[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
+pub struct DeviceInviteRequest;
+
+#[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
+pub struct DeviceInviteResponze {
+    pub ticket: DocTicket
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
+pub struct DeviceInitRequest;
+
+#[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
+pub struct DeviceInitResponse;
+
+#[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
+pub struct DeviceJoinRequest {
+    pub ticket: DocTicket,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
+pub struct DeviceJoinResponse;

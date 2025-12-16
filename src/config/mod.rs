@@ -1,15 +1,15 @@
 mod log;
-#[cfg(feature = "engine")]
+#[cfg(feature = "server")]
 mod p2p;
 #[cfg(feature = "desktop")]
 mod ipc;
-#[cfg(feature = "engine")]
+#[cfg(feature = "server")]
 mod storage;
 
 pub use log::LogConfig;
-#[cfg(feature = "engine")]
+#[cfg(feature = "server")]
 pub use p2p::P2pConfig;
 #[cfg(feature = "desktop")]
 pub use ipc::IpcConfig;
-#[cfg(feature = "engine")]
+#[cfg(feature = "server")]
 pub use storage::StorageConfig;

@@ -9,12 +9,11 @@ exclude = ["/.github", "/.gitignore", "/.gitmodules", "/.vscode"]
 
 [features]
 default = []
-engine = [
+server = [
     "dep:caretta-sync-migration",
     "dep:gethostname",
     "dep:iroh",
     "dep:iroh-blobs",
-    "dep:iroh-docs",
     "dep:iroh-gossip",
     "dep:iroh-ping",
     "dep:rand",
@@ -22,12 +21,14 @@ engine = [
     "dep:sea-orm-migration",
     "caretta-id/sea-orm", 
 ]
+client = []
 desktop = []
+cli = ["desktop"]
 gui = []
-mobile = ["engine", "gui"]
-client = ["desktop"]
-cli = ["client", "desktop"]
-server = ["engine", "desktop"]
+mobile = ["client", "server", "gui"]
+desktop-cli = ["client", "desktop", "cli"]
+desktop-gui = ["client", "desktop", "gui"]
+desktop-server = ["client", "desktop"]
 
 macros = ["dep:caretta-sync-macros"]
 
@@ -56,9 +57,10 @@ gethostname = { version = "1.1.0", optional = true }
 iroh = { workspace = true,  optional = true }
 iroh-base.workspace = true
 iroh-blobs = {version = "0.97.0", optional = true}
-iroh-docs = { version = "0.95.0", optional = true }
+iroh-docs = "0.95.0"
 iroh-gossip = {version = "0.95.0", optional = true}
 iroh-ping = { version = "0.7.0", optional = true }
+iroh-tickets = "0.2.0"
 rand = { version = "0.9.2", optional = true }
 rmcp = "0.11.0"
 schemars = "1.1.0"
