@@ -4,28 +4,26 @@ use iroh::Endpoint;
 use iroh_docs::api::DocsApi;
 use sea_orm::DatabaseConnection;
 
-use crate::ipc::IpcActor;
-
-#[derive(Debug)]
-pub struct IpcContext {
+#[derive(Clone, Debug)]
+pub struct McpContext {
     pub database_connection: Arc<DatabaseConnection>,
     pub iroh_endpoint: Endpoint,
     pub docs: DocsApi,
 }
 
-impl AsRef<DatabaseConnection> for IpcContext {
+impl AsRef<DatabaseConnection> for McpContext {
     fn as_ref(&self) -> &DatabaseConnection {
         &self.database_connection
     }
 }
 
-impl AsRef<Endpoint> for IpcContext {
+impl AsRef<Endpoint> for McpContext {
     fn as_ref(&self) -> &Endpoint {
         &self.iroh_endpoint
     }
 }
 
-impl AsRef<DocsApi> for IpcContext {
+impl AsRef<DocsApi> for McpContext {
     fn as_ref(&self) -> &DocsApi {
         &self.docs
     }

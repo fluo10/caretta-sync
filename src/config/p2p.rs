@@ -27,16 +27,14 @@ pub struct P2pConfig {
 
 impl P2pConfig {
     #[cfg(feature = "server")]
-    pub(crate) async fn spawn_iroh_endpoint(&self) -> Result<Endpoint, iroh::endpoint::BindError> {
+    pub(crate) async fn spawn_iroh_endpoint(&self, app_name: &'static str) -> Result<Endpoint, iroh::endpoint::BindError> {
         let mut endpoint = iroh::endpoint::Builder::empty(iroh::RelayMode::Disabled)
             .secret_key(self.secret_key.clone().into());
         if self.enable_n0 {
             endpoint = endpoint.discovery(DnsDiscovery::n0_dns());
         }
         if self.enable_mdns {
-            use crate::APP_NAME;
-
-            let mdns = MdnsDiscovery::builder().service_name(APP_NAME);
+                    let mdns = MdnsDiscovery::builder().service_name(app_name);
             endpoint = endpoint.discovery(mdns);
         }
         endpoint.bind().await
@@ -44,11 +42,12 @@ impl P2pConfig {
     #[cfg(feature = "server")]
     pub async fn spawn_iroh_protocols(
         &self,
+        app_name: &'static str,
         storage_config: &StorageConfig
     ) -> Result<(Endpoint, BlobsProtocol, Docs, Gossip), iroh::endpoint::BindError> {
         use iroh_blobs::BlobsProtocol;
         use iroh_gossip::Gossip;
-        let endpoint = self.spawn_iroh_endpoint().await.unwrap();
+        let endpoint = self.spawn_iroh_endpoint(app_name).await.unwrap();
 
         let iroh_dir = storage_config.to_iroh_path();
         let blobs = iroh_blobs::store::fs::FsStore::load(&iroh_dir.join("blobs")).await.unwrap();

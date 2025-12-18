@@ -1,4 +1,4 @@
-use caretta_sync_core::{
+use crate::{
     config::LogConfig,
     util::{Emptiable, Mergeable},
 };

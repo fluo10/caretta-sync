@@ -1,6 +1,5 @@
 {
     "recommendations": [
-        "ianandhum.protobuf-support"
-
+        "rust-lang.rust-analyzer"
     ]
 }

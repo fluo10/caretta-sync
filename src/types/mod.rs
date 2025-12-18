@@ -15,6 +15,8 @@ mod namespace_public_key;
 #[cfg(feature="server")]
 mod namespace_secret_key;
 mod token_status;
+#[cfg(feature="desktop")]
+mod verbosity;
 
 
 pub use bytes::*;
@@ -30,3 +32,5 @@ pub use namespace_secret_key::*;
 pub use endpoint_public_key::*;
 pub use endpoint_secret_key::*;
 pub use token_status::*;
+#[cfg(feature="desktop")]
+pub use verbosity::*;

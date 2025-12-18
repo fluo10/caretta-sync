@@ -6,6 +6,8 @@ use iroh::Endpoint;
 use sea_orm::{Database, DatabaseConnection};
 use tokio::sync::OnceCell;
 
+pub static APP_NAME: &str = "caretta-sync-test";
+
 static STORAGE_CONFIG: OnceCell<StorageConfig> = OnceCell::const_new();
 async fn storage_config() -> &'static StorageConfig {
     STORAGE_CONFIG.get_or_init(|| async move {
@@ -63,7 +65,7 @@ pub async fn context() -> &'static TestContext {
     TEST_CONTEXT.get_or_init(|| async move {
         TestContext {
             database_connection: database_connection().await.clone(),
-            iroh_endpoint: p2p_config().await.spawn_iroh_endpoint().await.unwrap()
+            iroh_endpoint: p2p_config().await.spawn_iroh_endpoint(APP_NAME).await.unwrap()
         }
     }).await
 }

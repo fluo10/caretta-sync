@@ -10,8 +10,6 @@ pub enum ParsedConfigError {
     TomlDerialization(#[from] toml::de::Error),
     #[error("Toml Serialization Error")]
     TomlSerialization(#[from] toml::ser::Error),
-    #[error("Invalid url: {0}")]
-    UriInvalid(#[from] url::ParseError),
     #[error("Failed to get config dir")]
     ConfigDir,
     #[error("Invalid log level: {0}")]

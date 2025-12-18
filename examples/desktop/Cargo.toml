@@ -1,0 +1,32 @@
+[package]
+name = "caretta-sync-example-desktop"
+edition.workspace = true
+version.workspace = true
+description.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[features]
+cli = ["caretta-sync/desktop-cli"]
+gui = ["caretta-sync/desktop-gui"]
+server = ["caretta-sync/desktop-server"]
+
+[[bin]]
+name = "cli"
+path = "src/bin/cli.rs"
+required-features = ["cli"]
+
+[[bin]]
+name = "gui"
+path = "src/bin/gui.rs"
+required-features = ["gui"]
+
+[[bin]]
+name = "server"
+path = "src/bin/server.rs"
+required-features = ["server"]
+
+[dependencies]
+caretta-sync = {workspace = true, features = ["desktop"]}
+caretta-sync-example-core = { path = "../core" }

@@ -1,8 +1,10 @@
 mod device_identifier;
 mod device_info;
+mod error;
 
 pub use device_identifier::*;
 pub use device_info::*;
+pub use error::McpError;
 
 use std::time::Duration;
 use schemars::JsonSchema;

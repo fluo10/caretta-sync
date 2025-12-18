@@ -2,28 +2,28 @@
 mod error;
 mod log;
 mod p2p;
-mod ipc;
+mod mcp;
 mod storage;
 pub mod types;
-#[cfg(feature = "client")]
-use caretta_sync_core::context::ClientContext;
+
 #[cfg(feature = "server")]
-use caretta_sync_core::{
+use crate::{
     config::{P2pConfig, StorageConfig},
-    context::ServerContext,
+    mcp::McpContext, server::Server,
 };
 use clap::Args;
 pub use error::ParsedConfigError;
 pub use log::ParsedLogConfig;
 pub use p2p::ParsedP2pConfig;
-pub use ipc::ParsedIpcConfig;
-#[cfg(feature = "server")]
-use redb::Database;
+pub use mcp::ParsedMcpConfig;
+
+#[cfg(feature = "desktop-server")]
+use rmcp::{RoleServer, Service};
 pub use storage::ParsedStorageConfig;
 use serde::{Deserialize, Serialize, ser::Error};
 
-use caretta_sync_core::{
-    config::{LogConfig, IpcConfig},
+use crate::{
+    config::{LogConfig, McpConfig},
     util::{Emptiable, Mergeable},
 };
 use std::{
@@ -42,8 +42,8 @@ pub struct ParsedConfig {
     #[serde(default, skip_serializing_if  = "ParsedStorageConfig::is_empty")]
     pub storage: ParsedStorageConfig,
     #[command(flatten)]
-    #[serde(default, skip_serializing_if  = "ParsedIpcConfig::is_empty")]
-    pub ipc: ParsedIpcConfig,
+    #[serde(default, skip_serializing_if  = "ParsedMcpConfig::is_empty")]
+    pub mcp: ParsedMcpConfig,
     #[command(flatten)]
     #[serde(default, skip_serializing_if  = "ParsedP2pConfig::is_empty")]
     pub p2p: ParsedP2pConfig,
@@ -57,7 +57,7 @@ impl ParsedConfig {
     fn default(app_name: &'static str) -> Self {
         Self {
             storage: ParsedStorageConfig::default(app_name),
-            ipc: ParsedIpcConfig::default(app_name),
+            mcp: ParsedMcpConfig::default(app_name),
             p2p: ParsedP2pConfig::empty(),
             log: ParsedLogConfig::default(),
         }
@@ -72,10 +72,11 @@ impl ParsedConfig {
 
     /// Fill empty configuration fields with database values
     #[cfg(feature = "server")]
-    pub fn with_local_database(mut self) -> Self {
-        use caretta_sync_service::local_data::LocalP2pConfigExt;
-        let db = self.to_storage_config().unwrap().to_local_database();
-        let p2p_config = P2pConfig::get_or_init_db(&db);
+    pub async fn with_database(mut self) -> Self {
+        use crate::entity::device_config;
+
+        let db = self.to_storage_config().unwrap().to_database_connection().await;
+        let p2p_config = P2pConfig::from(device_config::Model::get_or_try_init(&Box::new(db)).await.unwrap());
         self.merge(ParsedP2pConfig::from(p2p_config));
         self
     }
@@ -100,9 +101,9 @@ impl ParsedConfig {
         self.p2p.clone().try_into()
     }
 
-    /// Build [`IpcConfig`] from own [`ParsedIpcConfig`]
-    pub fn to_ipc_config(&self) -> Result<IpcConfig, ParsedConfigError> {
-        self.ipc.clone().try_into()
+    /// Build [`McpConfig`] from own [`ParsedMcpConfig`]
+    pub fn to_mcp_config(&self) -> Result<McpConfig, ParsedConfigError> {
+        self.mcp.clone().try_into()
     }
     /// Build [`LogConfig`] from own [`ParsedLogConfig`]
     pub fn to_log_config(&self) -> Result<LogConfig, ParsedConfigError> {
@@ -143,35 +144,43 @@ impl ParsedConfig {
     pub fn init_tracing_subscriber(&self) {
         self.to_log_config().unwrap().init_tracing_subscriber();
     }
-
+    #[cfg(feature = "desktop-server")]
+    pub fn spawn_server<S,M> (service_factory: impl Fn() -> Result<S, Error> + Send + Sync + 'static) -> Server
+    where 
+    S: Service<RoleServer> + Send + 'static,
+    M: rmcp::transport::streamable_http_server::SessionManager
+    {
+        let ct = tokio_util::sync::CancellationToken::new();
+        let service = StreamableHttpService::new(
+            service_factory,
+            rmcp::transport::streamable_http_server::session::local::LocalSessionManager,
+            rmcp::transport::StreamableHttpServerConfig {
+                cancellation_token: ct.child_token(),
+                ..Default::default()
+            },
+        );
+        todo!()
+    }
     #[cfg(feature = "server")]
-    pub async fn into_server_context(
+    pub async fn spawn_server(
         self,
         app_name: &'static str,
-    ) -> Result<ServerContext, ParsedConfigError>
+    ) -> Result<McpContext, ParsedConfigError>
     {
-        use caretta_sync_core::context::ServiceContext;
 
         let config = self.as_ref();
         let ipc_config = config.to_ipc_config()?;
         let p2p_config = config.to_p2p_config()?;
         let storage_config = config.to_storage_config()?;
-        let iroh_router = p2p_config.to_iroh_router(app_name).await.unwrap();
-        let local_database = storage_config.to_local_database();
-        let cache_database = storage_config.to_cache_database();
-        let service_context = ServiceContext {
-            app_name,
-            storage_config,
-            iroh_router,
-            local_database,
-            cache_database,
-        };
-        Ok(ServerContext {
-            app_name,
-            ipc_config,
-            service_context,
+        let iroh_endpoint = p2p_config.spawn_iroh_protocols(app_name, &storage_config).await.unwrap();
+        let database_connection = storage_config.to_database_connection().await;
+        Ok( McpContext {
+            database_connection,
+            iroh_endpoint,
+            docs: todo!(),
         })
     }
+    
     #[cfg(feature = "client")]
     pub fn into_client_context(
         self,
@@ -197,7 +206,7 @@ impl Emptiable for ParsedConfig {
         Self {
             p2p: ParsedP2pConfig::empty(),
             storage: ParsedStorageConfig::empty(),
-            ipc: ParsedIpcConfig::empty(),
+            mcp: ParsedMcpConfig::empty(),
             log: ParsedLogConfig::empty(),
         }
     }
