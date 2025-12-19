@@ -39,28 +39,7 @@ impl P2pConfig {
         }
         endpoint.bind().await
     }
-    #[cfg(feature = "server")]
-    pub async fn spawn_iroh_protocols(
-        &self,
-        app_name: &'static str,
-        storage_config: &StorageConfig
-    ) -> Result<(Endpoint, BlobsProtocol, Docs, Gossip), iroh::endpoint::BindError> {
-        use iroh_blobs::BlobsProtocol;
-        use iroh_gossip::Gossip;
-        let endpoint = self.spawn_iroh_endpoint(app_name).await.unwrap();
 
-        let iroh_dir = storage_config.to_iroh_path();
-        let blobs = iroh_blobs::store::fs::FsStore::load(&iroh_dir.join("blobs")).await.unwrap();
-        let gossip = Gossip::builder().spawn(endpoint.clone());
-        let docs = Docs::persistent(iroh_dir.join("docs")).spawn(endpoint.clone(), blobs.clone().into(), gossip.clone()).await.unwrap();
-
-        Ok((
-            endpoint, 
-            BlobsProtocol::new(&blobs, None),
-            docs,
-            gossip,
-        ))
-    }
 }
 
 impl PartialEq for P2pConfig {

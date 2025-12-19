@@ -30,4 +30,9 @@ impl McpConfig {
         }
     
     }
+
+    #[cfg(feature = "desktop-server")]
+    pub async fn bind_tcp_listener(&self) -> tokio::net::TcpListener {
+        tokio::net::TcpListener::bind(self.listen_addr).await.unwrap()
+    }
 }

@@ -6,6 +6,8 @@ mod mcp;
 mod storage;
 pub mod types;
 
+#[cfg(feature = "desktop-server")]
+use crate::config::ServerConfig;
 #[cfg(feature = "server")]
 use crate::{
     config::{P2pConfig, StorageConfig},
@@ -144,41 +146,11 @@ impl ParsedConfig {
     pub fn init_tracing_subscriber(&self) {
         self.to_log_config().unwrap().init_tracing_subscriber();
     }
-    #[cfg(feature = "desktop-server")]
-    pub fn spawn_server<S,M> (service_factory: impl Fn() -> Result<S, Error> + Send + Sync + 'static) -> Server
-    where 
-    S: Service<RoleServer> + Send + 'static,
-    M: rmcp::transport::streamable_http_server::SessionManager
-    {
-        let ct = tokio_util::sync::CancellationToken::new();
-        let service = StreamableHttpService::new(
-            service_factory,
-            rmcp::transport::streamable_http_server::session::local::LocalSessionManager,
-            rmcp::transport::StreamableHttpServerConfig {
-                cancellation_token: ct.child_token(),
-                ..Default::default()
-            },
-        );
-        todo!()
-    }
-    #[cfg(feature = "server")]
-    pub async fn spawn_server(
-        self,
-        app_name: &'static str,
-    ) -> Result<McpContext, ParsedConfigError>
-    {
 
-        let config = self.as_ref();
-        let ipc_config = config.to_ipc_config()?;
-        let p2p_config = config.to_p2p_config()?;
-        let storage_config = config.to_storage_config()?;
-        let iroh_endpoint = p2p_config.spawn_iroh_protocols(app_name, &storage_config).await.unwrap();
-        let database_connection = storage_config.to_database_connection().await;
-        Ok( McpContext {
-            database_connection,
-            iroh_endpoint,
-            docs: todo!(),
-        })
+    /// Create [`ServerConfig`] from `ParsedConfig`
+    #[cfg(feature = "desktop-server")]
+    pub fn into_server_config (self, app_name:&'static str) -> Result<ServerConfig, ParsedConfigError> {
+        todo!()
     }
     
     #[cfg(feature = "client")]
