@@ -48,9 +48,9 @@ mod tests {
 
     #[tokio::test]
     async fn insert_and_get_record() {
-        let ctx = crate::tests::context().await;
-        let model = Model::new(ctx).await.unwrap();
-        assert_eq!(model, Model::get(ctx).await.unwrap().unwrap());
+        let db = crate::tests::database().await;
+        let model = Model::new(db).await.unwrap();
+        assert_eq!(model, Model::get(db).await.unwrap().unwrap());
     }
 }
 

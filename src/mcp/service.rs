@@ -1,19 +1,21 @@
-use std::time::Duration;
+use std::{sync::Arc, time::Duration};
 
 use iroh::{Endpoint, discovery::Discovery as _};
+use iroh_docs::api::DocsApi;
 use tokio_stream::StreamExt;
 use rmcp::{ErrorData, Json, handler::server::wrapper::Parameters, model::{ServerCapabilities, ServerInfo}, tool, tool_router};
 
-use crate::{error::Error, mcp::{DeviceIdentifier, DeviceInfo, DevicePingRequest, DevicePingResponse, McpContext, McpError}, types::Bytes};
+use crate::{error::Error, mcp::{DeviceIdentifier, DeviceInfo, DevicePingRequest, DevicePingResponse, McpError, ServiceGenerator}, types::{Bytes, Database}};
 
 #[derive(Clone, Debug)]
-pub struct McpService {
-    context: McpContext
-    
+pub struct Service {
+    pub database: Arc<Database>,
+    pub iroh_endpoint: Endpoint,
+    pub docs: DocsApi,
 }
 
 #[tool_router]
-impl McpService {
+impl Service {
 
     /// Get device information
     #[tool(description = "Get device information")]
@@ -30,20 +32,19 @@ impl McpService {
     /// 
     /// This function is for connectivity test so it's works between non-authorized devices.
     #[tool(description = "Ping to remote device")]
-    async fn device_ping(&self, params: Parameters<DevicePingRequest>) -> Result<Json<DevicePingResponse>, ErrorData> {
+    pub async fn device_ping(&self, params: Parameters<DevicePingRequest>) -> Result<Json<DevicePingResponse>, ErrorData> {
         let target = params.0.target;
         let public_key = target
-            .to_public_key(&self.context)
+            .to_public_key(&self.database)
             .await?
             .ok_or(McpError::DeviceNotFound(target.clone()))?;
-        let endpoint: &Endpoint = self.context.as_ref();
-        let mut stream = endpoint.discovery().resolve(public_key.into_inner())
+        let mut stream = self.iroh_endpoint.discovery().resolve(public_key.into_inner())
             .ok_or(McpError::DeviceNotFound(target))?;
         if let Some(x) = stream.next().await {
             let discovered = x.map_err(McpError::from)?;
             match iroh_ping::Ping::new()
                 .ping(
-                    <McpContext as AsRef<Endpoint>>::as_ref(&self.context),
+                    &self.iroh_endpoint,
                     discovered.into_endpoint_addr(),
                 )
                 .await {
@@ -77,7 +78,17 @@ impl McpService {
 
 }
 
-impl rmcp::ServerHandler for McpService {
+impl From<&'static ServiceGenerator> for Service {
+    fn from(value: &'static ServiceGenerator) -> Self {
+        Service {
+            database:value.database.clone(),
+            iroh_endpoint: value.iroh_endpoint.clone(),
+            docs: value.docs.clone(),
+        }
+    }
+}
+
+impl rmcp::ServerHandler for Service {
     fn get_info(&self) -> ServerInfo {
         ServerInfo {
             instructions: Some("A device and user manager for data syncronization via iroh p2p".into()),

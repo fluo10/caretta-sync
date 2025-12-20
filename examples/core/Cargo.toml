@@ -9,3 +9,4 @@ publish = false
 
 [dependencies]
 caretta-sync.workspace = true
+rmcp.workspace = true

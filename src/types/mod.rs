@@ -2,11 +2,24 @@
 
 #[macro_use]
 mod macros;
+
+mod util;
+
 mod bytes;
 #[cfg(feature="server")]
 mod author_public_key;
 #[cfg(feature="server")]
 mod author_secret_key;
+
+#[cfg(feature = "server")]
+mod app_database;
+#[cfg(feature = "server")]
+pub use app_database::*;
+#[cfg(feature = "server")]
+mod database;
+#[cfg(feature = "server")]
+pub use database::*;
+
 mod doc_ticket;
 mod endpoint_public_key;
 mod endpoint_secret_key;

@@ -1,3 +1,5 @@
+use caretta_sync::parser::ServerParser;
+
 fn main() {
-    println!("Hello, world!");
+    ServerParser::parse();
 }

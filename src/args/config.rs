@@ -2,7 +2,7 @@ use std::{marker::PhantomData, path::PathBuf};
 
 use crate::parsed_config::ParsedConfig;
 
-use caretta_sync_core::util::{Emptiable, Mergeable};
+use crate::util::{Emptiable, Mergeable};
 use clap::Args;
 
 /// An arguments about config.

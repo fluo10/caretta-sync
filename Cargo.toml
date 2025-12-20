@@ -54,7 +54,7 @@ caretta-sync-macros = {workspace = true, optional = true}
 caretta-sync-migration = { workspace = true, optional = true }
 chrono.workspace = true
 ciborium = "0.2.2"
-clap = { version = "4.5.53", features = ["derive", "env"], optional = true }
+clap = { workspace = true,  optional = true }
 dirs = { version = "6.0.0", optional = true }
 ed25519-dalek = "3.0.0-pre"
 gethostname = { version = "1.1.0", optional = true }
@@ -66,7 +66,7 @@ iroh-gossip = {version = "0.95.0", optional = true}
 iroh-ping = { version = "0.7.0", optional = true }
 iroh-tickets = "0.2.0"
 rand = { version = "0.9.2", optional = true }
-rmcp = {version = "0.11.0", default-features = false, features = ["base64", "macros", "server"]}
+rmcp.workspace = true
 schemars = "1.1.0"
 sea-orm = { version = "2.0.0-rc", features = [ "sqlx-sqlite", "runtime-tokio-rustls", "macros", "with-uuid", "with-chrono" ], optional = true }
 sea-orm-migration = { version = "2.0.0-rc", features = [ "sqlx-sqlite", "runtime-tokio-rustls" ], optional = true }
@@ -104,8 +104,10 @@ caretta-sync = {version = "0.0.2", path = "." }
 caretta-sync-macros = { version = "0.0.2", path = "macros" }
 caretta-sync-migration = {version = "0.0.2", path = "migration"}
 chrono = { version = "0.4.41", features = [ "serde" ]}
+clap = { version = "4.5.53", features = ["derive", "env"] }
 iroh = { version = "0.95.1", features = ["discovery-local-network", "discovery-pkarr-dht"] }
 iroh-base = { version = "0.95.1", features = ["key"] }
+rmcp = {version = "0.11.0", default-features = false, features = ["base64", "macros", "server"]}
 sea-orm-migration = { version = "2.0.0-rc", features = [ "runtime-tokio-rustls", "sqlx-postgres" ] }
 tempfile = "3.20.0"
 tokio = { version = "1.45.0", features = ["macros", "rt", "rt-multi-thread"] }

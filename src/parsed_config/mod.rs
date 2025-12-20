@@ -6,12 +6,13 @@ mod mcp;
 mod storage;
 pub mod types;
 
+#[cfg(feature = "client")]
+use crate::config::ClientConfig;
 #[cfg(feature = "desktop-server")]
 use crate::config::ServerConfig;
 #[cfg(feature = "server")]
 use crate::{
     config::{P2pConfig, StorageConfig},
-    mcp::McpContext, server::Server,
 };
 use clap::Args;
 pub use error::ParsedConfigError;
@@ -77,7 +78,7 @@ impl ParsedConfig {
     pub async fn with_database(mut self) -> Self {
         use crate::entity::device_config;
 
-        let db = self.to_storage_config().unwrap().to_database_connection().await;
+        let db = self.to_storage_config().unwrap().open_database().await;
         let p2p_config = P2pConfig::from(device_config::Model::get_or_try_init(&Box::new(db)).await.unwrap());
         self.merge(ParsedP2pConfig::from(p2p_config));
         self
@@ -154,15 +155,14 @@ impl ParsedConfig {
     }
     
     #[cfg(feature = "client")]
-    pub fn into_client_context(
+    pub fn into_client_config(
         self,
         app_name: &'static str,
-    ) -> Result<ClientContext, ParsedConfigError> {
+    ) -> Result<ClientConfig, ParsedConfigError> {
         let config = self.as_ref();
-        let ipc_config = config.to_ipc_config()?;
-        Ok(ClientContext {
-            app_name,
-            ipc_config,
+        let mcp = config.to_mcp_config()?;
+        Ok(ClientConfig {
+            mcp,
         })
     }
 }
@@ -184,14 +184,14 @@ impl Emptiable for ParsedConfig {
     }
 
     fn is_empty(&self) -> bool {
-        self.p2p.is_empty() && self.ipc.is_empty() && self.storage.is_empty() && self.log.is_empty()
+        self.p2p.is_empty() && self.mcp.is_empty() && self.storage.is_empty() && self.log.is_empty()
     }
 }
 
 impl Mergeable for ParsedConfig {
     fn merge(&mut self, other: Self) {
         self.p2p.merge(other.p2p);
-        self.ipc.merge(other.ipc);
+        self.mcp.merge(other.mcp);
         self.storage.merge(other.storage);
         self.log.merge(other.log);
     }

@@ -1,9 +1,10 @@
-use std::pin::Pin;
+use std::{marker::PhantomData, pin::Pin, sync::{Arc, OnceLock}};
 
 use iroh_docs::protocol::Docs;
 use rmcp::{RoleServer, Service};
+use sea_orm_migration::MigratorTrait;
 
-use crate::{config::{LogConfig, McpConfig, P2pConfig, ServerConfigExt, StorageConfig}, server::Server};
+use crate::{config::{LogConfig, McpConfig, P2pConfig, ServerConfigExt, StorageConfig}, mcp::{ServiceGenerator}};
 
 /// A config for server for desktop OS
 #[derive(Clone, Debug)]
@@ -14,23 +15,29 @@ pub struct ServerConfig {
     storage: StorageConfig,
 }
 
+static SERVICE_GENERATOR: OnceLock<ServiceGenerator> = OnceLock::new();
+
 impl ServerConfig {
-    pub async fn spawn_server<S,M> (self, app_name: &'static str,  service_factory: impl Fn(ServerConfig, Docs ) -> Result<S, std::io::Error> + Send + Sync + 'static)
+    pub async fn spawn_server<S,M> (self, app_name: &'static str)
     where 
-    S: Service<RoleServer> + Send + 'static,
-    M: rmcp::transport::streamable_http_server::SessionManager
+    S: Service<RoleServer> + From<&'static ServiceGenerator> + Send + 'static,
+    M: MigratorTrait
     {
         use rmcp::transport::{StreamableHttpServerConfig, StreamableHttpService, streamable_http_server::session::local::LocalSessionManager};
         let mcp_config = &self.mcp;
         let p2p_config = &self.p2p;
         let storage_config = &self.storage;
-        let (irou_endpoint, iroh_docs, iroh_router_builder) = self.to_iroh_router_builder(app_name).await.unwrap();
-        let database_connection = storage_config.to_database_connection().await;
+        let (iroh_endpoint, iroh_docs, iroh_router_builder) = self.to_iroh_router_builder(app_name).await.unwrap();
+        let database = storage_config.open_database().await;
         let ct = tokio_util::sync::CancellationToken::new();
-        let config = Box::pin(self.clone());
-        let docs = Box::pin(iroh_docs);
+        SERVICE_GENERATOR.set(ServiceGenerator {
+            app_database: Arc::new(storage_config.open_app_database::<M>(app_name,).await),
+            database: Arc::new(database),
+            iroh_endpoint: iroh_endpoint,
+            docs: iroh_docs.api().clone(),
+        }).unwrap();
         let service = StreamableHttpService::new(
-              move || {service_factory((*config).clone(), (*docs).clone())},
+               || Ok(S::from((SERVICE_GENERATOR.get().unwrap()))),
             LocalSessionManager::default().into(),
             StreamableHttpServerConfig {
                 cancellation_token: ct.child_token(),

@@ -30,3 +30,4 @@ required-features = ["server"]
 [dependencies]
 caretta-sync = {workspace = true, features = ["desktop"]}
 caretta-sync-example-core = { path = "../core" }
+clap.workspace = true
