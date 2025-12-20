@@ -4,23 +4,23 @@ use iroh_docs::protocol::Docs;
 use rmcp::{RoleServer, Service};
 use sea_orm_migration::MigratorTrait;
 
-use crate::{config::{LogConfig, McpConfig, P2pConfig, ServerConfigExt, StorageConfig}, mcp::{ServiceGenerator}};
+use crate::{config::{LogConfig, McpConfig, P2pConfig, ServerConfigExt, StorageConfig}, mcp::context::McpContext};
 
 /// A config for server for desktop OS
 #[derive(Clone, Debug)]
 pub struct ServerConfig {
-    log: LogConfig,
-    mcp: McpConfig,
-    p2p: P2pConfig,
-    storage: StorageConfig,
+    pub log: LogConfig,
+    pub mcp: McpConfig,
+    pub p2p: P2pConfig,
+    pub storage: StorageConfig,
 }
 
-static SERVICE_GENERATOR: OnceLock<ServiceGenerator> = OnceLock::new();
+static CONTEXT: OnceLock<McpContext> = OnceLock::new();
 
 impl ServerConfig {
     pub async fn spawn_server<S,M> (self, app_name: &'static str)
     where 
-    S: Service<RoleServer> + From<&'static ServiceGenerator> + Send + 'static,
+    S: Service<RoleServer> + From<&'static McpContext> + Send + 'static,
     M: MigratorTrait
     {
         use rmcp::transport::{StreamableHttpServerConfig, StreamableHttpService, streamable_http_server::session::local::LocalSessionManager};
@@ -30,21 +30,21 @@ impl ServerConfig {
         let (iroh_endpoint, iroh_docs, iroh_router_builder) = self.to_iroh_router_builder(app_name).await.unwrap();
         let database = storage_config.open_database().await;
         let ct = tokio_util::sync::CancellationToken::new();
-        SERVICE_GENERATOR.set(ServiceGenerator {
-            app_database: Arc::new(storage_config.open_app_database::<M>(app_name,).await),
-            database: Arc::new(database),
+        CONTEXT.set(McpContext {
+            app_database: storage_config.open_app_database::<M>(app_name,).await,
+            database: database,
             iroh_endpoint: iroh_endpoint,
             docs: iroh_docs.api().clone(),
         }).unwrap();
         let service = StreamableHttpService::new(
-               || Ok(S::from((SERVICE_GENERATOR.get().unwrap()))),
+               || Ok(S::from((CONTEXT.get().unwrap()))),
             LocalSessionManager::default().into(),
             StreamableHttpServerConfig {
                 cancellation_token: ct.child_token(),
                 ..Default::default()
             },
         );
-        let router = axum::Router::new().nest_service("/", service);
+        let router = axum::Router::new().fallback_service(service);
         let tcp_listener = mcp_config.bind_tcp_listener().await;
         let p2p_handler = tokio::spawn(async move {
             let router = iroh_router_builder.spawn();

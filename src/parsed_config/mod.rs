@@ -151,7 +151,12 @@ impl ParsedConfig {
     /// Create [`ServerConfig`] from `ParsedConfig`
     #[cfg(feature = "desktop-server")]
     pub fn into_server_config (self, app_name:&'static str) -> Result<ServerConfig, ParsedConfigError> {
-        todo!()
+        Ok(ServerConfig {
+            log: self.to_log_config()?,
+            mcp: self.to_mcp_config()?,
+            p2p: self.to_p2p_config()?,
+            storage: self.to_storage_config()?,
+        })
     }
     
     #[cfg(feature = "client")]

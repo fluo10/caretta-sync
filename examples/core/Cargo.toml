@@ -9,4 +9,5 @@ publish = false
 
 [dependencies]
 caretta-sync.workspace = true
+caretta-sync-example-migration.path = "../migration"
 rmcp.workspace = true

@@ -23,7 +23,9 @@ pub trait ServerConfigExt {
         let iroh_dir = storage_config.to_iroh_path();
         let blobs = iroh_blobs::store::fs::FsStore::load(&iroh_dir.join("blobs")).await.unwrap();
         let gossip = Gossip::builder().spawn(endpoint.clone());
-        let docs = Docs::persistent(iroh_dir.join("docs")).spawn(endpoint.clone(), blobs.clone().into(), gossip.clone()).await.unwrap();
+        let docs_dir = iroh_dir.join("docs");
+        std::fs::create_dir_all(&docs_dir).unwrap();
+        let docs = Docs::persistent(docs_dir).spawn(endpoint.clone(), blobs.clone().into(), gossip.clone()).await.unwrap();
         let router = Router::builder(endpoint.clone())
             .accept(iroh_blobs::ALPN, BlobsProtocol::new(&blobs, None))
             .accept(iroh_docs::ALPN, docs.clone())

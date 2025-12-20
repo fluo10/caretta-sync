@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use crate::{config::ServerConfig, mcp::ServiceGenerator, util::RunnableCommand};
+use crate::{config::ServerConfig, mcp::context::McpContext, util::RunnableCommand};
 use clap::Parser;
 use rmcp::{RoleServer, Service};
 use sea_orm_migration::MigratorTrait;
@@ -14,7 +14,7 @@ use crate::{
 #[derive(Parser, Debug)]
 pub struct ServerParser<S,M>
 where
-    S: Service<RoleServer> + From<&'static ServiceGenerator> + Send + 'static,
+    S: Service<RoleServer> + From<&'static McpContext> + Send + 'static,
     M: MigratorTrait
 {
     #[arg(skip)]
@@ -28,7 +28,7 @@ where
 }
 impl<S,M> RunnableCommand for ServerParser<S,M>
 where
-    S: Service<RoleServer> + From<&'static ServiceGenerator> + Send + 'static,
+    S: Service<RoleServer> + From<&'static McpContext> + Send + 'static,
     M: MigratorTrait
 {
     #[tokio::main]

@@ -1,4 +1,4 @@
-use crate::{mcp::DeviceIdentifier, types::EndpointPublicKey, util::{decode_base32, encode_base32}};
+use crate::{mcp::model::DeviceIdentifier, types::EndpointPublicKey, util::{decode_base32, encode_base32}};
 use clap::Args;
 use caretta_id::CarettaId;
 use iroh::PublicKey;

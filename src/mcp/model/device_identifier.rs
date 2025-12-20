@@ -3,7 +3,7 @@ use rmcp::schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "server")]
-use crate::{mcp::McpError, types::Database};
+use crate::{mcp::model::McpError, types::Database};
 use crate::types::EndpointPublicKey;
 
 #[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]

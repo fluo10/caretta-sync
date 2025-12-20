@@ -1,42 +1,27 @@
-use caretta_sync::mcp::{Service as SyncService, *};
-use rmcp::{model::{ServerCapabilities, ServerInfo}, tool, tool_router};
+use caretta_sync::mcp::{context::McpContext, tool::*, model::*};
+use rmcp::{ErrorData, Json, handler::server::{tool::ToolRouter, wrapper::Parameters}, model::{ServerCapabilities, ServerInfo}, tool, tool_router};
 
 #[derive(Clone, Debug)]
 pub struct Service {
-    pub sync_service: SyncService
+    pub context: &'static McpContext,
+    pub tool_router: ToolRouter<Service>,
 }
 
 #[tool_router]
 impl Service {
-
+    pub fn new(context: &'static McpContext) -> Self {
+        Self {
+            context,
+            tool_router: Self::tool_router(),
+        }
+    }
     /// Ping device.
     /// 
     /// This function is for connectivity test so it's works between non-authorized devices.
     #[tool(description = "Ping to remote device")]
     async fn device_ping(&self, params: Parameters<DevicePingRequest>) -> Result<Json<DevicePingResponse>, ErrorData> {
-        self.sync_service.device_ping(params)
-    } 
-
-    /// Remove target device from authorized device table.
-    async fn device_remove(&self, target: DeviceIdentifier) -> Result<(), Error> {
-        todo!()
+        device_ping(self.context, params).await
     }
-    /// Create iroh-docs tichet of user data
-    async fn device_invite(&self) -> Result<Bytes, Error> {
-        todo!()
-    }
-
-    /// Join exist cluster and import its user data
-    async fn device_join(&self, token: Bytes) -> Result<(), Error> {
-        todo!()
-    }
-
-    /// Initialize empty user data.
-    async fn device_init(&self) -> Result<(), Error> {
-        todo!()
-    }
-    
-
 }
 
 impl rmcp::ServerHandler for Service {
@@ -46,5 +31,11 @@ impl rmcp::ServerHandler for Service {
             capabilities: ServerCapabilities::builder().enable_tools().build(),
             ..Default::default()
         }
+    }
+}
+
+impl From<&'static McpContext> for Service {
+    fn from(value: &'static McpContext) -> Self {
+        Self::new(value)
     }
 }

@@ -88,7 +88,7 @@ jsonschema = "0.37.4"
 tempfile.workspace = true
 
 [workspace]
-members = [ ".", "macros", "examples/mobile" , "migration", "examples/desktop", "examples/core",]
+members = [ ".", "macros", "examples/mobile" , "migration", "examples/desktop", "examples/core", "examples/migration" ]
 resolver = "3"
 
 [workspace.package]
