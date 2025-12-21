@@ -8,7 +8,7 @@ use crate::mcp::model::DeviceIdentifier;
 
 /// Error returned from McpServer.
 #[derive(Debug, thiserror::Error, Serialize, Deserialize)]
-pub enum McpError {
+pub enum Error {
     #[error("Target device not found: {0}")]
     DeviceNotFound(DeviceIdentifier),
     #[error("Device discovery failed: {0}")]
@@ -17,9 +17,9 @@ pub enum McpError {
     DevicePingFailed(String)
 }
 
-impl From<McpError> for ErrorData {
+impl From<Error> for ErrorData {
     
-    fn from(value: McpError) -> Self {
+    fn from(value: Error) -> Self {
         let data = match serde_json::to_value(&value) {
             Ok(x) => x,
             Err(_) => serde_json::Value::String(format!("{:?}", &value))
@@ -30,11 +30,11 @@ impl From<McpError> for ErrorData {
 }
 
 #[cfg(feature = "server")]
-impl From<DiscoveryError> for McpError {
+impl From<DiscoveryError> for Error {
     fn from(value: DiscoveryError) -> Self {
         match value {
-            DiscoveryError::NoResults { endpoint_id, meta } => McpError::DeviceNotFound(DeviceIdentifier::PublicKey(endpoint_id.into())),
-            x => McpError::DeviceDiscoveryFailed(format!("{:?}", x)),
+            DiscoveryError::NoResults { endpoint_id, meta } => Error::DeviceNotFound(DeviceIdentifier::PublicKey(endpoint_id.into())),
+            x => Error::DeviceDiscoveryFailed(format!("{:?}", x)),
         }
     }
 }

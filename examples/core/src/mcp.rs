@@ -1,15 +1,15 @@
-use caretta_sync::mcp::{context::McpContext, tool::*, model::*};
+use caretta_sync::mcp::{context::Context, tool::*, model::*};
 use rmcp::{ErrorData, Json, handler::server::{tool::ToolRouter, wrapper::Parameters}, model::{ServerCapabilities, ServerInfo}, tool, tool_router};
 
 #[derive(Clone, Debug)]
 pub struct Service {
-    pub context: &'static McpContext,
+    pub context: &'static Context,
     pub tool_router: ToolRouter<Service>,
 }
 
 #[tool_router]
 impl Service {
-    pub fn new(context: &'static McpContext) -> Self {
+    pub fn new(context: &'static Context) -> Self {
         Self {
             context,
             tool_router: Self::tool_router(),
@@ -34,8 +34,8 @@ impl rmcp::ServerHandler for Service {
     }
 }
 
-impl From<&'static McpContext> for Service {
-    fn from(value: &'static McpContext) -> Self {
+impl From<&'static Context> for Service {
+    fn from(value: &'static Context) -> Self {
         Self::new(value)
     }
 }

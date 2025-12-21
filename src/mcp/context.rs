@@ -7,7 +7,7 @@ use sea_orm::DatabaseConnection;
 use crate::{types::{AppDatabase, Database}};
 
 #[derive(Debug)]
-pub struct McpContext {
+pub struct Context {
     pub app_database: AppDatabase,
     pub database: Database,
     pub iroh_endpoint: Endpoint,

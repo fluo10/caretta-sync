@@ -3,7 +3,7 @@ use rmcp::schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "server")]
-use crate::{mcp::model::McpError, types::Database};
+use crate::{mcp::model::Error, types::Database};
 use crate::types::EndpointPublicKey;
 
 #[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
@@ -15,7 +15,7 @@ pub enum DeviceIdentifier {
 
 #[cfg(feature = "server")]
 impl DeviceIdentifier {
-    pub async fn to_public_key(&self, db: &Database) -> Result<Option<EndpointPublicKey>, McpError> {
+    pub async fn to_public_key(&self, db: &Database) -> Result<Option<EndpointPublicKey>, Error> {
         match self {
             DeviceIdentifier::Id(x) => todo!(),
             DeviceIdentifier::Name(x) => todo!(),

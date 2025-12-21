@@ -11,10 +11,14 @@ pub enum Error {
     MissingConfig(&'static str),
     #[error("Parse OsString error: {0:?}")]
     OsStringConvert(std::ffi::OsString),
+    #[cfg(feature = "desktop-client")]
+    #[error("Client initialization failed: {0}")]
+    ClientInitialization(#[from] rmcp::service::ClientInitializeError),
     #[error("slice parse error: {0}")]
     SliceTryFrom(#[from] TryFromSliceError),
     #[error("Caretta id error: {0}")]
     CarettaId(#[from] caretta_id::Error),
+    
 }
 
 impl From<std::ffi::OsString> for Error {

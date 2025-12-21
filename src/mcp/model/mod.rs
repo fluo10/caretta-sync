@@ -4,7 +4,7 @@ mod error;
 
 pub use device_identifier::*;
 pub use device_info::*;
-pub use error::McpError;
+pub use error::Error;
 
 use std::time::Duration;
 use schemars::JsonSchema;
