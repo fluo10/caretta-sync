@@ -163,11 +163,13 @@ impl ParsedConfig {
     pub fn into_client_config(
         self,
         app_name: &'static str,
+        verbose: bool,
     ) -> Result<ClientConfig, ParsedConfigError> {
         let config = self.as_ref();
         let mcp = config.to_mcp_config()?;
+        let log = config.to_log_config()?;
         Ok(ClientConfig {
-            mcp,
+            mcp,log, verbose
         })
     }
 }

@@ -1,18 +1,18 @@
-#[cfg(feature = "client")]
 mod api;
+pub use api::*;
 
 #[cfg(feature = "client")]
-pub use api::*;
+mod client_error;
+#[cfg(feature = "client")]
+use client_error::ClientError;
 
 #[cfg(feature = "desktop-client")]
 pub mod client;
 
 #[cfg(feature = "server")]
-pub mod context;
+pub mod service_context;
 #[cfg(feature = "server")]
-pub use context::Context;
+pub use service_context::ServiceContext;
 
-#[cfg(feature = "server")]
-pub mod tool;
 pub mod model;
 

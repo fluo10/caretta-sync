@@ -10,6 +10,10 @@ pub mod mcp;
 pub mod parsed_config;
 #[cfg(feature = "desktop")]
 pub mod parser;
+
+#[cfg(feature = "desktop-cli")]
+pub mod subcommand;
+
 #[cfg(test)]
 pub mod tests;
 pub mod types;

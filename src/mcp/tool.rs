@@ -5,10 +5,10 @@ use iroh_docs::api::DocsApi;
 use tokio_stream::StreamExt;
 use rmcp::{ErrorData, Json, handler::server::wrapper::Parameters, model::{ServerCapabilities, ServerInfo}, tool, tool_router};
 
-use crate::{mcp::{context::Context, model::{DeviceGetRequest, DeviceGetResponse, DeviceIdentifier, DeviceInfo, DeviceListRequest, DeviceListResponse, DevicePingRequest, DevicePingResponse, Error}}, types::{Bytes, Database}};
+use crate::{mcp::{ServiceContext, model::{DeviceGetRequest, DeviceGetResponse, DeviceIdentifier, DeviceInfo, DeviceListRequest, DeviceListResponse, DevicePingRequest, DevicePingResponse, Error}}, types::{Bytes, Database}};
 
 /// Get device information
-pub async fn device_get(ctx: &'static Context, params: Parameters<DeviceGetRequest>) -> Result<Json<DeviceGetResponse>, ErrorData> {
+pub async fn device_get(ctx: &'static ServiceContext, params: Parameters<DeviceGetRequest>) -> Result<Json<DeviceGetResponse>, ErrorData> {
     todo!()
 }
 

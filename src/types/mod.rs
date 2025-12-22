@@ -5,6 +5,8 @@ mod macros;
 
 mod util;
 
+mod app_info;
+pub use app_info::AppInfo;
 mod bytes;
 #[cfg(feature="server")]
 mod author_public_key;

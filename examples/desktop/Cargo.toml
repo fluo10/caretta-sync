@@ -10,7 +10,7 @@ publish = false
 [features]
 cli = ["caretta-sync/desktop-cli"]
 gui = ["caretta-sync/desktop-gui"]
-server = ["caretta-sync/desktop-server"]
+server = ["caretta-sync/desktop-server", "caretta-sync-example-core/server"]
 
 [[bin]]
 name = "cli"
@@ -31,3 +31,4 @@ required-features = ["server"]
 caretta-sync = {workspace = true, features = ["desktop"]}
 caretta-sync-example-core = { path = "../core" }
 clap.workspace = true
+rmcp.workspace = true

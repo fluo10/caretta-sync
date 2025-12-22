@@ -1,7 +1,6 @@
 use crate::{mcp::model::DeviceIdentifier, types::EndpointPublicKey, util::{decode_base32, encode_base32}};
 use clap::Args;
 use caretta_id::CarettaId;
-use iroh::PublicKey;
 
 #[derive(Args, Clone, Debug)]
 #[group(multiple = false, required = true)]

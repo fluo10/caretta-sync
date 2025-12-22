@@ -1,3 +1,4 @@
+use crate::types::AppInfo;
 use crate::{
     args::ConfigArgs,
     types::Verbosity,
@@ -16,7 +17,7 @@ pub struct GuiParser
 impl RunnableCommand for GuiParser
 {
     #[tokio::main]
-    async fn run(self, app_name: &'static str) {
+    async fn run(self, app_info: AppInfo) {
         if let Some(x) = self.check_config {
             todo!()
         } else {

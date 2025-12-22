@@ -4,7 +4,7 @@ use iroh_docs::protocol::Docs;
 use rmcp::{RoleServer, Service};
 use sea_orm_migration::MigratorTrait;
 
-use crate::{config::{LogConfig, McpConfig, P2pConfig, ServerConfigExt, StorageConfig}, mcp::context::Context};
+use crate::{config::{LogConfig, McpConfig, P2pConfig, ServerConfigExt, StorageConfig}, mcp::ServiceContext};
 
 /// A config for server for desktop OS
 #[derive(Clone, Debug)]
@@ -15,12 +15,12 @@ pub struct ServerConfig {
     pub storage: StorageConfig,
 }
 
-static CONTEXT: OnceLock<Context> = OnceLock::new();
+static CONTEXT: OnceLock<ServiceContext> = OnceLock::new();
 
 impl ServerConfig {
     pub async fn spawn_server<S,M> (self, app_name: &'static str)
     where 
-    S: Service<RoleServer> + From<&'static Context> + Send + 'static,
+    S: Service<RoleServer> + From<&'static ServiceContext> + Send + 'static,
     M: MigratorTrait
     {
         use rmcp::transport::{StreamableHttpServerConfig, StreamableHttpService, streamable_http_server::session::local::LocalSessionManager};
@@ -30,7 +30,7 @@ impl ServerConfig {
         let (iroh_endpoint, iroh_docs, iroh_router_builder) = self.to_iroh_router_builder(app_name).await.unwrap();
         let database = storage_config.open_database().await;
         let ct = tokio_util::sync::CancellationToken::new();
-        CONTEXT.set(Context {
+        CONTEXT.set(ServiceContext {
             app_database: storage_config.open_app_database::<M>(app_name,).await,
             database: database,
             iroh_endpoint: iroh_endpoint,
