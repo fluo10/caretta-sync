@@ -1,14 +1,9 @@
 use std::net::{Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrV4, SocketAddrV6};
 
-use caretta_sync_core::{ipc::IpcApi, util::RunnableCommand};
+use crate::{mcp::Api, types::AppInfo, util::RunnableCommand};
 use clap::Args;
-use irpc::util::{make_client_endpoint, make_insecure_client_endpoint};
 
 use crate::args::{ConfigArgs, DeviceIdentifierArgs};
-use caretta_sync_core::{
-    context::{self, ClientContext},
-};
-
 
 #[derive(Debug, Args)]
 pub struct DevicePingCommandArgs {
@@ -22,25 +17,22 @@ pub struct DevicePingCommandArgs {
 
 impl RunnableCommand for DevicePingCommandArgs {
     #[tokio::main]
-    async fn run(self, app_name: &'static str) {
-        let config = self
+    async fn run(self, app_info: AppInfo) {
+        let app_name = app_info.app_name;
+        let client = self
             .config
             .into_parsed_config(app_name)
-            .with_default(app_name);
-        config.init_tracing_subscriber();
-        let context = config.into_client_context(app_name).unwrap();
-        let api = match context.ipc_config.endpoint.clone() {
-            SocketAddr::V4(x) => {
-                let client = make_insecure_client_endpoint(SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, 0).into()).unwrap();
-                IpcApi::connect(client, x.into()).unwrap()
-            },
-            SocketAddr::V6(x) => {
-                let client = make_insecure_client_endpoint(SocketAddrV6::new(Ipv6Addr::UNSPECIFIED, 0, 0, 0).into()).unwrap();
-                IpcApi::connect(client, x.into()).unwrap()
-            }
-        };
-
-        let rtt = api.ping_device(self.target.into()).await.unwrap().unwrap();
-        println!("rtt: {:?}", rtt)
+            .with_default(app_name)
+            .into_client_config(app_name, self.verbose)
+            .unwrap()
+            .spawn_client(app_info.client_info)
+            .await;
+        let response = client
+            .device_ping(crate::mcp::model::DevicePingRequest {
+                target: self.target.into(),
+            })
+            .await
+            .unwrap();
+        println!("rtt: {:?}", response.rtt)
     }
 }

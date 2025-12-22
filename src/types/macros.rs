@@ -1,14 +1,35 @@
+macro_rules! database_impl {
+    ($SelfT:ty) => {
+        impl AsRef<sea_orm::DatabaseConnection> for $SelfT {
+            fn as_ref(&self) -> &sea_orm::DatabaseConnection {
+                &self.0
+            }
+        }
+        impl From<sea_orm::DatabaseConnection> for $SelfT {
+            fn from(value: sea_orm::DatabaseConnection) -> Self {
+                Self(value)
+            }
+        }
+
+        impl From<$SelfT> for sea_orm::DatabaseConnection {
+            fn from(value: $SelfT) -> Self {
+                value.0
+            }
+        }
+    };
+}
+
 macro_rules! def_new_type {
-    { 
+    {
         Self = $SelfT:ident,
         Inner = $Inner:ty
     } => {
         #[doc = concat!("A wrapper struct of [`", stringify!($Inner), "`]")]
         ///
-        /// 
+        ///
         ///
         /// # Examples
-        /// 
+        ///
         /// ## Sea ORM
         /// ```
         /// # use sea_orm::entity::prelude::*;
@@ -18,7 +39,7 @@ macro_rules! def_new_type {
         /// pub struct Model {
         ///     #[sea_orm(primary_key)]
         ///     pub id: u32,
-        #[doc = concat!("pub value: ", stringify!($Self), ",")] 
+        #[doc = concat!("pub value: ", stringify!($Self), ",")]
         /// }
         /// # #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
         /// # pub enum Relation {}
@@ -31,7 +52,7 @@ macro_rules! def_new_type {
 }
 
 macro_rules! def_iroh_public_key {
-    { 
+    {
         Self = $SelfT:ident,
         Inner = $Inner:ty,
         TryIntoError = $TryIntoError:ident,
@@ -54,9 +75,8 @@ macro_rules! def_iroh_public_key {
     };
 }
 
-
 macro_rules! def_iroh_secret_key {
-    { 
+    {
         Self = $SelfT:ident,
         Inner = $Inner:ty,
         TryIntoError = $TryIntoError:ident
@@ -80,6 +100,7 @@ macro_rules! impl_iroh_public_key {
         Self = $SelfT:ty,
         Inner = $Inner:ty,
         TryIntoError = $TryIntoError:ty,
+        SecretKey = $SecretKey:ty
     } => {
         impl $SelfT {
             pub const LENGTH:usize = 32;
@@ -105,7 +126,7 @@ macro_rules! impl_iroh_public_key {
                 value.into_inner()
             }
         }
-        #[cfg(feature="engine")]
+        #[cfg(feature="server")]
         impl From<$SelfT> for sea_orm::Value {
             fn from(value: $SelfT) -> Self {
                 sea_orm::Value::Bytes(Some(Vec::from(value.as_bytes())))
@@ -141,7 +162,27 @@ macro_rules! impl_iroh_public_key {
                 <$SelfT>::from_bytes(slice)
             }
         }
-        #[cfg(feature = "engine")]
+
+         impl schemars::JsonSchema for $SelfT {
+            fn inline_schema() -> bool {
+                true
+            }
+            fn schema_name() -> std::borrow::Cow<'static, str> {
+                stringify!($SelfT).into()
+            }
+            fn schema_id() -> std::borrow::Cow<'static, str> {
+                format!("{}::{}", module_path!(), Self::schema_name()).into()
+            }
+            fn json_schema(_generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+                schemars::json_schema!({
+                    "type": "string",
+                    "description": "base32 encoded public key",
+                    "pattern": "^[a-zA-Z0-9]{52}$"
+                })
+            }
+        }
+
+        #[cfg(feature = "server")]
         impl sea_orm::TryGetable for $SelfT {
             fn try_get_by<I: sea_orm::ColIdx>(
                 res: &sea_orm::QueryResult,
@@ -156,7 +197,7 @@ macro_rules! impl_iroh_public_key {
                 Ok(<$SelfT>::from_bytes(&slice).map_err(|x| sea_orm::DbErr::TryIntoErr { from: stringify!(Vec<u8>), into: stringify!($SelfT), source: std::sync::Arc::new(x) })?)
             }
         }
-        #[cfg(feature = "engine")]
+        #[cfg(feature = "server")]
         impl sea_orm::sea_query::ValueType for $SelfT {
             fn try_from(v: sea_orm::Value) -> Result<Self, sea_orm::sea_query::ValueTypeErr> {
                 let vec = <Vec<u8> as sea_orm::sea_query::ValueType>::try_from(v)?;
@@ -174,7 +215,7 @@ macro_rules! impl_iroh_public_key {
                 sea_orm::sea_query::ColumnType::Blob
             }
         }
-        #[cfg(feature = "engine")]
+        #[cfg(feature = "server")]
         impl sea_orm::sea_query::Nullable for $SelfT {
             fn null() -> sea_orm::Value {
                 <Vec<u8> as sea_orm::sea_query::Nullable>::null()
@@ -185,7 +226,12 @@ macro_rules! impl_iroh_public_key {
             fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
             where
                 S: serde::Serializer {
-                todo!()
+                let bytes = self.as_bytes();
+                if serializer.is_human_readable() {
+                    serializer.serialize_str(&crate::util::encode_base32(bytes))
+                } else {
+                    serializer.serialize_bytes(bytes)
+                }
             }
         }
 
@@ -193,9 +239,49 @@ macro_rules! impl_iroh_public_key {
             fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
                 where
                     D: serde::Deserializer<'de> {
-                todo!()
+                use serde::de::Error as _;
+                let bytes = if deserializer.is_human_readable() {
+                    crate::util::decode_base32(&String::deserialize(deserializer)?).map_err(D::Error::custom)?
+                } else {
+                    Vec::<u8>::deserialize(deserializer)?
+                };
+                Self::from_bytes(bytes.as_slice().try_into().map_err(D::Error::custom)?).map_err(D::Error::custom)
             }
         }
+
+        #[cfg(test)]
+        mod tests {
+            use super::*;
+            use std::sync::LazyLock;
+
+            static PUBLIC_KEY: LazyLock<$SelfT> = LazyLock::new(|| {
+                <$SecretKey>::new().public_key()
+            });
+            #[test]
+            fn jron_schema() {
+                let schema = serde_json::Value::from(<$SelfT as schemars::JsonSchema>::json_schema(&mut schemars::SchemaGenerator::new(schemars::generate::SchemaSettings::openapi3())));
+                let instance = serde_json::to_value(&*PUBLIC_KEY).unwrap();
+
+                jsonschema::validate(&schema, &instance).unwrap();
+            }
+
+                #[test]
+            fn json_convertion() {
+                let s = serde_json::to_string(&*PUBLIC_KEY).unwrap();
+                let t: $SelfT = serde_json::from_str(&s).unwrap();
+                assert_eq!(t, *PUBLIC_KEY)
+            }
+
+            #[test]
+            fn cbor_conversion() {
+                let mut v: Vec<u8> = Vec::new();
+                ciborium::into_writer(&*PUBLIC_KEY, &mut v).unwrap();
+                let t: $SelfT = ciborium::from_reader(v.as_slice()).unwrap();
+                assert_eq!(t, *PUBLIC_KEY)
+            }
+        }
+
+
     }
 }
 
@@ -204,12 +290,18 @@ macro_rules! impl_iroh_secret_key {
         Self = $SelfT:ty,
         Inner = $Inner:ty,
         TryIntoError = $TryIntoError:ty,
-        new = $new:path
+        PublicKey = $PublicKey:ty,
+        new = $new:path,
+        public_key = $public_key:path
     } => {
         impl $SelfT {
-            #[cfg(feature = "engine")]
+            #[cfg(feature = "server")]
             pub fn new() -> Self {
                 Self($new(&mut rand::rng()))
+            }
+
+            pub fn public_key(&self) -> $PublicKey {
+                $public_key(&self.0).into()
             }
 
             pub fn to_bytes(&self) -> [u8; 32] {
@@ -238,7 +330,7 @@ macro_rules! impl_iroh_secret_key {
                 value.0
             }
         }
-        #[cfg(feature = "engine")]
+        #[cfg(feature = "server")]
         impl From<$SelfT> for sea_orm::Value {
             fn from(value: $SelfT) -> Self {
                 sea_orm::Value::Bytes(Some(Vec::from(&value.to_bytes())))
@@ -258,7 +350,7 @@ macro_rules! impl_iroh_secret_key {
                 Ok(Self::from_bytes(&slice))
             }
         }
-        
+
         impl std::fmt::Display for $SelfT {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
                 write!(f, "{}", &crate::util::encode_base32(&self.to_bytes()))
@@ -273,7 +365,27 @@ macro_rules! impl_iroh_secret_key {
                 Ok(<$SelfT>::from_bytes(slice))
             }
         }
-        #[cfg(feature = "engine")]
+
+        impl schemars::JsonSchema for $SelfT {
+            fn inline_schema() -> bool {
+                true
+            }
+            fn schema_name() -> std::borrow::Cow<'static, str> {
+                stringify!($SelfT).into()
+            }
+            fn schema_id() -> std::borrow::Cow<'static, str> {
+                format!("{}::{}", module_path!(), Self::schema_name()).into()
+            }
+            fn json_schema(_generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+                schemars::json_schema!({
+                    "type": "string",
+                    "description": "base32 encoded secret key",
+                    "pattern": "^[a-zA-Z0-9]{52}$"
+                })
+            }
+        }
+
+        #[cfg(feature = "server")]
         impl sea_orm::TryGetable for $SelfT {
             fn try_get_by<I: sea_orm::ColIdx>(
                 res: &sea_orm::QueryResult,
@@ -288,7 +400,7 @@ macro_rules! impl_iroh_secret_key {
                 Ok(<$SelfT>::from_bytes(&slice))
             }
         }
-        #[cfg(feature="engine")]
+        #[cfg(feature="server")]
         impl sea_orm::sea_query::ValueType for $SelfT {
             fn try_from(v: sea_orm::Value) -> Result<Self, sea_orm::sea_query::ValueTypeErr> {
                 let vec = <Vec<u8> as sea_orm::sea_query::ValueType>::try_from(v)?;
@@ -306,7 +418,7 @@ macro_rules! impl_iroh_secret_key {
                 sea_orm::sea_query::ColumnType::Blob
             }
         }
-        #[cfg(feature="engine")]
+        #[cfg(feature="server")]
         impl sea_orm::sea_query::Nullable for $SelfT {
             fn null() -> sea_orm::sea_query::Value {
                 <Vec<u8> as sea_orm::sea_query::Nullable>::null()
@@ -317,7 +429,12 @@ macro_rules! impl_iroh_secret_key {
             fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
             where
                 S: serde::Serializer {
-                todo!()
+                let bytes = self.to_bytes();
+                if serializer.is_human_readable() {
+                    serializer.serialize_str(&crate::util::encode_base32(&bytes))
+                } else {
+                    serializer.serialize_bytes(&bytes)
+                }
             }
         }
 
@@ -325,16 +442,52 @@ macro_rules! impl_iroh_secret_key {
             fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
                 where
                     D: serde::Deserializer<'de> {
-                todo!()
+                use serde::de::Error as _;
+                let bytes = if deserializer.is_human_readable() {
+                    crate::util::decode_base32(&String::deserialize(deserializer)?).map_err(D::Error::custom)?
+                } else {
+                    Vec::<u8>::deserialize(deserializer)?
+                };
+                Ok(Self::from_bytes(bytes.as_slice().try_into().map_err(D::Error::custom)?))
             }
         }
+
+
+        #[cfg(test)]
+        mod tests {
+            use super::*;
+            use std::sync::LazyLock;
+
+            static SECRET_KEY: LazyLock<$SelfT> = LazyLock::new(|| {
+                <$SelfT>::new()
+            });
+            #[test]
+            fn json_schema() {
+                let schema = serde_json::Value::from(<$SelfT as schemars::JsonSchema>::json_schema(&mut schemars::SchemaGenerator::new(schemars::generate::SchemaSettings::openapi3())));
+                let instance = serde_json::to_value(&*SECRET_KEY).unwrap();
+
+                jsonschema::validate(&schema, &instance).unwrap();
+            }
+
+            #[test]
+            fn json_convertion() {
+                let s = serde_json::to_string(&*SECRET_KEY).unwrap();
+                let t: $SelfT = serde_json::from_str(&s).unwrap();
+                assert_eq!(t, *SECRET_KEY)
+            }
+
+            #[test]
+            fn cbor_conversion() {
+                let mut v: Vec<u8> = Vec::new();
+                ciborium::into_writer(&*SECRET_KEY, &mut v).unwrap();
+                let t: $SelfT = ciborium::from_reader(v.as_slice()).unwrap();
+                assert_eq!(t, *SECRET_KEY)
+            }
+        }
+
     }
 }
 
-
-
 pub(crate) use def_iroh_public_key;
 pub(crate) use def_iroh_secret_key;
-pub(crate) use impl_iroh_public_key;
-pub(crate) use impl_iroh_secret_key;
 pub(crate) use def_new_type;

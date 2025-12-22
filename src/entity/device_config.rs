@@ -1,7 +1,9 @@
 use sea_orm::{ActiveValue::Set, entity::prelude::*};
 
-use crate::{config::P2pConfig, types::EndpointSecretKey};
-
+use crate::{
+    config::P2pConfig,
+    types::{Database, EndpointSecretKey},
+};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel)]
 #[sea_orm(table_name = "device_config")]
@@ -16,12 +18,8 @@ pub struct Model {
 impl Model {
     const ID: u32 = 0;
 
-    pub async fn get_or_try_init<T>(ctx: &T) -> Result<Self, DbErr> 
-    where 
-        T: AsRef<DatabaseConnection>
-    {
-        let db = ctx.as_ref();
-        if let Some(x) = Entity::find_by_id(Self::ID).one(db).await? {
+    pub async fn get_or_try_init(db: &Database) -> Result<Self, DbErr> {
+        if let Some(x) = Entity::find_by_id(Self::ID).one(db.as_ref()).await? {
             Ok(x)
         } else {
             Ok(ActiveModel {
@@ -30,14 +28,14 @@ impl Model {
                 iroh_enable_n0: Set(true),
                 iroh_enable_mdns: Set(true),
             }
-            .insert(db)
+            .insert(db.as_ref())
             .await?)
         }
     }
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation{}
+pub enum Relation {}
 
 impl ActiveModelBehavior for ActiveModel {}
 
@@ -57,7 +55,7 @@ mod tests {
 
     #[tokio::test]
     async fn insert_and_get_record() {
-        let db = crate::tests::context().await;
+        let db = crate::tests::database().await;
         let model = Model::get_or_try_init(db).await.unwrap();
         assert_eq!(model, Model::get_or_try_init(db).await.unwrap());
     }

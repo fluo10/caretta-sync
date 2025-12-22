@@ -1,0 +1,17 @@
+[package]
+name = "caretta-sync-example-core"
+edition.workspace = true
+version.workspace = true
+description.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[features]
+server = ["caretta-sync/server", "dep:caretta-sync-example-migration"]
+
+[dependencies]
+caretta-sync.workspace = true
+caretta-sync-example-migration = {path = "../migration", optional = true}
+rmcp.workspace = true
+serde_json.workspace = true

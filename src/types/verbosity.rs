@@ -13,11 +13,7 @@ pub enum Verbosity {
 
 impl ValueEnum for Verbosity {
     fn value_variants<'a>() -> &'a [Self] {
-        &[
-            Self::Default,
-            Self::Quiet,
-            Self::Verbose,
-        ]
+        &[Self::Default, Self::Quiet, Self::Verbose]
     }
     fn to_possible_value(&self) -> Option<clap::builder::PossibleValue> {
         use clap::builder::PossibleValue;
@@ -31,8 +27,6 @@ pub enum VerbosityError {
     #[error("Parse check config mode error")]
     Parse,
 }
-
-
 
 impl Verbosity {
     const DEFAULT: &str = "default";

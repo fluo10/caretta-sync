@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use clap::Args;
 use serde::{Deserialize, Serialize};
 
-use caretta_sync_core::util::{Emptiable, Mergeable};
+use crate::util::{Emptiable, Mergeable};
 /// A storage config parsed from file, args and enviroment variables
 #[derive(Args, Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct ParsedStorageConfig {
@@ -85,8 +85,8 @@ impl Mergeable for ParsedStorageConfig {
 #[cfg(feature = "server")]
 mod server {
     use super::*;
+    use crate::config::StorageConfig;
     use crate::parsed_config::error::ParsedConfigError;
-    use caretta_sync_core::config::StorageConfig;
     impl TryFrom<ParsedStorageConfig> for StorageConfig {
         type Error = ParsedConfigError;
 

@@ -1,14 +1,9 @@
 mod derive;
 
 use derive::*;
-use heck::ToUpperCamelCase;
 use proc_macro::{self, TokenStream};
-use proc_macro2::Span;
-use quote::{ToTokens, format_ident, quote};
-use syn::{
-    Data, DataStruct, DeriveInput, Expr, ExprTuple, Field, Fields, FieldsNamed, Ident,
-    parse_macro_input,
-};
+use quote::quote;
+use syn::{Data, DeriveInput, Expr, Fields, FieldsNamed, Ident, parse_macro_input};
 
 fn extract_unique_field_ident<'a>(
     fields: &'a FieldsNamed,
@@ -139,7 +134,7 @@ pub fn runnable_command(input: TokenStream) -> TokenStream {
     let type_ident = input.ident;
     match input.data {
         Data::Struct(ref data) => {
-            let mut idents =
+            let idents =
                 extract_idents_and_types_from_data_struct_with_attribute(data, "runnable_command");
             let (field_ident, field_type) = unwrap_vec_or_panic(
                 idents,

@@ -1,12 +1,19 @@
-pub const APP_NAME: &str = "caretta-brain";
+#[cfg(feature = "desktop")]
+pub mod args;
 
 pub mod config;
-#[cfg(feature = "engine")]
-pub mod engine;
-#[cfg(feature = "engine")]
+#[cfg(feature = "server")]
 pub mod entity;
 pub mod error;
-pub mod ipc;
+pub mod mcp;
+#[cfg(feature = "desktop")]
+pub mod parsed_config;
+#[cfg(feature = "desktop")]
+pub mod parser;
+
+#[cfg(feature = "desktop-cli")]
+pub mod subcommand;
+
 #[cfg(test)]
 pub mod tests;
 pub mod types;

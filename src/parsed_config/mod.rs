@@ -1,54 +1,52 @@
 //! Provides configs parsed from file, command-line args and environment valiables.
 mod error;
 mod log;
+mod mcp;
 mod p2p;
-mod ipc;
 mod storage;
 pub mod types;
+
 #[cfg(feature = "client")]
-use caretta_sync_core::context::ClientContext;
+use crate::config::ClientConfig;
+#[cfg(feature = "desktop-server")]
+use crate::config::ServerConfig;
 #[cfg(feature = "server")]
-use caretta_sync_core::{
-    config::{P2pConfig, StorageConfig},
-    context::ServerContext,
-};
+use crate::config::{P2pConfig, StorageConfig};
 use clap::Args;
 pub use error::ParsedConfigError;
 pub use log::ParsedLogConfig;
+pub use mcp::ParsedMcpConfig;
 pub use p2p::ParsedP2pConfig;
-pub use ipc::ParsedIpcConfig;
-#[cfg(feature = "server")]
-use redb::Database;
-pub use storage::ParsedStorageConfig;
-use serde::{Deserialize, Serialize, ser::Error};
 
-use caretta_sync_core::{
-    config::{LogConfig, IpcConfig},
+#[cfg(feature = "desktop-server")]
+use rmcp::{RoleServer, Service};
+use serde::{Deserialize, Serialize};
+pub use storage::ParsedStorageConfig;
+
+use crate::{
+    config::{LogConfig, McpConfig},
     util::{Emptiable, Mergeable},
 };
 use std::{
     fmt::Display,
     fs::File,
     io::Read,
-    marker::PhantomData,
     path::{Path, PathBuf},
 };
-
-use crate::types::Verbosity;
 
 #[derive(Args, Clone, Debug, Default, Deserialize, Serialize)]
 pub struct ParsedConfig {
     #[command(flatten)]
-    #[serde(default, skip_serializing_if  = "ParsedStorageConfig::is_empty")]
+    #[serde(default, skip_serializing_if = "ParsedStorageConfig::is_empty")]
     pub storage: ParsedStorageConfig,
     #[command(flatten)]
-    #[serde(default, skip_serializing_if  = "ParsedIpcConfig::is_empty")]
-    pub ipc: ParsedIpcConfig,
+    #[serde(default, skip_serializing_if = "ParsedMcpConfig::is_empty")]
+    pub mcp: ParsedMcpConfig,
     #[command(flatten)]
-    #[serde(default, skip_serializing_if  = "ParsedP2pConfig::is_empty")]
+    #[serde(default, skip_serializing_if = "ParsedP2pConfig::is_empty")]
     pub p2p: ParsedP2pConfig,
     #[command(flatten)]
-    #[serde(default, skip_serializing_if  = "ParsedLogConfig::is_empty")]
+    #[serde(default, skip_serializing_if = "ParsedLogConfig::is_empty")]
     pub log: ParsedLogConfig,
 }
 
@@ -57,7 +55,7 @@ impl ParsedConfig {
     fn default(app_name: &'static str) -> Self {
         Self {
             storage: ParsedStorageConfig::default(app_name),
-            ipc: ParsedIpcConfig::default(app_name),
+            mcp: ParsedMcpConfig::default(app_name),
             p2p: ParsedP2pConfig::empty(),
             log: ParsedLogConfig::default(),
         }
@@ -72,10 +70,15 @@ impl ParsedConfig {
 
     /// Fill empty configuration fields with database values
     #[cfg(feature = "server")]
-    pub fn with_local_database(mut self) -> Self {
-        use caretta_sync_service::local_data::LocalP2pConfigExt;
-        let db = self.to_storage_config().unwrap().to_local_database();
-        let p2p_config = P2pConfig::get_or_init_db(&db);
+    pub async fn with_database(mut self) -> Self {
+        use crate::entity::device_config;
+
+        let db = self.to_storage_config().unwrap().open_database().await;
+        let p2p_config = P2pConfig::from(
+            device_config::Model::get_or_try_init(&Box::new(db))
+                .await
+                .unwrap(),
+        );
         self.merge(ParsedP2pConfig::from(p2p_config));
         self
     }
@@ -100,9 +103,9 @@ impl ParsedConfig {
         self.p2p.clone().try_into()
     }
 
-    /// Build [`IpcConfig`] from own [`ParsedIpcConfig`]
-    pub fn to_ipc_config(&self) -> Result<IpcConfig, ParsedConfigError> {
-        self.ipc.clone().try_into()
+    /// Build [`McpConfig`] from own [`ParsedMcpConfig`]
+    pub fn to_mcp_config(&self) -> Result<McpConfig, ParsedConfigError> {
+        self.mcp.clone().try_into()
     }
     /// Build [`LogConfig`] from own [`ParsedLogConfig`]
     pub fn to_log_config(&self) -> Result<LogConfig, ParsedConfigError> {
@@ -144,45 +147,30 @@ impl ParsedConfig {
         self.to_log_config().unwrap().init_tracing_subscriber();
     }
 
-    #[cfg(feature = "server")]
-    pub async fn into_server_context(
+    /// Create [`ServerConfig`] from `ParsedConfig`
+    #[cfg(feature = "desktop-server")]
+    pub fn into_server_config(
         self,
         app_name: &'static str,
-    ) -> Result<ServerContext, ParsedConfigError>
-    {
-        use caretta_sync_core::context::ServiceContext;
-
-        let config = self.as_ref();
-        let ipc_config = config.to_ipc_config()?;
-        let p2p_config = config.to_p2p_config()?;
-        let storage_config = config.to_storage_config()?;
-        let iroh_router = p2p_config.to_iroh_router(app_name).await.unwrap();
-        let local_database = storage_config.to_local_database();
-        let cache_database = storage_config.to_cache_database();
-        let service_context = ServiceContext {
-            app_name,
-            storage_config,
-            iroh_router,
-            local_database,
-            cache_database,
-        };
-        Ok(ServerContext {
-            app_name,
-            ipc_config,
-            service_context,
+    ) -> Result<ServerConfig, ParsedConfigError> {
+        Ok(ServerConfig {
+            log: self.to_log_config()?,
+            mcp: self.to_mcp_config()?,
+            p2p: self.to_p2p_config()?,
+            storage: self.to_storage_config()?,
         })
     }
+
     #[cfg(feature = "client")]
-    pub fn into_client_context(
+    pub fn into_client_config(
         self,
         app_name: &'static str,
-    ) -> Result<ClientContext, ParsedConfigError> {
+        verbose: bool,
+    ) -> Result<ClientConfig, ParsedConfigError> {
         let config = self.as_ref();
-        let ipc_config = config.to_ipc_config()?;
-        Ok(ClientContext {
-            app_name,
-            ipc_config,
-        })
+        let mcp = config.to_mcp_config()?;
+        let log = config.to_log_config()?;
+        Ok(ClientConfig { mcp, log, verbose })
     }
 }
 
@@ -197,20 +185,20 @@ impl Emptiable for ParsedConfig {
         Self {
             p2p: ParsedP2pConfig::empty(),
             storage: ParsedStorageConfig::empty(),
-            ipc: ParsedIpcConfig::empty(),
+            mcp: ParsedMcpConfig::empty(),
             log: ParsedLogConfig::empty(),
         }
     }
 
     fn is_empty(&self) -> bool {
-        self.p2p.is_empty() && self.ipc.is_empty() && self.storage.is_empty() && self.log.is_empty()
+        self.p2p.is_empty() && self.mcp.is_empty() && self.storage.is_empty() && self.log.is_empty()
     }
 }
 
 impl Mergeable for ParsedConfig {
     fn merge(&mut self, other: Self) {
         self.p2p.merge(other.p2p);
-        self.ipc.merge(other.ipc);
+        self.mcp.merge(other.mcp);
         self.storage.merge(other.storage);
         self.log.merge(other.log);
     }

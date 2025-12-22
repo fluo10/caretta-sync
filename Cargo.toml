@@ -9,72 +9,86 @@ exclude = ["/.github", "/.gitignore", "/.gitmodules", "/.vscode"]
 
 [features]
 default = []
-engine = [
+server = [
     "dep:caretta-sync-migration",
     "dep:gethostname",
     "dep:iroh",
     "dep:iroh-blobs",
-    "dep:iroh-docs",
     "dep:iroh-gossip",
     "dep:iroh-ping",
     "dep:rand",
     "dep:sea-orm",
     "dep:sea-orm-migration",
-    "caretta-id/sea-orm", 
+    "caretta-id/sea-orm",
+    "rmcp/server",
 ]
-desktop = []
+client = [ "rmcp/client" ]
+desktop = ["dep:clap", "dep:dirs", "dep:whoami", ]
+cli = ["desktop"]
 gui = []
-mobile = ["engine", "gui"]
-client = ["desktop"]
-cli = ["client", "desktop"]
-server = ["engine", "desktop"]
+mobile = ["client", "server", "gui"]
+desktop-client = [
+    "client",
+    "desktop",
+    "rmcp/transport-streamable-http-client-reqwest"
+]
+desktop-cli = ["desktop-client", "cli"]
+desktop-gui = ["desktop-client", "gui"]
+desktop-server = [
+    "server",
+    "desktop",
+    "dep:axum",
+    "rmcp/transport-streamable-http-server",
+    "rmcp/transport-streamable-http-server-session"
+]
 
 macros = ["dep:caretta-sync-macros"]
 
-[[example]]
-name = "cli"
-required-features = ["cli"]
-
-[[example]]
-name = "server"
-required-features = ["server"]
-
-[[example]]
-name = "gui"
-required-features = ["gui", "desktop", "macros"]
-
 [dependencies]
 async-trait.workspace = true
+axum = { version = "0.8.7", optional = true }
 base32 = "0.5.1"
-caretta-id = { version = "0.11.0-rc.1", features = [ "serde" ] }
+blake3 = "1.8.2"
+caretta-id = { version = "0.11.0-rc.2", features = [ "schemars", "serde"] }
 caretta-sync-macros = {workspace = true, optional = true}
 caretta-sync-migration = { workspace = true, optional = true }
 chrono.workspace = true
 ciborium = "0.2.2"
+clap = { workspace = true,  optional = true }
+dirs = { version = "6.0.0", optional = true }
 ed25519-dalek = "3.0.0-pre"
 gethostname = { version = "1.1.0", optional = true }
 iroh = { workspace = true,  optional = true }
 iroh-base.workspace = true
 iroh-blobs = {version = "0.97.0", optional = true}
-iroh-docs = { version = "0.95.0", optional = true }
+iroh-docs = "0.95.0"
 iroh-gossip = {version = "0.95.0", optional = true}
 iroh-ping = { version = "0.7.0", optional = true }
+iroh-tickets = "0.2.0"
 rand = { version = "0.9.2", optional = true }
+rmcp.workspace = true
+schemars = "1.1.0"
 sea-orm = { version = "2.0.0-rc", features = [ "sqlx-sqlite", "runtime-tokio-rustls", "macros", "with-uuid", "with-chrono" ], optional = true }
 sea-orm-migration = { version = "2.0.0-rc", features = [ "sqlx-sqlite", "runtime-tokio-rustls" ], optional = true }
 serde = "1.0.228"
+serde_json.workspace = true
 thiserror = "2.0.17"
 tokio.workspace = true
+tokio-stream = "0.1.17"
+tokio-util = "0.7.17"
+toml = "0.9.8"
 tracing.workspace = true
 tracing-subscriber.workspace = true
 uuid = { version = "1.18.1", features = ["v7"] }
+whoami = { version = "1.6.1", optional = true }
 
 
 [dev-dependencies]
+jsonschema = "0.37.4"
 tempfile.workspace = true
 
 [workspace]
-members = [ ".", "macros", "examples/mobile" , "migration",]
+members = [ ".", "macros", "examples/mobile" , "migration", "examples/desktop", "examples/core", "examples/migration" ]
 resolver = "3"
 
 [workspace.package]
@@ -85,39 +99,22 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/fluo10/caretta-sync" 
 
 [workspace.dependencies]
-anyhow = "1.0.100"
 async-trait = "0.1.89"
-base32 = "0.5.1"
-caretta-id = { version = "0.9.1", features=[ "redb", "serde" ]}
 caretta-sync = {version = "0.0.2", path = "." }
 caretta-sync-macros = { version = "0.0.2", path = "macros" }
 caretta-sync-migration = {version = "0.0.2", path = "migration"}
 chrono = { version = "0.4.41", features = [ "serde" ]}
-ciborium = "0.2.2"
-clap = { version = "4.5.38", features = [ "derive", "env" ] }
-dirs = "6.0.0"
-futures = { version = "0.3.31", features = ["executor"] }
+clap = { version = "4.5.53", features = ["derive", "env"] }
 iroh = { version = "0.95.1", features = ["discovery-local-network", "discovery-pkarr-dht"] }
 iroh-base = { version = "0.95.1", features = ["key"] }
-iroh-ping = "0.7.0"
-iroh-tickets = "0.1.0"
-irpc = "0.11.0"
-n0-future = "0.3.1"
-quinn = { package = "iroh-quinn", version = "0.14.0" }
-quinn-udp = "0.5.14"
-rand = "0.9.2"
+rmcp = {version = "0.11.0", default-features = false, features = ["base64", "macros", "server"]}
 sea-orm-migration = { version = "2.0.0-rc", features = [ "runtime-tokio-rustls", "sqlx-postgres" ] }
-serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.145"
 tempfile = "3.20.0"
-thiserror = "2.0.12"
 tokio = { version = "1.45.0", features = ["macros", "rt", "rt-multi-thread"] }
-tokio-stream = "0.1.17"
-toml = "0.9.8"
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
-url = "2.5.7"
 uuid = { version = "1.17.0", features = ["v7"] }
-whoami = "1.6.1"
 
 [profile.dev]
 opt-level = 1

@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, schema::*, sea_orm::DatabaseBackend};
+use sea_orm_migration::{prelude::*, sea_orm::DatabaseBackend};
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
@@ -40,8 +40,11 @@ impl MigrationTrait for Migration {
                 )
                 .await?;
                 Ok(())
-            }, 
-            x => Err(DbErr::Migration(format!("Expected Sqlite, found {}", x.as_str())))
+            }
+            x => Err(DbErr::Migration(format!(
+                "Expected Sqlite, found {}",
+                x.as_str()
+            ))),
         }
     }
 

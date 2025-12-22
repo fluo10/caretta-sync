@@ -1,14 +1,16 @@
-use std::{array::TryFromSliceError, sync::Arc};
+use crate::types::EndpointPublicKey;
 
-crate::types::macros::def_iroh_secret_key!{
+crate::types::macros::def_iroh_secret_key! {
     Self = EndpointSecretKey,
     Inner = iroh_base::SecretKey,
     TryIntoError = TryIntoEndpointSecretKeyError
 }
 
-impl_iroh_secret_key!{
+impl_iroh_secret_key! {
     Self = EndpointSecretKey,
     Inner = iroh_base::SecretKey,
     TryIntoError = TryIntoEndpointSecretKeyError,
-    new = iroh_base::SecretKey::generate
+    PublicKey = EndpointPublicKey,
+    new = iroh_base::SecretKey::generate,
+    public_key = iroh_base::SecretKey::public
 }

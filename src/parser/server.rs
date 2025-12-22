@@ -1,33 +1,35 @@
 use std::marker::PhantomData;
 
-use caretta_sync_core::{context::ServerContext, util::RunnableCommand};
-use caretta_sync_service::server::ServerTrait;
+use crate::{config::ServerConfig, mcp::ServiceContext, types::AppInfo, util::RunnableCommand};
 use clap::Parser;
+use rmcp::{RoleServer, Service};
+use sea_orm_migration::MigratorTrait;
 
-use crate::{
-    args::ConfigArgs,
-    parsed_config::ParsedConfig,
-    types::Verbosity,
-};
+use crate::{args::ConfigArgs, parsed_config::ParsedConfig, types::Verbosity};
 
 #[derive(Parser, Debug)]
-pub struct ServerParser<S>
+pub struct ServerParser<S, M>
 where
-    S: ServerTrait,
+    S: Service<RoleServer> + From<&'static ServiceContext> + Send + 'static,
+    M: MigratorTrait,
 {
     #[arg(skip)]
     server: PhantomData<S>,
+    #[arg(skip)]
+    migrator: PhantomData<M>,
     #[command(flatten)]
     config: ConfigArgs,
     #[arg(short, long, value_name = "VERBOSITY")]
-    check_config: Option<Option<Verbosity>>
+    check_config: Option<Option<Verbosity>>,
 }
-impl<S> RunnableCommand for ServerParser<S>
+impl<S, M> RunnableCommand for ServerParser<S, M>
 where
-    S: ServerTrait,
+    S: Service<RoleServer> + From<&'static ServiceContext> + Send + 'static,
+    M: MigratorTrait,
 {
     #[tokio::main]
-    async fn run(self, app_name: &'static str) {
+    async fn run(self, app_info: AppInfo) {
+        let app_name = app_info.app_name;
         let mut check_config: bool;
         let mut verbosity: Verbosity;
         let mut config_to_print: Option<ParsedConfig> = None;
@@ -40,11 +42,9 @@ where
             }
         } else {
             check_config = false;
-            verbosity =  Verbosity::Default;
+            verbosity = Verbosity::Default;
         }
-        let config = config
-            .with_default(app_name)
-            .with_local_database();
+        let config = config.with_default(app_name).with_database().await;
         if check_config {
             if verbosity == Verbosity::Verbose {
                 let _ = config_to_print.insert(config.clone());
@@ -52,17 +52,13 @@ where
         } else {
             config.init_tracing_subscriber();
         }
-        let context = config
-            .into_server_context(app_name)
-            .await
-            .unwrap();
+        let config = config.into_server_config(app_name).unwrap();
         if check_config {
             if let Some(x) = config_to_print {
                 println!("{}", x);
             }
         } else {
-            S::serve(context).await.unwrap();
+            config.spawn_server::<S, M>(app_name).await
         }
-        
     }
 }

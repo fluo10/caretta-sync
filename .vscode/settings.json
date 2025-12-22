@@ -1,7 +1,0 @@
-{
-    "protobuf-support.protols": {
-        "args": [
-            "--include-paths=core/caretta-sync-proto,core/caretta_id-proto"
-        ]
-    }
-}
