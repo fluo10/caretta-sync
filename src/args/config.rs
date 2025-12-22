@@ -1,8 +1,8 @@
-use std::{marker::PhantomData, path::PathBuf};
+use std::path::PathBuf;
 
 use crate::parsed_config::ParsedConfig;
 
-use crate::util::{Emptiable, Mergeable};
+use crate::util::Mergeable;
 use clap::Args;
 
 /// An arguments about config.

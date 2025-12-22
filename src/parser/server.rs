@@ -5,17 +5,13 @@ use clap::Parser;
 use rmcp::{RoleServer, Service};
 use sea_orm_migration::MigratorTrait;
 
-use crate::{
-    args::ConfigArgs,
-    parsed_config::ParsedConfig,
-    types::Verbosity,
-};
+use crate::{args::ConfigArgs, parsed_config::ParsedConfig, types::Verbosity};
 
 #[derive(Parser, Debug)]
-pub struct ServerParser<S,M>
+pub struct ServerParser<S, M>
 where
     S: Service<RoleServer> + From<&'static ServiceContext> + Send + 'static,
-    M: MigratorTrait
+    M: MigratorTrait,
 {
     #[arg(skip)]
     server: PhantomData<S>,
@@ -24,12 +20,12 @@ where
     #[command(flatten)]
     config: ConfigArgs,
     #[arg(short, long, value_name = "VERBOSITY")]
-    check_config: Option<Option<Verbosity>>
+    check_config: Option<Option<Verbosity>>,
 }
-impl<S,M> RunnableCommand for ServerParser<S,M>
+impl<S, M> RunnableCommand for ServerParser<S, M>
 where
     S: Service<RoleServer> + From<&'static ServiceContext> + Send + 'static,
-    M: MigratorTrait
+    M: MigratorTrait,
 {
     #[tokio::main]
     async fn run(self, app_info: AppInfo) {
@@ -46,11 +42,9 @@ where
             }
         } else {
             check_config = false;
-            verbosity =  Verbosity::Default;
+            verbosity = Verbosity::Default;
         }
-        let config = config
-            .with_default(app_name)
-            .with_database().await;
+        let config = config.with_default(app_name).with_database().await;
         if check_config {
             if verbosity == Verbosity::Verbose {
                 let _ = config_to_print.insert(config.clone());
@@ -58,16 +52,13 @@ where
         } else {
             config.init_tracing_subscriber();
         }
-        let config = config
-            .into_server_config(app_name)
-            .unwrap();
+        let config = config.into_server_config(app_name).unwrap();
         if check_config {
             if let Some(x) = config_to_print {
                 println!("{}", x);
             }
         } else {
-            config.spawn_server::<S,M>(app_name).await
+            config.spawn_server::<S, M>(app_name).await
         }
-        
     }
 }

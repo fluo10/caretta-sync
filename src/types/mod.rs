@@ -7,11 +7,11 @@ mod util;
 
 mod app_info;
 pub use app_info::AppInfo;
-mod bytes;
-#[cfg(feature="server")]
+#[cfg(feature = "server")]
 mod author_public_key;
-#[cfg(feature="server")]
+#[cfg(feature = "server")]
 mod author_secret_key;
+mod bytes;
 
 #[cfg(feature = "server")]
 mod app_database;
@@ -25,27 +25,26 @@ pub use database::*;
 mod doc_ticket;
 mod endpoint_public_key;
 mod endpoint_secret_key;
-#[cfg(feature="server")]
+#[cfg(feature = "server")]
 mod namespace_public_key;
-#[cfg(feature="server")]
+#[cfg(feature = "server")]
 mod namespace_secret_key;
 mod token_status;
-#[cfg(feature="desktop")]
+#[cfg(feature = "desktop")]
 mod verbosity;
 
-
-pub use bytes::*;
-#[cfg(feature="server")]
+#[cfg(feature = "server")]
 pub use author_public_key::*;
-#[cfg(feature="server")]
+#[cfg(feature = "server")]
 pub use author_secret_key::*;
+pub use bytes::*;
 pub use doc_ticket::*;
-#[cfg(feature="server")]
-pub use namespace_public_key::*;
-#[cfg(feature="server")]
-pub use namespace_secret_key::*;
 pub use endpoint_public_key::*;
 pub use endpoint_secret_key::*;
+#[cfg(feature = "server")]
+pub use namespace_public_key::*;
+#[cfg(feature = "server")]
+pub use namespace_secret_key::*;
 pub use token_status::*;
-#[cfg(feature="desktop")]
+#[cfg(feature = "desktop")]
 pub use verbosity::*;

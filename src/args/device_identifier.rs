@@ -1,6 +1,10 @@
-use crate::{mcp::model::DeviceIdentifier, types::EndpointPublicKey, util::{decode_base32, encode_base32}};
-use clap::Args;
+use crate::{
+    mcp::model::DeviceIdentifier,
+    types::EndpointPublicKey,
+    util::{decode_base32, encode_base32},
+};
 use caretta_id::CarettaId;
+use clap::Args;
 
 #[derive(Args, Clone, Debug)]
 #[group(multiple = false, required = true)]
@@ -13,7 +17,7 @@ pub struct DeviceIdentifierArgs {
     name: Option<String>,
 }
 
-impl From<DeviceIdentifierArgs> for DeviceIdentifier{
+impl From<DeviceIdentifierArgs> for DeviceIdentifier {
     fn from(value: DeviceIdentifierArgs) -> Self {
         match (value.id, value.public_key, value.name) {
             (Some(x), None, None) => Self::Id(x),

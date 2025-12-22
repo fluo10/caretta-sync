@@ -1,7 +1,6 @@
-use chrono::naive::serde::ts_microseconds::deserialize;
-use iroh_tickets::{ParseError, Ticket};
+use iroh_tickets::Ticket;
 use schemars::{JsonSchema, json_schema};
-use serde::{Deserialize, de::Error as _, Serialize};
+use serde::{Deserialize, Serialize, de::Error as _};
 
 use crate::util::{decode_base32, encode_base32};
 
@@ -22,37 +21,37 @@ impl From<DocTicket> for iroh_docs::DocTicket {
 
 impl PartialEq for DocTicket {
     fn eq(&self, other: &Self) -> bool {
-        self.0.capability.raw() == other.0.capability.raw() &&
-        self.0.nodes == other.0.nodes
+        self.0.capability.raw() == other.0.capability.raw() && self.0.nodes == other.0.nodes
     }
 }
 
 impl Serialize for DocTicket {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where
-            S: serde::Serializer {
-        let bytes =self.0.to_bytes();
+    where
+        S: serde::Serializer,
+    {
+        let bytes = self.0.to_bytes();
         if serializer.is_human_readable() {
             serializer.serialize_str(&encode_base32(&bytes))
         } else {
             serializer.serialize_bytes(&bytes)
         }
-    
     }
 }
 impl<'de> Deserialize<'de> for DocTicket {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
-        D: serde::Deserializer<'de> {
+        D: serde::Deserializer<'de>,
+    {
         let bytes = if deserializer.is_human_readable() {
-            decode_base32(&String::deserialize(deserializer)?).map_err(|e|D::Error::custom(e))?
+            decode_base32(&String::deserialize(deserializer)?).map_err(|e| D::Error::custom(e))?
         } else {
             Vec::<u8>::deserialize(deserializer)?
         };
 
-        match iroh_docs::DocTicket::from_bytes(&bytes){
+        match iroh_docs::DocTicket::from_bytes(&bytes) {
             Ok(x) => Ok(Self(x)),
-            Err(e) => Err(D::Error::custom(e))
+            Err(e) => Err(D::Error::custom(e)),
         }
     }
 }
@@ -79,11 +78,14 @@ mod tests {
     use schemars::{SchemaGenerator, generate::SchemaSettings};
 
     use super::*;
-    static DOC_TICKET: LazyLock<DocTicket> = LazyLock::new(|| DocTicket::from(
-        iroh_docs::DocTicket::new(
-            iroh_docs::Capability::Write(NamespaceSecret::new(&mut rand::rng())), 
-            vec![EndpointAddr::new(SecretKey::generate(&mut rand::rng()).public())])
-        ));
+    static DOC_TICKET: LazyLock<DocTicket> = LazyLock::new(|| {
+        DocTicket::from(iroh_docs::DocTicket::new(
+            iroh_docs::Capability::Write(NamespaceSecret::new(&mut rand::rng())),
+            vec![EndpointAddr::new(
+                SecretKey::generate(&mut rand::rng()).public(),
+            )],
+        ))
+    });
 
     #[test]
     fn json_conversion() {
@@ -102,8 +104,12 @@ mod tests {
     #[test]
     fn json_schema() {
         jsonschema::validate(
-            &serde_json::to_value(DocTicket::json_schema(&mut SchemaGenerator::new(SchemaSettings::openapi3()))).unwrap(),
-            &serde_json::to_value(&*DOC_TICKET).unwrap()
-        ).unwrap();
+            &serde_json::to_value(DocTicket::json_schema(&mut SchemaGenerator::new(
+                SchemaSettings::openapi3(),
+            )))
+            .unwrap(),
+            &serde_json::to_value(&*DOC_TICKET).unwrap(),
+        )
+        .unwrap();
     }
 }

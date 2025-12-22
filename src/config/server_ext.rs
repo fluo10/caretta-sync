@@ -1,4 +1,7 @@
-use iroh::{Endpoint, protocol::{Router, RouterBuilder}};
+use iroh::{
+    Endpoint,
+    protocol::{Router, RouterBuilder},
+};
 use iroh_blobs::BlobsProtocol;
 use iroh_docs::protocol::Docs;
 use iroh_gossip::Gossip;
@@ -21,20 +24,21 @@ pub trait ServerConfigExt {
         let endpoint = p2p_config.spawn_iroh_endpoint(app_name).await.unwrap();
 
         let iroh_dir = storage_config.to_iroh_path();
-        let blobs = iroh_blobs::store::fs::FsStore::load(&iroh_dir.join("blobs")).await.unwrap();
+        let blobs = iroh_blobs::store::fs::FsStore::load(&iroh_dir.join("blobs"))
+            .await
+            .unwrap();
         let gossip = Gossip::builder().spawn(endpoint.clone());
         let docs_dir = iroh_dir.join("docs");
         std::fs::create_dir_all(&docs_dir).unwrap();
-        let docs = Docs::persistent(docs_dir).spawn(endpoint.clone(), blobs.clone().into(), gossip.clone()).await.unwrap();
+        let docs = Docs::persistent(docs_dir)
+            .spawn(endpoint.clone(), blobs.clone().into(), gossip.clone())
+            .await
+            .unwrap();
         let router = Router::builder(endpoint.clone())
             .accept(iroh_blobs::ALPN, BlobsProtocol::new(&blobs, None))
             .accept(iroh_docs::ALPN, docs.clone())
             .accept(iroh_gossip::ALPN, gossip)
             .accept(iroh_ping::ALPN, Ping::new());
-        Ok((
-            endpoint,
-            docs,
-            router,
-        ))
+        Ok((endpoint, docs, router))
     }
 }

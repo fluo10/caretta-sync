@@ -1,7 +1,9 @@
 use sea_orm::{ActiveValue::Set, entity::prelude::*};
 
-use crate::{config::P2pConfig, types::{Database, EndpointSecretKey}};
-
+use crate::{
+    config::P2pConfig,
+    types::{Database, EndpointSecretKey},
+};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel)]
 #[sea_orm(table_name = "device_config")]
@@ -16,8 +18,7 @@ pub struct Model {
 impl Model {
     const ID: u32 = 0;
 
-    pub async fn get_or_try_init(db: &Database) -> Result<Self, DbErr> 
-    {
+    pub async fn get_or_try_init(db: &Database) -> Result<Self, DbErr> {
         if let Some(x) = Entity::find_by_id(Self::ID).one(db.as_ref()).await? {
             Ok(x)
         } else {
@@ -34,7 +35,7 @@ impl Model {
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation{}
+pub enum Relation {}
 
 impl ActiveModelBehavior for ActiveModel {}
 

@@ -1,10 +1,10 @@
 use std::{fmt::Display, str::FromStr};
 
-#[cfg(feature="server")]
+#[cfg(feature = "server")]
 use sea_orm::{DeriveActiveEnum, EnumIter};
 use serde::Serialize;
 #[cfg_attr(feature = "server", derive(EnumIter, DeriveActiveEnum))]
-#[derive(Copy, Clone, Debug,  PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 #[cfg_attr(feature = "server", sea_orm(rs_type = "u8", db_type = "Integer"))]
 pub enum TokenStatus {
     Pending = 0,
@@ -19,7 +19,7 @@ impl TokenStatus {
     const USED_INT: u8 = 1;
     const USED_STR: &str = "used";
     const REVOKED_INT: u8 = 2;
-    const REVOKED_STR: &str  = "revoked";
+    const REVOKED_STR: &str = "revoked";
     const EXPIRED_INT: u8 = 3;
     const EXPIRED_STR: &str = "expired";
 }
@@ -30,7 +30,7 @@ impl From<TokenStatus> for u8 {
             TokenStatus::Pending => TokenStatus::PENDING_INT,
             TokenStatus::Used => TokenStatus::USED_INT,
             TokenStatus::Revoked => TokenStatus::REVOKED_INT,
-            TokenStatus::Expired => TokenStatus::EXPIRED_INT
+            TokenStatus::Expired => TokenStatus::EXPIRED_INT,
         }
     }
 }
@@ -38,25 +38,28 @@ impl From<TokenStatus> for u8 {
 impl TryFrom<u8> for TokenStatus {
     type Error = TryIntoTokenStatusError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
-        
         match value {
             TokenStatus::PENDING_INT => Ok(TokenStatus::Pending),
             TokenStatus::USED_INT => Ok(TokenStatus::Used),
             TokenStatus::REVOKED_INT => Ok(TokenStatus::Revoked),
             TokenStatus::EXPIRED_INT => Ok(TokenStatus::Expired),
-            i => Err(TryIntoTokenStatusError::InvalidInt(i))
+            i => Err(TryIntoTokenStatusError::InvalidInt(i)),
         }
     }
 }
 
 impl Display for TokenStatus {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", match self {
-            TokenStatus::Pending => TokenStatus::PENDING_STR,
-            TokenStatus::Used => TokenStatus::USED_STR,
-            TokenStatus::Revoked => TokenStatus::REVOKED_STR,
-            TokenStatus::Expired => TokenStatus::EXPIRED_STR
-        })
+        write!(
+            f,
+            "{}",
+            match self {
+                TokenStatus::Pending => TokenStatus::PENDING_STR,
+                TokenStatus::Used => TokenStatus::USED_STR,
+                TokenStatus::Revoked => TokenStatus::REVOKED_STR,
+                TokenStatus::Expired => TokenStatus::EXPIRED_STR,
+            }
+        )
     }
 }
 
@@ -68,15 +71,16 @@ impl FromStr for TokenStatus {
             TokenStatus::USED_STR => Ok(TokenStatus::Used),
             TokenStatus::REVOKED_STR => Ok(TokenStatus::Revoked),
             TokenStatus::EXPIRED_STR => Ok(TokenStatus::Expired),
-            s => Err(TryIntoTokenStatusError::InvalidStr(s.to_string()))
+            s => Err(TryIntoTokenStatusError::InvalidStr(s.to_string())),
         }
     }
 }
 
 impl Serialize for TokenStatus {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where
-            S: serde::Serializer {
+    where
+        S: serde::Serializer,
+    {
         if serializer.is_human_readable() {
             serializer.serialize_str(&self.to_string())
         } else {

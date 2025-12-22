@@ -1,11 +1,8 @@
 use clap::Args;
 use serde::{Deserialize, Serialize};
 
-use crate::parsed_config::error::ParsedConfigError;
 use crate::types::{EndpointPublicKey, EndpointSecretKey};
-use crate::{
-    util::{Emptiable, Mergeable},
-};
+use crate::util::{Emptiable, Mergeable};
 
 #[derive(Args, Clone, Debug, Default, Deserialize, Serialize)]
 pub struct ParsedP2pConfig {

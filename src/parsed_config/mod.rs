@@ -1,8 +1,8 @@
 //! Provides configs parsed from file, command-line args and environment valiables.
 mod error;
 mod log;
-mod p2p;
 mod mcp;
+mod p2p;
 mod storage;
 pub mod types;
 
@@ -11,19 +11,17 @@ use crate::config::ClientConfig;
 #[cfg(feature = "desktop-server")]
 use crate::config::ServerConfig;
 #[cfg(feature = "server")]
-use crate::{
-    config::{P2pConfig, StorageConfig},
-};
+use crate::config::{P2pConfig, StorageConfig};
 use clap::Args;
 pub use error::ParsedConfigError;
 pub use log::ParsedLogConfig;
-pub use p2p::ParsedP2pConfig;
 pub use mcp::ParsedMcpConfig;
+pub use p2p::ParsedP2pConfig;
 
 #[cfg(feature = "desktop-server")]
 use rmcp::{RoleServer, Service};
+use serde::{Deserialize, Serialize};
 pub use storage::ParsedStorageConfig;
-use serde::{Deserialize, Serialize, ser::Error};
 
 use crate::{
     config::{LogConfig, McpConfig},
@@ -33,25 +31,22 @@ use std::{
     fmt::Display,
     fs::File,
     io::Read,
-    marker::PhantomData,
     path::{Path, PathBuf},
 };
-
-use crate::types::Verbosity;
 
 #[derive(Args, Clone, Debug, Default, Deserialize, Serialize)]
 pub struct ParsedConfig {
     #[command(flatten)]
-    #[serde(default, skip_serializing_if  = "ParsedStorageConfig::is_empty")]
+    #[serde(default, skip_serializing_if = "ParsedStorageConfig::is_empty")]
     pub storage: ParsedStorageConfig,
     #[command(flatten)]
-    #[serde(default, skip_serializing_if  = "ParsedMcpConfig::is_empty")]
+    #[serde(default, skip_serializing_if = "ParsedMcpConfig::is_empty")]
     pub mcp: ParsedMcpConfig,
     #[command(flatten)]
-    #[serde(default, skip_serializing_if  = "ParsedP2pConfig::is_empty")]
+    #[serde(default, skip_serializing_if = "ParsedP2pConfig::is_empty")]
     pub p2p: ParsedP2pConfig,
     #[command(flatten)]
-    #[serde(default, skip_serializing_if  = "ParsedLogConfig::is_empty")]
+    #[serde(default, skip_serializing_if = "ParsedLogConfig::is_empty")]
     pub log: ParsedLogConfig,
 }
 
@@ -79,7 +74,11 @@ impl ParsedConfig {
         use crate::entity::device_config;
 
         let db = self.to_storage_config().unwrap().open_database().await;
-        let p2p_config = P2pConfig::from(device_config::Model::get_or_try_init(&Box::new(db)).await.unwrap());
+        let p2p_config = P2pConfig::from(
+            device_config::Model::get_or_try_init(&Box::new(db))
+                .await
+                .unwrap(),
+        );
         self.merge(ParsedP2pConfig::from(p2p_config));
         self
     }
@@ -150,7 +149,10 @@ impl ParsedConfig {
 
     /// Create [`ServerConfig`] from `ParsedConfig`
     #[cfg(feature = "desktop-server")]
-    pub fn into_server_config (self, app_name:&'static str) -> Result<ServerConfig, ParsedConfigError> {
+    pub fn into_server_config(
+        self,
+        app_name: &'static str,
+    ) -> Result<ServerConfig, ParsedConfigError> {
         Ok(ServerConfig {
             log: self.to_log_config()?,
             mcp: self.to_mcp_config()?,
@@ -158,7 +160,7 @@ impl ParsedConfig {
             storage: self.to_storage_config()?,
         })
     }
-    
+
     #[cfg(feature = "client")]
     pub fn into_client_config(
         self,
@@ -168,9 +170,7 @@ impl ParsedConfig {
         let config = self.as_ref();
         let mcp = config.to_mcp_config()?;
         let log = config.to_log_config()?;
-        Ok(ClientConfig {
-            mcp,log, verbose
-        })
+        Ok(ClientConfig { mcp, log, verbose })
     }
 }
 

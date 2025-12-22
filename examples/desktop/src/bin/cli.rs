@@ -17,18 +17,18 @@ impl RunnableCommand for Cli {
 
 #[derive(Debug, Subcommand)]
 enum CliCommand {
-    Device(DeviceCommandArgs)
+    Device(DeviceCommandArgs),
 }
 
 impl RunnableCommand for CliCommand {
     fn run(self, app_info: caretta_sync::types::AppInfo) {
         match self {
-            CliCommand::Device(x) => x.run(app_info)
+            CliCommand::Device(x) => x.run(app_info),
         }
     }
 }
 fn main() {
-    Cli::parse().run(AppInfo{
+    Cli::parse().run(AppInfo {
         app_name: APP_NAME,
         client_info: Implementation {
             name: "caretta-sync-example-cli".to_string(),
@@ -36,6 +36,6 @@ fn main() {
             version: "0.0.0".to_string(),
             icons: None,
             website_url: None,
-        }
+        },
     })
 }

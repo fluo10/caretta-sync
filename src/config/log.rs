@@ -1,8 +1,3 @@
-use tracing_subscriber::{
-    EnvFilter,
-    fmt::{FormatEvent, format::Compact},
-};
-
 /// A Config about logging
 #[derive(Clone, Debug)]
 pub struct LogConfig {

@@ -1,5 +1,5 @@
 //! Provides commandline argument parser
-//! 
+//!
 #[cfg(feature = "gui")]
 mod gui;
 

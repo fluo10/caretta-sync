@@ -1,14 +1,17 @@
 use rmcp::model::Implementation;
 
-use crate::{config::{LogConfig, McpConfig}, mcp::client::Client};
+use crate::{
+    config::{LogConfig, McpConfig},
+    mcp::client::Client,
+};
 
 /// A Config for desktop client
-/// 
+///
 #[derive(Clone, Debug)]
 pub struct ClientConfig {
     pub mcp: McpConfig,
     pub log: LogConfig,
-    pub verbose: bool
+    pub verbose: bool,
 }
 
 impl ClientConfig {
@@ -16,6 +19,8 @@ impl ClientConfig {
         if self.verbose {
             self.log.init_tracing_subscriber();
         }
-        Client::connect(&self.mcp.endpoint_url, client_info).await.unwrap()
+        Client::connect(&self.mcp.endpoint_url, client_info)
+            .await
+            .unwrap()
     }
 }

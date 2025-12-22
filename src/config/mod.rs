@@ -1,7 +1,7 @@
 #[cfg(feature = "desktop-client")]
 mod client;
 #[cfg(feature = "desktop-client")]
-pub use  client::*;
+pub use client::*;
 
 mod log;
 pub use log::LogConfig;

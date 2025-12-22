@@ -1,9 +1,9 @@
 use sea_orm::{ActiveValue::Set, entity::prelude::*};
 use tracing_subscriber::registry::Data;
 
-use crate::{types::{NamespacePublicKey, NamespaceSecretKey}};
+use crate::types::{NamespacePublicKey, NamespaceSecretKey};
 
-const ID: u32= 0;
+const ID: u32 = 0;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel)]
 #[sea_orm(table_name = "user_config")]
@@ -15,30 +15,30 @@ pub struct Model {
 
 impl Model {
     const ID: u32 = 0;
-    pub async fn from_secret<C>(ctx: &C, namespace: NamespaceSecretKey) -> Result<Self, DbErr> 
-    where 
-        C: AsRef<DatabaseConnection>
+    pub async fn from_secret<C>(ctx: &C, namespace: NamespaceSecretKey) -> Result<Self, DbErr>
+    where
+        C: AsRef<DatabaseConnection>,
     {
         todo!()
     }
 
     pub async fn new<C>(ctx: &C) -> Result<Self, DbErr>
-    where 
-        C: AsRef<DatabaseConnection>
+    where
+        C: AsRef<DatabaseConnection>,
     {
         todo!()
     }
 
     pub async fn get<C>(ctx: &C) -> Result<Option<Self>, DbErr>
-    where 
-        C: AsRef<DatabaseConnection>
+    where
+        C: AsRef<DatabaseConnection>,
     {
         Entity::find_by_id(Self::ID).one(ctx.as_ref()).await
     }
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation{}
+pub enum Relation {}
 
 impl ActiveModelBehavior for ActiveModel {}
 
@@ -53,4 +53,3 @@ mod tests {
         assert_eq!(model, Model::get(db).await.unwrap().unwrap());
     }
 }
-

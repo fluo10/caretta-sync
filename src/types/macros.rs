@@ -5,32 +5,31 @@ macro_rules! database_impl {
                 &self.0
             }
         }
-         impl From<sea_orm::DatabaseConnection> for $SelfT {
+        impl From<sea_orm::DatabaseConnection> for $SelfT {
             fn from(value: sea_orm::DatabaseConnection) -> Self {
                 Self(value)
             }
-         }
+        }
 
-         impl From<$SelfT> for sea_orm::DatabaseConnection {
+        impl From<$SelfT> for sea_orm::DatabaseConnection {
             fn from(value: $SelfT) -> Self {
                 value.0
             }
-         } 
+        }
     };
 }
-pub(crate) use database_impl;
 
 macro_rules! def_new_type {
-    { 
+    {
         Self = $SelfT:ident,
         Inner = $Inner:ty
     } => {
         #[doc = concat!("A wrapper struct of [`", stringify!($Inner), "`]")]
         ///
-        /// 
+        ///
         ///
         /// # Examples
-        /// 
+        ///
         /// ## Sea ORM
         /// ```
         /// # use sea_orm::entity::prelude::*;
@@ -40,7 +39,7 @@ macro_rules! def_new_type {
         /// pub struct Model {
         ///     #[sea_orm(primary_key)]
         ///     pub id: u32,
-        #[doc = concat!("pub value: ", stringify!($Self), ",")] 
+        #[doc = concat!("pub value: ", stringify!($Self), ",")]
         /// }
         /// # #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
         /// # pub enum Relation {}
@@ -53,7 +52,7 @@ macro_rules! def_new_type {
 }
 
 macro_rules! def_iroh_public_key {
-    { 
+    {
         Self = $SelfT:ident,
         Inner = $Inner:ty,
         TryIntoError = $TryIntoError:ident,
@@ -76,9 +75,8 @@ macro_rules! def_iroh_public_key {
     };
 }
 
-
 macro_rules! def_iroh_secret_key {
-    { 
+    {
         Self = $SelfT:ident,
         Inner = $Inner:ty,
         TryIntoError = $TryIntoError:ident
@@ -283,7 +281,7 @@ macro_rules! impl_iroh_public_key {
             }
         }
 
-       
+
     }
 }
 
@@ -352,7 +350,7 @@ macro_rules! impl_iroh_secret_key {
                 Ok(Self::from_bytes(&slice))
             }
         }
-        
+
         impl std::fmt::Display for $SelfT {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
                 write!(f, "{}", &crate::util::encode_base32(&self.to_bytes()))
@@ -454,7 +452,7 @@ macro_rules! impl_iroh_secret_key {
             }
         }
 
-        
+
         #[cfg(test)]
         mod tests {
             use super::*;
@@ -490,10 +488,6 @@ macro_rules! impl_iroh_secret_key {
     }
 }
 
-
-
 pub(crate) use def_iroh_public_key;
 pub(crate) use def_iroh_secret_key;
-pub(crate) use impl_iroh_public_key;
-pub(crate) use impl_iroh_secret_key;
 pub(crate) use def_new_type;

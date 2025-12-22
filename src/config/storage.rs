@@ -1,6 +1,12 @@
-use std::{marker::PhantomData, path::{Path, PathBuf}};
+use std::{
+    marker::PhantomData,
+    path::{Path, PathBuf},
+};
 
-use crate::{types::{AppDatabase, Database}, util::{Emptiable, Mergeable}};
+use crate::{
+    types::{AppDatabase, Database},
+    util::{Emptiable, Mergeable},
+};
 
 use caretta_sync_migration::Migrator;
 use sea_orm::{DatabaseConnection, sqlx::sqlite::SqliteConnectOptions};
@@ -31,12 +37,12 @@ impl StorageConfig {
         self.data_dir().join(format!("{app_name}.sqlite"))
     }
 
-    pub fn data_dir(&self) -> &Path{
+    pub fn data_dir(&self) -> &Path {
         std::fs::create_dir_all(&self.data_dir).expect("Failed to create data dir");
         self.data_dir.as_path()
     }
 
-    pub fn cache_dir(&self) -> &Path{
+    pub fn cache_dir(&self) -> &Path {
         std::fs::create_dir_all(&self.cache_dir).expect("Failed to create cache dir");
         self.cache_dir.as_path()
     }
@@ -52,10 +58,12 @@ impl StorageConfig {
     ///
     /// # Panic
     /// If initialize database is failed, then panic.
-    pub async fn open_app_database<M>(&self, app_name: &'static str) -> AppDatabase 
-    where 
-        M: MigratorTrait
+    pub async fn open_app_database<M>(&self, app_name: &'static str) -> AppDatabase
+    where
+        M: MigratorTrait,
     {
-        AppDatabase::open::<_, M>(&self.to_app_database_path(app_name)).await.unwrap()
+        AppDatabase::open::<_, M>(&self.to_app_database_path(app_name))
+            .await
+            .unwrap()
     }
 }
