@@ -1,8 +1,10 @@
 [package]
-name = "caretta-sync-migration"
+name = "caretta-framework-migration"
+edition.workspace = true
 version.workspace = true
-edition = "2024"
-rust-version = "1.85.0"
+description.workspace = true
+license.workspace = true
+repository.workspace = true
 
 [dependencies]
 sea-orm-migration.workspace = true

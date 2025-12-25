@@ -58,7 +58,7 @@ mod server {
     use std::array::TryFromSliceError;
 
     use super::*;
-    use crate::config::P2pConfig;
+    use crate::{config::P2pConfig, parsed_config::ParsedConfigError};
     use iroh::SecretKey;
     impl TryFrom<ParsedP2pConfig> for P2pConfig {
         type Error = ParsedConfigError;

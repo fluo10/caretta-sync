@@ -6,7 +6,7 @@ use sea_orm_migration::MigratorTrait;
 use crate::types::util::path_to_sqlite_connect_options;
 /// A wrapper stract of [`DatabaseConnection`] for application-side data.
 ///
-/// This struct is used to distinguish between the application-side and caretta-sync library-side database.
+/// This struct is used to distinguish between the application-side and caretta-framework library-side database.
 #[derive(Debug)]
 pub struct AppDatabase(DatabaseConnection);
 

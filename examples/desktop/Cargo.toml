@@ -1,5 +1,5 @@
 [package]
-name = "caretta-sync-example-desktop"
+name = "caretta-framework-example-desktop"
 edition.workspace = true
 version.workspace = true
 description.workspace = true
@@ -8,9 +8,9 @@ repository.workspace = true
 publish = false
 
 [features]
-cli = ["caretta-sync/desktop-cli"]
-gui = ["caretta-sync/desktop-gui"]
-server = ["caretta-sync/desktop-server", "caretta-sync-example-core/server"]
+cli = ["caretta-framework/desktop-cli"]
+gui = ["caretta-framework/desktop-gui"]
+server = ["caretta-framework/desktop-server", "caretta-framework-example-core/server"]
 
 [[bin]]
 name = "cli"
@@ -28,7 +28,7 @@ path = "src/bin/server.rs"
 required-features = ["server"]
 
 [dependencies]
-caretta-sync = {workspace = true, features = ["desktop"]}
-caretta-sync-example-core = { path = "../core" }
+caretta-framework = {workspace = true, features = ["desktop"]}
+caretta-framework-example-core = { path = "../core" }
 clap.workspace = true
 rmcp.workspace = true

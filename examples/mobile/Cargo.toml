@@ -1,5 +1,5 @@
 [package]
-name = "caretta-sync-example-mobile"
+name = "caretta-framework-example-mobile"
 edition.workspace = true
 version.workspace = true
 description.workspace = true
@@ -8,13 +8,13 @@ repository.workspace = true
 publish = false
 
 [[bin]]
-name = "caretta_sync_example"
+name = "caretta_framework_example"
 path = "src/main.rs"
 
 [lib]
-name = "caretta_sync_example"
+name = "caretta_framework_example"
 crate-type = ["lib", "cdylib"]
 
 [dependencies]
-caretta-sync.path = "../.."
+caretta-framework.path = "../.."
 tokio.workspace = true

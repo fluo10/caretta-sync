@@ -2,7 +2,7 @@ use crate::util::RunnableCommand;
 use clap::Args;
 
 use crate::args::{ConfigArgs, DeviceIdentifierArgs};
-use caretta_sync_core::{
+use caretta_framework_core::{
     context::ClientContext,
 };
 use caretta_id::CarettaId;

@@ -6,12 +6,12 @@ use bevy::{
     window::{AppLifecycle, ScreenEdge, WindowMode},
     winit::WinitSettings,
 };
-use caretta_sync::{
+use caretta_framework::{
     config::{Config, ParsedConfig, ParsedP2pConfig, ParsedStorageConfig, StorageConfig},
     server::ServerTrait,
     utils::{Emptiable, Mergeable},
 };
-use caretta_sync_example_core::{global::APP_NAME, server::Server};
+use caretta_framework_example_core::{global::APP_NAME, server::Server};
 
 #[tokio::main]
 pub async fn init_config() {

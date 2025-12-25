@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
-use caretta_sync::util::Mergeable;
-use caretta_sync_macros::Mergeable;
+use caretta_framework::util::Mergeable;
+use caretta_framework_macros::Mergeable;
 
 #[derive(Clone, Debug, PartialEq)]
 struct MergeableTuple(Option<u8>);

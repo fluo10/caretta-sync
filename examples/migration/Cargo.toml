@@ -1,8 +1,9 @@
 [package]
-name = "caretta-sync-example-migration"
+name = "caretta-framework-example-migration"
 version.workspace = true
 edition = "2024"
 rust-version = "1.85.0"
+publish = false
 
 [dependencies]
 sea-orm-migration.workspace = true

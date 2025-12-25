@@ -18,14 +18,14 @@ pub struct DevicePingCommandArgs {
 impl RunnableCommand for DevicePingCommandArgs {
     #[tokio::main]
     async fn run(self, app_info: AppInfo) {
-        let app_name = app_info.app_name;
+        let app_name = app_info.name;
         let client = self
             .config
             .into_parsed_config(app_name)
             .with_default(app_name)
             .into_client_config(app_name, self.verbose)
             .unwrap()
-            .spawn_client(app_info.client_info)
+            .spawn_client(app_info.info)
             .await;
         let response = client
             .device_ping(crate::mcp::model::DevicePingRequest {

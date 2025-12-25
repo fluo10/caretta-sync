@@ -1,5 +1,5 @@
-use caretta_sync::{subcommand::DeviceCommandArgs, types::AppInfo, util::RunnableCommand};
-use caretta_sync_example_core::APP_NAME;
+use caretta_framework::{subcommand::DeviceCommandArgs, types::AppInfo, util::RunnableCommand};
+use caretta_framework_example_core::APP_NAME;
 use clap::{Parser, Subcommand};
 use rmcp::model::Implementation;
 
@@ -10,7 +10,7 @@ struct Cli {
 }
 
 impl RunnableCommand for Cli {
-    fn run(self, app_info: caretta_sync::types::AppInfo) {
+    fn run(self, app_info: caretta_framework::types::AppInfo) {
         self.command.run(app_info)
     }
 }
@@ -21,7 +21,7 @@ enum CliCommand {
 }
 
 impl RunnableCommand for CliCommand {
-    fn run(self, app_info: caretta_sync::types::AppInfo) {
+    fn run(self, app_info: caretta_framework::types::AppInfo) {
         match self {
             CliCommand::Device(x) => x.run(app_info),
         }
@@ -29,9 +29,9 @@ impl RunnableCommand for CliCommand {
 }
 fn main() {
     Cli::parse().run(AppInfo {
-        app_name: APP_NAME,
-        client_info: Implementation {
-            name: "caretta-sync-example-cli".to_string(),
+        name: APP_NAME,
+        info: Implementation {
+            name: "caretta-framework-example-cli".to_string(),
             title: None,
             version: "0.0.0".to_string(),
             icons: None,
