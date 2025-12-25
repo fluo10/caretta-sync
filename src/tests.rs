@@ -9,12 +9,12 @@ use crate::{
     entity::device_config,
     types::Database,
 };
-use caretta_sync_migration::Migrator;
+use caretta_framework_migration::Migrator;
 use iroh::Endpoint;
 use sea_orm::DatabaseConnection;
 use tokio::sync::OnceCell;
 
-pub static APP_NAME: &str = "caretta-sync-test";
+pub static APP_NAME: &str = "caretta-framework-test";
 
 static STORAGE_CONFIG: OnceCell<StorageConfig> = OnceCell::const_new();
 async fn storage_config() -> &'static StorageConfig {

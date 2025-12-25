@@ -6,19 +6,19 @@ ifndef DEVICE_ID
 endif
 
 run: install
-	xcrun simctl launch --console $(DEVICE)  net.fireturtle.caretta-sync-example
+	xcrun simctl launch --console $(DEVICE)  net.fireturtle.caretta-framework-example
 
 boot-sim:
 	xcrun simctl boot $(DEVICE) || true
 
 install: xcodebuild-simulator boot-sim
-	xcrun simctl install $(DEVICE) build/Build/Products/Debug-iphonesimulator/caretta_sync_example.app
+	xcrun simctl install $(DEVICE) build/Build/Products/Debug-iphonesimulator/caretta_framework_example.app
 
 xcodebuild-simulator:
-	IOS_TARGETS=x86_64-apple-ios xcodebuild -scheme caretta_sync_example -configuration Debug -derivedDataPath build -destination "id=$(DEVICE)"
+	IOS_TARGETS=x86_64-apple-ios xcodebuild -scheme caretta_framework_example -configuration Debug -derivedDataPath build -destination "id=$(DEVICE)"
 
 xcodebuild-iphone:
-	IOS_TARGETS=aarch64-apple-ios xcodebuild -scheme caretta_sync_example -configuration Debug -derivedDataPath build -arch arm64
+	IOS_TARGETS=aarch64-apple-ios xcodebuild -scheme caretta_framework_example -configuration Debug -derivedDataPath build -arch arm64
 
 clean:
 	rm -r build

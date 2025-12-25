@@ -29,7 +29,7 @@ where
 {
     #[tokio::main]
     async fn run(self, app_info: AppInfo) {
-        let app_name = app_info.app_name;
+        let app_name = app_info.name;
         let mut check_config: bool;
         let mut verbosity: Verbosity;
         let mut config_to_print: Option<ParsedConfig> = None;

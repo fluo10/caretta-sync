@@ -1,4 +1,4 @@
-use caretta_sync::mcp::{Api as _, ServiceContext, model::*};
+use caretta_framework::mcp::{Api as _, ServiceContext, model::*};
 use rmcp::{
     ErrorData, Json,
     handler::server::{tool::ToolRouter, wrapper::Parameters},

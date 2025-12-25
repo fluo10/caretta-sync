@@ -1,4 +1,4 @@
-# caretta-sync
+# caretta-framework
 
 A device management and data synchronization library for local-first application.
 

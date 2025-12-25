@@ -58,10 +58,10 @@ for arch in $ARCHS; do
       fi
   esac
   cd ..
-  cargo build $RELFLAG --target $TARGET --bin caretta_sync_example
+  cargo build $RELFLAG --target $TARGET --bin caretta_framework_example
   cd -
   # Collect the executables
-  EXECUTABLES="$EXECUTABLES $DERIVED_FILE_DIR/cargo/$TARGET/$PROFILE/caretta_sync_example"
+  EXECUTABLES="$EXECUTABLES $DERIVED_FILE_DIR/cargo/$TARGET/$PROFILE/caretta_framework_example"
 done
 
 # Combine executables, and place them at the output path excepted by Xcode

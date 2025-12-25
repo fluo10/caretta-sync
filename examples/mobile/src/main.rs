@@ -1,1 +1,1 @@
-use caretta_sync_example::main;
+use caretta_framework_example::main;

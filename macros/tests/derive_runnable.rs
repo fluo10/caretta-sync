@@ -1,5 +1,5 @@
-use caretta_sync::util::RunnableCommand;
-use caretta_sync_macros::RunnableCommand;
+use caretta_framework::util::RunnableCommand;
+use caretta_framework_macros::RunnableCommand;
 
 struct RunnableCommandStruct1;
 

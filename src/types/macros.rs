@@ -489,5 +489,7 @@ macro_rules! impl_iroh_secret_key {
 }
 
 pub(crate) use def_iroh_public_key;
+pub(crate) use impl_iroh_public_key;
 pub(crate) use def_iroh_secret_key;
+pub(crate) use impl_iroh_secret_key;
 pub(crate) use def_new_type;

@@ -8,7 +8,7 @@ use crate::{
     util::{Emptiable, Mergeable},
 };
 
-use caretta_sync_migration::Migrator;
+use caretta_framework_migration::Migrator;
 use sea_orm::{DatabaseConnection, sqlx::sqlite::SqliteConnectOptions};
 use sea_orm_migration::MigratorTrait;
 #[cfg(any(test, feature = "test"))]
@@ -21,7 +21,7 @@ pub struct StorageConfig {
 }
 
 impl StorageConfig {
-    const DATABASE_FILE_NAME: &str = "caretta-sync.sqlite";
+    const DATABASE_FILE_NAME: &str = "caretta-framework.sqlite";
     const IROH_DIR_NAME: &str = "iroh";
 
     pub fn to_iroh_path(&self) -> PathBuf {
