@@ -1,12 +1,12 @@
 use crate::util::RunnableCommand;
 use clap::Args;
 
-use crate::args::{ConfigArgs, DeviceIdentifierArgs, DurationArgs};
+use crate::args::{ConfigOptionArgs, DeviceIdentifierOptionArgs, DurationArgs};
 
 #[derive(Debug, Args)]
 pub struct DeviceInviteCommandArgs {
     #[command(flatten)]
-    config: ConfigArgs,
+    config: ConfigOptionArgs,
     #[command(flatten)]
     duration: DurationArgs,
 }

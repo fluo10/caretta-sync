@@ -1,20 +1,20 @@
 use std::path::PathBuf;
 
-use crate::parsed_config::ParsedConfig;
+use crate::config::parsed::ParsedConfig;
 
 use crate::util::Mergeable;
 use clap::Args;
 
 /// An arguments about config.
 #[derive(Args, Clone, Debug)]
-pub struct ConfigArgs {
+pub struct ConfigOptionArgs {
     #[arg(short = 'f', long = "config-file", env = "CONFIG_FILE")]
     pub file_path: Option<PathBuf>,
     #[command(flatten)]
     pub args: ParsedConfig,
 }
 
-impl ConfigArgs {
+impl ConfigOptionArgs {
     /// Convert [`ConfigOptionArgs`] into [`ParsedConfig`]
     ///
     /// This function returns a merged [`ParsedConfig`] from the following two sources (The latter has priority).

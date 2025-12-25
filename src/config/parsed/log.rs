@@ -5,7 +5,7 @@ use crate::{
 use clap::Args;
 use serde::{Deserialize, Serialize};
 
-use crate::parsed_config::{error::ParsedConfigError, types::ParsedLogLevel};
+use crate::config::parsed::{error::ParsedConfigError, types::ParsedLogLevel};
 
 #[derive(Args, Clone, Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct ParsedLogConfig {

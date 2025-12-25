@@ -86,7 +86,7 @@ impl Mergeable for ParsedStorageConfig {
 mod server {
     use super::*;
     use crate::config::StorageConfig;
-    use crate::parsed_config::error::ParsedConfigError;
+    use crate::config::parsed::error::ParsedConfigError;
     impl TryFrom<ParsedStorageConfig> for StorageConfig {
         type Error = ParsedConfigError;
 
