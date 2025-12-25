@@ -3,14 +3,14 @@ use std::net::{Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrV4, SocketAddrV6};
 use crate::{mcp::Api, types::AppInfo, util::RunnableCommand};
 use clap::Args;
 
-use crate::args::{ConfigArgs, DeviceIdentifierArgs};
+use crate::args::option::{ConfigOptionArgs, DeviceIdentifierOptionArgs};
 
 #[derive(Debug, Args)]
 pub struct DevicePingCommandArgs {
     #[command(flatten)]
-    target: DeviceIdentifierArgs,
+    target: DeviceIdentifierOptionArgs,
     #[command(flatten)]
-    config: ConfigArgs,
+    config: ConfigOptionArgs,
     #[arg(short, long)]
     verbose: bool,
 }

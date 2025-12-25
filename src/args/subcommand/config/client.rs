@@ -4,15 +4,15 @@ use caretta_framework_core::util::RunnableCommand;
 use clap::Args;
 
 use crate::{
-    args::ConfigArgs,
-    parsed_config::ParsedConfig,
+    args::option::ConfigOptionArgs,
+    config::parsed::ParsedConfig,
     types::Verbosity,
 };
 
 #[derive(Debug, Args)]
 pub struct ConfigClientCommandArgs {
     #[command(flatten)]
-    config: ConfigArgs,
+    config: ConfigOptionArgs,
     #[arg(default_value_t)]
     verbosity: Verbosity,
 }

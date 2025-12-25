@@ -8,7 +8,7 @@ use clap::Args;
 
 #[derive(Args, Clone, Debug)]
 #[group(multiple = false, required = true)]
-pub struct DeviceIdentifierArgs {
+pub struct DeviceIdentifierOptionArgs {
     #[arg(long)]
     id: Option<CarettaId>,
     #[arg(long)]
@@ -17,8 +17,8 @@ pub struct DeviceIdentifierArgs {
     name: Option<String>,
 }
 
-impl From<DeviceIdentifierArgs> for DeviceIdentifier {
-    fn from(value: DeviceIdentifierArgs) -> Self {
+impl From<DeviceIdentifierOptionArgs> for DeviceIdentifier {
+    fn from(value: DeviceIdentifierOptionArgs) -> Self {
         match (value.id, value.public_key, value.name) {
             (Some(x), None, None) => Self::Id(x),
             (None, Some(x), None) => Self::PublicKey(x),

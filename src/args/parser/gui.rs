@@ -1,12 +1,12 @@
 use crate::types::AppInfo;
 use crate::util::RunnableCommand;
-use crate::{args::ConfigArgs, types::Verbosity};
+use crate::{args::option::ConfigOptionArgs, types::Verbosity};
 use clap::Parser;
 
 #[derive(Parser, Debug)]
 pub struct GuiParser {
     #[command(flatten)]
-    config: ConfigArgs,
+    config: ConfigOptionArgs,
     #[arg(short, long, value_name = "VERBOSITY")]
     check_config: Option<Option<Verbosity>>,
 }

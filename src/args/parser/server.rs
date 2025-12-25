@@ -5,7 +5,7 @@ use clap::Parser;
 use rmcp::{RoleServer, Service};
 use sea_orm_migration::MigratorTrait;
 
-use crate::{args::ConfigArgs, parsed_config::ParsedConfig, types::Verbosity};
+use crate::{args::option::ConfigOptionArgs, config::parsed::ParsedConfig, types::Verbosity};
 
 #[derive(Parser, Debug)]
 pub struct ServerParser<S, M>
@@ -18,7 +18,7 @@ where
     #[arg(skip)]
     migrator: PhantomData<M>,
     #[command(flatten)]
-    config: ConfigArgs,
+    config: ConfigOptionArgs,
     #[arg(short, long, value_name = "VERBOSITY")]
     check_config: Option<Option<Verbosity>>,
 }

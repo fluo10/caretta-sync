@@ -3,7 +3,7 @@ use std::net::SocketAddr;
 use clap::Args;
 use serde::{Deserialize, Serialize};
 
-use crate::parsed_config::error::ParsedConfigError;
+use crate::config::parsed::error::ParsedConfigError;
 use crate::{
     config::McpConfig,
     util::{Emptiable, Mergeable},
