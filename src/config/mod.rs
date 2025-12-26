@@ -35,3 +35,6 @@ pub use server_ext::*;
 mod storage;
 #[cfg(feature = "server")]
 pub use storage::StorageConfig;
+
+#[cfg(feature = "desktop")]
+pub mod parsed;

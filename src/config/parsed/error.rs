@@ -13,7 +13,7 @@ pub enum ParsedConfigError {
     #[error("Failed to get config dir")]
     ConfigDir,
     #[error("Invalid log level: {0}")]
-    LogLevel(#[from] crate::parsed_config::types::LogLevelParseError),
+    LogLevel(#[from] crate::config::parsed::types::LogLevelParseError),
     #[error(transparent)]
     SliceTryFrom(#[from] TryFromSliceError),
 }

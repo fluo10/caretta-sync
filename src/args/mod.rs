@@ -1,7 +1,7 @@
-mod config;
-#[cfg(feature = "client")]
-mod device_identifier;
+pub mod option;
 
-pub use config::ConfigArgs;
-#[cfg(feature = "client")]
-pub use device_identifier::DeviceIdentifierArgs;
+#[cfg(any(feature = "desktop-gui", feature = "desktop-server"))]
+pub mod parser;
+
+#[cfg(feature = "desktop-cli")]
+pub mod subcommand;

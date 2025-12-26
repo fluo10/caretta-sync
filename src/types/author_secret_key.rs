@@ -8,6 +8,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::{types::AuthorPublicKey, util::DecodeBase32Error};
 
+super::macros::iroh_secret_key_def!{AuthorSecretKey(iroh_docs::Author)}
+
 super::macros::def_iroh_secret_key! {
     Self = AuthorSecretKey,
     Inner = iroh_docs::Author,

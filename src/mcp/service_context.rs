@@ -37,7 +37,7 @@ impl Api for ServiceContext {
         let mut stream = self
             .iroh_endpoint
             .discovery()
-            .resolve(public_key.into_inner())
+            .resolve(public_key.into())
             .ok_or(model::Error::DeviceNotFound(target))?;
         if let Some(x) = stream.next().await {
             let discovered = x.map_err(model::Error::from)?;
