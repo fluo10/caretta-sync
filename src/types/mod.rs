@@ -8,9 +8,9 @@ mod util;
 mod app_info;
 pub use app_info::AppInfo;
 #[cfg(feature = "server")]
-mod author_key;
+mod device_key;
 #[cfg(feature = "server")]
-pub use author_key::*;
+pub use device_key::*;
 mod bytes;
 
 #[cfg(feature = "server")]
@@ -24,14 +24,8 @@ pub use database::*;
 
 mod doc_ticket;
 
-mod endpoint_key;
-pub use endpoint_key::*;
-
 mod key_parsing_error;
 pub use key_parsing_error::*; 
-
-mod namespace_key;
-pub use namespace_key::*;
 
 mod token_status;
 #[cfg(feature = "desktop")]
@@ -44,3 +38,6 @@ pub use doc_ticket::*;
 pub use token_status::*;
 #[cfg(feature = "desktop")]
 pub use verbosity::*;
+
+mod workspace_key;
+pub use workspace_key::*;

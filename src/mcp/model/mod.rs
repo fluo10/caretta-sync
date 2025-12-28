@@ -6,6 +6,9 @@ pub use device_identifier::*;
 pub use device_info::*;
 pub use error::Error;
 
+mod workspace_identifier;
+pub use workspace_identifier::*;
+
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
@@ -14,6 +17,7 @@ use std::time::Duration;
 use rmcp::handler::server::tool::ToolRouter;
 
 use crate::types::DocTicket;
+
 
 #[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
 pub struct DevicePingRequest {

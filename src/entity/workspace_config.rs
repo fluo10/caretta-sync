@@ -1,39 +1,39 @@
 use sea_orm::{ActiveValue::Set, entity::prelude::*};
 use tracing_subscriber::registry::Data;
 
-use crate::types::{NamespacePublicKey, NamespaceSecretKey};
-
-const ID: u32 = 0;
+use crate::types::{Database, WorkspacePublicKey, WorkspaceSecretKey};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel)]
-#[sea_orm(table_name = "user_config")]
+#[sea_orm(table_name = "workspace_config")]
 pub struct Model {
-    #[sea_orm(primary_key, auto_increment = false)]
-    pub id: u32,
-    pub iroh_namespace_id: NamespacePublicKey,
+    #[sea_orm(primary_key)]
+    pub id: i8,
+    pub secret_key: WorkspaceSecretKey,
+    pub name: String
 }
 
 impl Model {
-    const ID: u32 = 0;
-    pub async fn from_secret<C>(ctx: &C, namespace: NamespaceSecretKey) -> Result<Self, DbErr>
+    const ID: i8 = 0;
+    pub async fn from_secret<C>(ctx: &C, secret: WorkspaceSecretKey) -> Result<Self, DbErr>
     where
-        C: AsRef<DatabaseConnection>,
+        C: AsRef<Database>,
     {
         todo!()
     }
 
     pub async fn new<C>(ctx: &C) -> Result<Self, DbErr>
     where
-        C: AsRef<DatabaseConnection>,
+        C: AsRef<Database>,
     {
         todo!()
     }
 
     pub async fn get<C>(ctx: &C) -> Result<Option<Self>, DbErr>
     where
-        C: AsRef<DatabaseConnection>,
+        C: AsRef<Database>,
     {
-        Entity::find_by_id(Self::ID).one(ctx.as_ref()).await
+        let db = AsRef::<DatabaseConnection>::as_ref(ctx.as_ref());
+        Entity::find_by_id(Self::ID).one(db).await
     }
 }
 
