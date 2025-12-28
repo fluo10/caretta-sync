@@ -17,13 +17,13 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "server")]
 use crate::config::StorageConfig;
 use crate::{
-    types::EndpointSecretKey,
+    types::DeviceSecretKey,
     util::{Emptiable, Mergeable},
 };
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct P2pConfig {
-    pub secret_key: EndpointSecretKey,
+    pub secret_key: DeviceSecretKey,
     pub enable_mdns: bool,
     pub enable_n0: bool,
 }
