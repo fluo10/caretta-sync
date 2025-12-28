@@ -1,5 +1,8 @@
 // mod config;
-mod device;
-
 // pub use config::ConfigCommandArgs;
-pub use device::DeviceCommandArgs;
+
+#[cfg(feature="devtools")]
+mod devtools;
+
+#[cfg(feature = "devtools")]
+pub use devtools::*;
