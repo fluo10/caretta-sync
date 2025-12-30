@@ -15,7 +15,7 @@ pub struct DevPingCommandArgs {
 impl RunnableCommand for DevPingCommandArgs {
     #[tokio::main]
     async fn run(self, app_info: AppInfo) {
-        let client = self.client.spawn_client(app_info).await;
+        let client = self.client.init_tracing_subscriber_and_spawn_client(app_info).await;
         let response = client
             .dev_ping(crate::mcp::model::DevPingRequest {
                 target: self.target.into(),

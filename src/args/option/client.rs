@@ -13,6 +13,7 @@ use clap::Args;
 pub struct ClientOptionArgs {
     #[command(flatten)]
     pub config: ConfigOptionArgs,
+    /// If true, print log to stdout
     #[arg(short, long)]
     pub verbose: bool
 }
@@ -24,15 +25,16 @@ impl ClientOptionArgs {
     ///
     /// - Read from the configuration file.
     /// - Specified via arguments or environment variables
-    pub async fn spawn_client(self, app_info: AppInfo) -> Client {
+    pub async fn init_tracing_subscriber_and_spawn_client(self, app_info: AppInfo) -> Client {
         let app_name = app_info.name;
-        self
+        let config = self
             .config
             .into_parsed_config(app_name)
             .with_default(app_name)
-            .into_client_config(app_name, self.verbose)
-            .unwrap()
-            .spawn_client(app_info.info)
+            .into_client_config(app_name)
+            .unwrap();
+        config.log.init_tracing_subscriber(self.verbose);
+        config.spawn_client(app_info.info)
             .await
     }
 }
