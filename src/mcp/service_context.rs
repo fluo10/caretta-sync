@@ -25,7 +25,7 @@ pub struct ServiceContext {
 impl Api for ServiceContext {
     type Error = ErrorData;
 
-    #[cfg(feature = "devtools")]
+    #[cfg(feature = "server-devtools")]
     async fn dev_ping(
         &self,
         params: DevPingRequest,

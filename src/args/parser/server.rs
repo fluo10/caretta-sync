@@ -34,7 +34,10 @@ where
         let mut check_config: bool;
         let mut verbosity: Verbosity;
         let config_to_print: Option<ParsedConfig> = None;
-        let config = self.config.into_parsed_config(app_name);
+        let mut config = self.config.into_parsed_config(app_name)
+            .with_default(app_name)
+            .with_database().await;
+        
         let config = config.into_server_config(app_name).unwrap();
         config.log.init_tracing_subscriber(true);
         config.spawn_server::<S, M>(app_name).await

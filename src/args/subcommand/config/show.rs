@@ -10,9 +10,6 @@ use crate::args::option::ConfigOptionArgs;
 pub struct ConfigShowCommandArgs {
     #[command(flatten)]
     config: ConfigOptionArgs,
-    /// Include default config.
-    #[arg(short, long)]
-    all: bool,
 }
 
 impl RunnableCommand for ConfigShowCommandArgs {
@@ -20,12 +17,10 @@ impl RunnableCommand for ConfigShowCommandArgs {
     async fn run(self, app_info : AppInfo) {
         let app_name = app_info.name;
         let mut config = self.config.into_parsed_config(app_name);
+        config = config.with_default(app_name);
         #[cfg(feature = "desktop-server")]
         {
             config = config.with_database().await;
-        }
-        if self.all {
-            config = config.with_default(app_name);
         }
         println!("{}", config)
     }
