@@ -1,10 +1,12 @@
-use crate::mcp::model::{DevicePingRequest, DevicePingResponse};
+#[cfg(feature = "devtools")]
+use crate::mcp::model::{DevPingRequest, DevResetRequest, DevResetResponse, DevPingResponse};
 
 #[async_trait::async_trait]
 pub trait Api {
     type Error;
-    async fn device_ping(
+    #[cfg(feature = "devtools")]
+    async fn dev_ping(
         &self,
-        params: DevicePingRequest,
-    ) -> Result<DevicePingResponse, Self::Error>;
+        params: DevPingRequest,
+    ) -> Result<DevPingResponse, Self::Error>;
 }

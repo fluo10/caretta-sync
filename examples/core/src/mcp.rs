@@ -24,12 +24,12 @@ impl Service {
     ///
     /// This function is for connectivity test so it's works between non-authorized devices.
     #[tool(description = "Ping to remote device")]
-    async fn device_ping(
+    async fn dev_ping(
         &self,
-        params: Parameters<DevicePingRequest>,
-    ) -> Result<Json<DevicePingResponse>, ErrorData> {
+        params: Parameters<DevPingRequest>,
+    ) -> Result<Json<DevPingResponse>, ErrorData> {
         self.context
-            .device_ping(params.0)
+            .dev_ping(params.0)
             .await
             .map(|x| Json(x))
             .map_err(Into::<ErrorData>::into)
